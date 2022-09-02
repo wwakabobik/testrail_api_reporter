@@ -329,4 +329,3 @@ class TestRailResultsReporter:
         for err in error:
             err_msg = f'{err_msg} : {err}'
         return err_msg
-
