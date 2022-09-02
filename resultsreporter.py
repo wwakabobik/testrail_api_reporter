@@ -275,15 +275,14 @@ class TestRailResultsReporter:
         return retval
 
     def __add_run(self, title, cases_list=None, include_all=False):
-        retval = True
+        retval = None
         print(f"Creating new test run '{title}'")
         try:
-            run_id = self.__api.runs.add_run(project_id=self.__project_id, suite_id=self.__suite_id, name=title,
+            retval = self.__api.runs.add_run(project_id=self.__project_id, suite_id=self.__suite_id, name=title,
                                              include_all=include_all, case_ids=cases_list)['id']
         except Exception as e:
             print(f"Add run failed. Please validate your settings!\nError{self.__print_error(e)}")
             self.__self_check()
-            retval = False
         return retval
 
     def __add_results(self, run_id=None, results=None):
