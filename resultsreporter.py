@@ -153,41 +153,23 @@ class TestRailResultsReporter:
             title = f"{title} on {environment}"
         return title
 
-    def send_results(self, run_id=None, environment=None, title=None, timestamp=None, close_run=True):
-        if not self.__project_id or not self.__at_section or not self.__xml_report:
+    def send_results(self, run_id=None, environment=None, title=None, timestamp=None, close_run=True, run_name=None,
+                     delete_old_run=False):
+        if not self.__project_id or not self.__at_section \
+                or not self.__check_report_exists(xml_report=self.__xml_report):
             print("Error! Please specify all required params!")
             self.__self_check()
             return True
-        if not title:
-            title = self.__prepare_title(environment, timestamp)
+        title = self.__prepare_title(environment, timestamp) if not title else title
+        title = run_name if run_name else title
         payload = self.__prepare_payload()
-        cases_list = []
-        for item in payload:
-            cases_list.append(item['case_id'])
-        if not run_id:
-            print(f"Creating new test run '{title}'")
-            try:
-                run_id = self.__api.runs.add_run(project_id=self.__project_id, suite_id=self.__suite_id, name=title,
-                                                 include_all=False, case_ids=cases_list)['id']
-            except Exception as e:
-                print(f"Add run failed. Please validate your settings!\nError{self.__print_error(e)}")
-                self.__self_check()
-                return None
-        try:
-            self.__api.results.add_results_for_cases(run_id=run_id, results=payload)
-        except Exception as e:
-            print(f"Add results failed. Please validate your settings!\nError{self.__print_error(e)}")
-            self.__self_check()
-            self.__check_run_exists(run_id=run_id)
-            return None
+        run_id = self.__prepare_runs(cases=payload, title=title, run_id=run_id, run_name=run_name,
+                                     delete_run=delete_old_run)
+        retval = self.__add_results(run_id=run_id, results=payload)
         if close_run:
-            try:
-                self.__api.runs.close_run(run_id=run_id)
-            except Exception as e:
-                print(f"Can't close run! Something nasty happened.\nError{self.__print_error(e)}")
-            print(f"Test run '{title}' is closed")
-        print(f"{len(cases_list)} results were added to test run '{title}', cases updated. Done")
-        return False
+            self.__close_run(run_id=run_id, title=title)
+        print(f"{len(payload)} results were added to test run '{title}', cases updated. Done")
+        return retval
 
     def set_project_id(self, project_id):
         self.__project_id = project_id if self.__check_project(project_id=project_id) else None
@@ -234,12 +216,14 @@ class TestRailResultsReporter:
         return retval
 
     def __check_report_exists(self, xml_report=None):
-        retval = True
+        retval = False
         if not xml_report:
             xml_report = self.__xml_report
-        if not exists(xml_report):
+        if xml_report:
+            if exists(xml_report):
+                retval = True
+        if not retval:
             print(f"Please specify correct path.\nError 404: No XML file found")
-            retval = False
         return retval
 
     def __check_run_exists(self, run_id=None):
@@ -257,6 +241,86 @@ class TestRailResultsReporter:
         self.__check_suite(suite_id=self.__suite_id)
         self.__check_section(section_id=self.__at_section)
         self.__check_report_exists(xml_report=self.__xml_report)
+
+    def __search_for_run_by_name(self, title=None):
+        retval = None
+        first_run = True
+        criteria = None
+        while criteria is not None or first_run:
+            if first_run:
+                try:
+                    response = self.__api.runs.get_runs(project_id=self.__project_id, suite_id=self.__suite_id)
+                except Exception as e:
+                    print(f"Can't get run list. Something nasty happened.\nError{self.__print_error(e)}")
+                    break
+                first_run = False
+            if response['_links']['next'] is not None:
+                offset = int(response['_links']['next'].split("&offset=")[1].split("&")[0])
+                response = self.__api.runs.get_runs(project_id=self.__project_id, suite_id=self.__suite_id,
+                                                    offset=offset)
+            if response['runs']['name'] == title:
+                retval = response['runs']['id']
+                break
+            criteria = response['_links']['next']
+        return retval
+
+    def __delete_run(self, run_id=None):
+        retval = True
+        try:
+            self.__api.runs.delete_run(run_id=run_id)
+        except Exception as e:
+            print(f"Can't delete run. Something nasty happened."
+                  f"\nError{self.__print_error(e)}")
+            retval = False
+        return retval
+
+    def __add_run(self, title, cases_list=None, include_all=False):
+        retval = True
+        print(f"Creating new test run '{title}'")
+        try:
+            run_id = self.__api.runs.add_run(project_id=self.__project_id, suite_id=self.__suite_id, name=title,
+                                             include_all=include_all, case_ids=cases_list)['id']
+        except Exception as e:
+            print(f"Add run failed. Please validate your settings!\nError{self.__print_error(e)}")
+            self.__self_check()
+            retval = False
+        return retval
+
+    def __add_results(self, run_id=None, results=None):
+        retval = True
+        try:
+            self.__api.results.add_results_for_cases(run_id=run_id, results=results)
+        except Exception as e:
+            print(f"Add results failed. Please validate your settings!\nError{self.__print_error(e)}")
+            self.__self_check()
+            self.__check_run_exists(run_id=run_id)
+            retval = False
+        return retval
+
+    def __prepare_runs(self, cases=None, title=None, run_id=None, run_name=None, delete_run=False):
+        cases_list = []
+        for item in cases:
+            cases_list.append(item['case_id'])
+        if run_name:
+            run_id = self.__search_for_run_by_name(title=run_name)
+        if not run_id:
+            print("No run has been found by given name")
+        if delete_run and run_id:
+            self.__delete_run(run_id=run_id)
+            run_id = None
+        if not run_id:
+            run_id = self.__add_run(title=title, cases_list=cases_list, include_all=False)
+        return run_id
+
+    def __close_run(self, title=None, run_id=None):
+        retval = True
+        try:
+            self.__api.runs.close_run(run_id=run_id)
+            print(f"Test run '{title}' is closed")
+        except Exception as e:
+            print(f"Can't close run! Something nasty happened.\nError{self.__print_error(e)}")
+            retval = False
+        return retval
 
     @staticmethod
     def __print_error(error):
