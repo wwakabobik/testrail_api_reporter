@@ -6,6 +6,7 @@ import datetime
 
 class TestRailResultsReporter:
     def __init__(self, url, email, password, project_id, xml_report='junit-report.xml', suite_id=None):
+        print("\nTestrail Api Reporter init")
         self.__api = TestRailAPI(url, email, password)
         self.__xml_report = xml_report if self.__check_report_exists(xml_report=xml_report) else None
         self.__project_id = project_id if self.__check_project(project_id=project_id) else None
@@ -156,6 +157,7 @@ class TestRailResultsReporter:
 
     def send_results(self, run_id=None, environment=None, title=None, timestamp=None, close_run=True, run_name=None,
                      delete_old_run=False):
+        print("\n")
         if not self.__project_id or not self.__at_section \
                 or not self.__check_report_exists(xml_report=self.__xml_report):
             print("Error! Please specify all required params!")
@@ -303,8 +305,8 @@ class TestRailResultsReporter:
             cases_list.append(item['case_id'])
         if run_name:
             run_id = self.__search_for_run_by_name(title=run_name)
-        if not run_id:
-            print("No run has been found by given name")
+            if not run_id:
+                print("No run has been found by given name")
         if delete_run and run_id:
             self.__delete_run(run_id=run_id)
             run_id = None
