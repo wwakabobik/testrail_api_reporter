@@ -65,7 +65,7 @@ class TestRailResultsReporter:
                     self.__self_check()
                     return None
                 first_run = False
-            if response['_links']['next'] is not None:
+            elif response['_links']['next'] is not None:
                 response = self.__api.sections.get_sections(project_id=self.__project_id, suite_id=self.__suite_id,
                                                             offset=int(response['_links']['next'].split("&offset=")[1]))
             sections = response['sections']
@@ -75,7 +75,8 @@ class TestRailResultsReporter:
             criteria = response['_links']['next']
         if not item_id:
             try:
-                item_id = self.__api.sections.add_section(project_id=self.__project_id, name=title)['id']
+                item_id = self.__api.sections.add_section(project_id=self.__project_id, suite_id=self.__suite_id,
+                                                          name=title)['id']
             except Exception as e:
                 print(f"Can't add section. Something nasty happened. Error{self.__print_error(e)}")
                 self.__self_check()
@@ -103,7 +104,7 @@ class TestRailResultsReporter:
                 comment = item['message'] if 'failure' in item.keys() else ''
                 elapsed = item['time'].split(".")[0]
                 elapsed = 1 if elapsed == 0 else elapsed
-                enriched_list.append({'case_id': case['id'], 'status_id': item['status'], 'comment': '',
+                enriched_list.append({'case_id': case['id'], 'status_id': item['status'], 'comment': comment,
                                       'elapsed': elapsed, 'attachments': []})
         if missed_tests_counter:
             print(f"{missed_tests_counter} test cases were missed, they was automatically created.")
@@ -123,7 +124,7 @@ class TestRailResultsReporter:
                     self.__self_check()
                     return None
                 first_run = False
-            if response['_links']['next'] is not None:
+            elif response['_links']['next'] is not None:
                 offset = int(response['_links']['next'].split("&offset=")[1].split("&")[0])
                 response = self.__api.cases.get_cases(project_id=self.__project_id, suite_id=self.__suite_id,
                                                       offset=offset)
@@ -254,7 +255,7 @@ class TestRailResultsReporter:
                     print(f"Can't get run list. Something nasty happened.\nError{self.__print_error(e)}")
                     break
                 first_run = False
-            if response['_links']['next'] is not None:
+            elif response['_links']['next'] is not None:
                 offset = int(response['_links']['next'].split("&offset=")[1].split("&")[0])
                 response = self.__api.runs.get_runs(project_id=self.__project_id, suite_id=self.__suite_id,
                                                     offset=offset)
