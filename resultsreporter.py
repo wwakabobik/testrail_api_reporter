@@ -65,7 +65,7 @@ class TestRailResultsReporter:
                     self.__self_check()
                     return None
                 first_run = False
-            if response['_links']['next'] is not None:
+            elif response['_links']['next'] is not None:
                 response = self.__api.sections.get_sections(project_id=self.__project_id, suite_id=self.__suite_id,
                                                             offset=int(response['_links']['next'].split("&offset=")[1]))
             sections = response['sections']
@@ -123,7 +123,7 @@ class TestRailResultsReporter:
                     self.__self_check()
                     return None
                 first_run = False
-            if response['_links']['next'] is not None:
+            elif response['_links']['next'] is not None:
                 offset = int(response['_links']['next'].split("&offset=")[1].split("&")[0])
                 response = self.__api.cases.get_cases(project_id=self.__project_id, suite_id=self.__suite_id,
                                                       offset=offset)
@@ -134,7 +134,7 @@ class TestRailResultsReporter:
             criteria = response['_links']['next']
 
         print(f'Found {len(cases_list)} existing tests in TestRails with automation_id')
-        return cases
+        return cases_list
 
     def __prepare_payload(self):
         parsed_xml = self.__xml_to_dict(filename=self.__xml_report)
@@ -254,7 +254,7 @@ class TestRailResultsReporter:
                     print(f"Can't get run list. Something nasty happened.\nError{self.__print_error(e)}")
                     break
                 first_run = False
-            if response['_links']['next'] is not None:
+            elif response['_links']['next'] is not None:
                 offset = int(response['_links']['next'].split("&offset=")[1].split("&")[0])
                 response = self.__api.runs.get_runs(project_id=self.__project_id, suite_id=self.__suite_id,
                                                     offset=offset)
