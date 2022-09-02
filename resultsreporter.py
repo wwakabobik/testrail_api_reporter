@@ -11,7 +11,7 @@ class TestRailResultsReporter:
         self.__project_id = project_id if self.__check_project(project_id=project_id) else None
         self.__suite_id = suite_id if self.__check_suite(suite_id=suite_id) else None
         self.__at_section = self.__ensure_automation_section() if self.__project_id and self.__suite_id else None
-        self.__check_section()
+        self.__check_section(section_id=self.__at_section)
         self.__timestamp = datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
 
     def __xml_to_dict(self, filename='junit-report.xml'):
@@ -124,7 +124,7 @@ class TestRailResultsReporter:
         return title
 
     def send_results(self, run_id=None, environment=None, title=None, timestamp=None, close_run=True):
-        if not (self.__check_project() and self.__check_suite() and self.__check_section() and self.__xml_report):
+        if not (self.__project_id or self.__suite_id or self.__at_section or self.__xml_report):
             return True
         if not title:
             title = self.__prepare_title(environment, timestamp)
@@ -162,7 +162,6 @@ class TestRailResultsReporter:
 
     def __check_project(self, project_id=None):
         retval = True
-        project_id = self.__project_id if not project_id else project_id
         try:
             self.__api.projects.get_project(project_id=project_id)
         except Exception as e:
@@ -172,7 +171,6 @@ class TestRailResultsReporter:
 
     def __check_suite(self, suite_id=None):
         retval = True
-        suite_id = self.__suite_id if not suite_id else suite_id
         try:
             self.__api.suites.get_suite(suite_id=suite_id)
         except Exception as e:
@@ -182,7 +180,6 @@ class TestRailResultsReporter:
 
     def __check_section(self, section_id=None):
         retval = True
-        section_id = self.__at_section if not section_id else section_id
         try:
             self.__api.sections.get_section(section_id=section_id)
         except Exception as e:
