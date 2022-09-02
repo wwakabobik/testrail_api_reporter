@@ -135,7 +135,7 @@ class TestRailResultsReporter:
             criteria = response['_links']['next']
 
         print(f'Found {len(cases_list)} existing tests in TestRails with automation_id')
-        return cases
+        return cases_list
 
     def __prepare_payload(self):
         parsed_xml = self.__xml_to_dict(filename=self.__xml_report)
