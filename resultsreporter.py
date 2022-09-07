@@ -289,14 +289,14 @@ class TestRailResultsReporter:
         return retval
 
     def __add_results(self, run_id=None, results=None):
-        retval = True
+        retval = False
         try:
             self.__api.results.add_results_for_cases(run_id=run_id, results=results)
+            return run_id
         except Exception as e:
             print(f"Add results failed. Please validate your settings!\nError{self.__print_error(e)}")
             self.__self_check()
             self.__check_run_exists(run_id=run_id)
-            retval = False
         return retval
 
     def __prepare_runs(self, cases=None, title=None, run_id=None, run_name=None, delete_run=False):
