@@ -1,1 +1,5 @@
-from testrail_reporter import TestRailResultsReporter
+from results_reporter import TestRailResultsReporter
+from plotly_reporter import PlotlyReporter
+from confluence_reporter import ConfluenceReporter
+from csv_parser import CSVParser
+from at_coverage_reporter import ATCoverageReporter

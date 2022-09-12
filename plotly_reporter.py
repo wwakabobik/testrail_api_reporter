@@ -1,7 +1,6 @@
-import csv
-from datetime import datetime
-
 import plotly
+
+from csv_parser import CSVParser
 
 # Set path to orca for plotly
 plotly.io.orca.config.executable = '/usr/local/bin/orca'
@@ -9,7 +8,8 @@ plotly.io.orca.config.executable = '/usr/local/bin/orca'
 
 class PlotlyReporter:
     def __init__(self, debug=True, pr_colors=None, pr_labels=None, ar_colors=None, lines=None):
-        print("\nPlotly Reporter init")
+        if debug:
+            print("\nPlotly Reporter init")
         self.__debug = debug
         self.__pr_labels = pr_labels if pr_labels else ['Low', 'Medium', 'High', 'Critical']
         self.__pr_colors = pr_colors if pr_colors else ['rgb(173,216,230)', 'rgb(34,139,34)', 'rgb(255,255,51)',
@@ -17,24 +17,6 @@ class PlotlyReporter:
         self.__ar_colors = ar_colors if ar_colors else ['rgb(255, 153, 153)', 'rgb(255,255,51)', 'rgb(34,139,34)',
                                                         'rgb(173,216,230)', 'rgb(65,105,225)', 'rgb(192, 192, 192)']
         self.__lines = lines if lines else ({'color': 'rgb(0,0,51)', 'width': 1.5})
-
-    def __load_history_data(self, filename, debug=None):
-        debug = debug if debug is not None else self.__debug
-        timestamps = []
-        totals = []
-        automateds = []
-        not_automateds = []
-        nas = []
-        if debug:
-            print('Loading history data from {}'.format(filename))
-        with open(filename, 'r') as csvfile:
-            for row in (csv.reader(csvfile)):
-                timestamps.append(datetime(year=int(row[0]), month=int(row[1]), day=int(row[2])))
-                totals.append(row[3])
-                automateds.append(row[4])
-                not_automateds.append(row[5])
-                nas.append(row[6])
-        return [timestamps, totals, automateds, not_automateds, nas]
 
     def draw_automation_state_report(self, filename, reports, state_markers=None, debug=None):
         debug = debug if debug is not None else self.__debug
@@ -91,7 +73,7 @@ class PlotlyReporter:
 
         layout = plotly.graph_objs.Layout(barmode='stack')
         if debug:
-            print('Drawing chart to file {}'.format(filename))
+            print(f'Drawing chart to file {filename}')
         fig = plotly.graph_objs.Figure(data=data, layout=layout)
         plotly.io.write_image(fig, filename)
 
@@ -117,7 +99,7 @@ class PlotlyReporter:
             ]
         }
         if debug:
-            print('Drawing chart to file {}'.format(filename))
+            print('Drawing chart to file {filename}')
         plotly.io.write_image(fig, filename)
 
     def draw_test_case_by_area(self, filename, cases, ar_colors=None, lines=None, debug=None):
@@ -150,18 +132,19 @@ class PlotlyReporter:
         }
 
         if debug:
-            print('Drawing chart to file {}'.format(filename))
+            print(f'Drawing chart to file {filename}')
         plotly.io.write_image(fig, filename)
 
     def draw_history_state_chart(self, chart_name, history_data=None, filename=None, debug=None, trace1_decor=None,
-                                 trace2_decor=None):
+                                 trace2_decor=None, filename_pattern='current_automation'):
         debug = debug if debug is not None else self.__debug
-        filename = filename if filename else 'current_automation_{}.csv'.format(chart_name.replace(' ', '_'))
+        filename = filename if filename else f"{filename_pattern}_{chart_name.replace(' ', '_')}.csv"
         trace1_decor = trace1_decor if trace1_decor else {'fill': 'tonexty',
                                                           'line': dict(width=0.5, color='rgb(255, 153, 153)')}
         trace2_decor = trace2_decor if trace2_decor else {'fill': 'tozeroy',
                                                           'line': dict(width=0.5, color='rgb(34,139,34)')}
-        history_data = history_data if history_data else self.__load_history_data(filename=filename, debug=debug)
+
+        history_data = history_data if history_data else CSVParser(debug=debug, filename=filename).load_history_data()
         trace1 = plotly.graph_objs.Scatter(
             x=history_data[0],
             y=history_data[1],
@@ -180,13 +163,14 @@ class PlotlyReporter:
 
         data = [trace1, trace2]
         fig = {'data': data}
-        filename = '{}png'.format(filename[:-3])
+        filename = f'{filename[:-3]}png'
         if debug:
-            print('Drawing chart to file {}'.format(filename))
+            print(f'Drawing chart to file {filename}')
         plotly.io.write_image(fig, filename)
         return filename
 
-    def draw_history_type_chart(self, filename, type_platforms, ar_colors=None, lines=None, debug=None):
+    def draw_history_type_chart(self, filename, type_platforms, history_filename_pattern='current_area_distribution',
+                                ar_colors=None, lines=None, debug=None):
         data = []
         ar_colors = ar_colors if ar_colors else self.__ar_colors
         lines = lines if lines else self.__lines
@@ -194,8 +178,8 @@ class PlotlyReporter:
         index = 0
         for platform in type_platforms:
             type_name = platform['name']
-            history_filename = 'current_area_distribution_{}.csv'.format(type_name.replace(' ', '_'))
-            history_data = self.__load_history_data(debug=debug, filename=history_filename)
+            history_filename = f"{history_filename_pattern}_{type_name.replace(' ', '_')}.csv"
+            history_data = CSVParser(debug=debug, filename=history_filename).load_history_data()
             data.append(plotly.graph_objs.Scatter(
                     x=history_data[0],
                     y=history_data[1],
@@ -205,5 +189,5 @@ class PlotlyReporter:
             index += 1
         fig = {'data': data}
         if debug:
-            print('Drawing chart to file {}'.format(filename))
+            print(f'Drawing chart to file {filename}')
         plotly.io.write_image(fig, filename)
