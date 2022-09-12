@@ -1,1 +1,3 @@
-from .resultsreporter import TestRailResultsReporter
+from .results_reporter import TestRailResultsReporter
+from .confluence_reporter import ConfluenceReporter
+from .plotly_reporter import PlotlyReporter
