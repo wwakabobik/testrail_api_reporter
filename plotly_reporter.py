@@ -202,14 +202,14 @@ class PlotlyReporter:
         plotly.io.write_image(fig, filename)
 
     def draw_history_state_chart(self, chart_name: str, history_data=None, filename=None, trace1_decor=None,
-                                 trace2_decor=None, filename_pattern='current_automation', debug=None):
+                                 trace2_decor=None, filename_pattern='current_automation', reverse_traces=False,
+                                 debug=None):
         """
         Generates image file (png) with state distribution (staked line chart)
 
         :param chart_name: chart name, string, required
         :param history_data: history data, previously stored in CSV, by default it is CSVParser().load_history_data()
         :param filename: output filename for image, png expected, optional
-        :param debug: debug output is enabled, may be True or False, optional
         :param trace1_decor: decoration for distribution stack (1), dict like {'fill': 'tonexty',
                                                                            'line': dict(width=0.5,
                                                                                         color='rgb(255, 153, 153)')}
@@ -217,6 +217,8 @@ class PlotlyReporter:
                                                                            'line': dict(width=0.5,
                                                                                         color='rgb(255, 153, 153)')}
         :param filename_pattern: pattern, what is prefix will be for filename, string, optional
+        :param reverse_traces: reverse traces order
+        :param debug: debug output is enabled, may be True or False, optional
         :return: none
         """
         if not chart_name:
@@ -245,7 +247,7 @@ class PlotlyReporter:
             line=trace2_decor['line'],
         )
 
-        data = [trace1, trace2]
+        data = [trace2, trace1] if reverse_traces else [trace1, trace2]
         fig = {'data': data}
         filename = f'{filename[:-3]}png'
         if debug:
