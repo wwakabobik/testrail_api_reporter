@@ -4,13 +4,28 @@ from os.path import exists
 
 
 class CSVParser:
-    def __init__(self, debug=True, filename=None):
+    """ Parser for CSV files """
+    def __init__(self, filename=None, debug=True):
+        """
+        Default init
+
+        :param filename: filename for csv file
+        :param debug: debug output, enabled or not
+        """
         if debug:
             print("\nPlotly Reporter init")
         self.__debug = debug
         self.__filename = filename
 
-    def save_history_data(self, debug=None, filename=None, report=None):
+    def save_history_data(self, filename=None, report=None, debug=None):
+        """
+        Save history data to CSV
+
+        :param filename: file name of output file, required
+        :param report: report with distribution in CaseStat format
+        :param debug: debug output, enabled or not
+        :return:
+        """
         debug = debug if debug is not None else self.__debug
         filename = filename if filename else self.__filename
         if not filename:
@@ -45,7 +60,14 @@ class CSVParser:
             if debug:
                 print('Data already stored for today, skipping save')
 
-    def load_history_data(self, debug=None, filename=None):
+    def load_history_data(self, filename=None, debug=None):
+        """
+        Load history data to CSV
+
+        :param filename: file name of output file, required
+        :param debug: debug output, enabled or not
+        :return: list with results
+        """
         debug = debug if debug is not None else self.__debug
         filename = filename if filename else self.__filename
         if not filename:

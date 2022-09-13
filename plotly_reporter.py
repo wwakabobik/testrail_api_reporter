@@ -7,7 +7,21 @@ plotly.io.orca.config.executable = '/usr/local/bin/orca'
 
 
 class PlotlyReporter:
-    def __init__(self, debug=True, pr_colors=None, pr_labels=None, ar_colors=None, lines=None, type_platforms=None):
+    """
+    Class contains wrapper for generate reports (images) via plot charts
+    """
+    def __init__(self, pr_colors=None, pr_labels=None, ar_colors=None, lines=None, type_platforms=None, debug=True):
+        """
+        General init
+
+        :param pr_colors: default colors for different priorities, list with rgb, (usually 1-4 values), optional
+        :param pr_labels: default labels for different priorities, list with strings (usually 1-4 values), optional
+        :param ar_colors: default colors for different sections (platforms), list  with rgb, optional
+        :param lines: default settings for lines, dict like {'color': 'rgb(0,0,51)', 'width': 1.5}, optional
+        :param type_platforms: list of dicts, with sections ids, where dict = {'name': 'UI',
+                                                                               'sections': [16276]}, optional
+        :param debug: debug output is enabled, may be True or False, optional
+        """
         if debug:
             print("\nPlotly Reporter init")
         if not type_platforms:
@@ -22,6 +36,20 @@ class PlotlyReporter:
         self.__type_platforms = type_platforms
 
     def draw_automation_state_report(self, filename=None, reports=None, state_markers=None, debug=None):
+        """
+        Generates an image file (png) with staked distribution (bar chart) with automation type coverage (or similar).
+
+        :param filename: output filename for image, png expected, required
+        :param reports: report with stacked distribution, usually it's output of
+                        ATCoverageReporter().automation_state_report()
+        :param state_markers: list of dicts, contains settings for markers on chart like following:
+                                {'Automated': {'marker': dict(color='rgb(34,139,34)',
+                                                        line=dict(color='rgb(0,0,51)',
+                                                        width=1.5)),
+                                               'opacity': 0.6, 'textposition': 'auto'}
+        :param debug: debug output is enabled, may be True or False, optional
+        :return: none
+        """
         debug = debug if debug is not None else self.__debug
         if not reports:
             raise ValueError("No TestRail reports are provided, report aborted!")
@@ -86,6 +114,18 @@ class PlotlyReporter:
 
     def draw_test_case_by_priority(self, filename=None, values=None, pr_labels=None, pr_colors=None,
                                    lines=None, debug=None):
+        """
+        Generates an image file (png) with priority distribution (pie chart)
+
+        :param filename: output filename for image, png expected, required
+        :param values: list of values to draw report with priority distribution, usually it's output from
+                       ATCoverageReporter().test_case_by_priority()
+        :param pr_labels: default labels for different priorities, list with strings (usually 1-4 values), optional
+        :param pr_colors: default colors for different priorities, list with rgb, (usually 1-4 values), optional
+        :param lines: default settings for lines, dict like {'color': 'rgb(0,0,51)', 'width': 1.5}, optional
+        :param debug: debug output is enabled, may be True or False, optional
+        :return: none
+        """
         if not values:
             raise ValueError("No TestRail values are provided, report aborted!")
         if not filename:
@@ -114,6 +154,17 @@ class PlotlyReporter:
         plotly.io.write_image(fig, filename)
 
     def draw_test_case_by_area(self, filename=None, cases=None, ar_colors=None, lines=None, debug=None):
+        """
+        Generates an image file (png) with sections distribution (pie chart)
+
+        :param filename: output filename for image, png expected, required
+        :param cases: list of values to draw report with priority distribution, usually it's output from
+                       ATCoverageReporter().test_case_by_type()
+        :param ar_colors: default colors for different sections (platforms), list  with rgb, optional
+        :param lines: default settings for lines, dict like {'color': 'rgb(0,0,51)', 'width': 1.5}, optional
+        :param debug: debug output is enabled, may be True or False, optional
+        :return: none
+        """
         if not cases:
             raise ValueError("No TestRail cases are provided, report aborted!")
         if not filename:
@@ -150,8 +201,24 @@ class PlotlyReporter:
             print(f'Drawing chart to file {filename}')
         plotly.io.write_image(fig, filename)
 
-    def draw_history_state_chart(self, chart_name, history_data=None, filename=None, debug=None, trace1_decor=None,
-                                 trace2_decor=None, filename_pattern='current_automation'):
+    def draw_history_state_chart(self, chart_name: str, history_data=None, filename=None, trace1_decor=None,
+                                 trace2_decor=None, filename_pattern='current_automation', debug=None):
+        """
+        Generates image file (png) with state distribution (staked line chart)
+
+        :param chart_name: chart name, string, required
+        :param history_data: history data, previously stored in CSV, by default it is CSVParser().load_history_data()
+        :param filename: output filename for image, png expected, optional
+        :param debug: debug output is enabled, may be True or False, optional
+        :param trace1_decor: decoration for distribution stack (1), dict like {'fill': 'tonexty',
+                                                                           'line': dict(width=0.5,
+                                                                                        color='rgb(255, 153, 153)')}
+        :param trace2_decor: decoration for distribution stack (2), dict like {'fill': 'tozeroy',
+                                                                           'line': dict(width=0.5,
+                                                                                        color='rgb(255, 153, 153)')}
+        :param filename_pattern: pattern, what is prefix will be for filename, string, optional
+        :return: none
+        """
         if not chart_name:
             raise "No chart name is provided, report aborted!"
         debug = debug if debug is not None else self.__debug
@@ -189,6 +256,18 @@ class PlotlyReporter:
     def draw_history_type_chart(self, filename=None, type_platforms=None,
                                 history_filename_pattern='current_area_distribution', ar_colors=None, lines=None,
                                 debug=None):
+        """
+        Generates an image file (png) with state distribution (staked line chart)
+
+        :param filename: output filename for image, png expected, required
+        :param type_platforms: list of dicts, with sections ids, where dict = {'name': 'UI',
+                                                                               'sections': [16276]}, optional
+        :param history_filename_pattern: pattern, what is prefix will be for filename, string, optional
+        :param ar_colors: default colors for different sections (platforms), list  with rgb, optional
+        :param lines: default settings for lines, dict like {'color': 'rgb(0,0,51)', 'width': 1.5}, optional
+        :param debug: debug output is enabled, may be True or False, optional
+        :return: none
+        """
         if not filename:
             raise ValueError("No output filename is provided, report aborted!")
         type_platforms = type_platforms if type_platforms else self.__type_platforms

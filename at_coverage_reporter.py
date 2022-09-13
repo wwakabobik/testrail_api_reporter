@@ -1,53 +1,33 @@
 from testrail_api import TestRailAPI
 
 from csv_parser import CSVParser
+from case_stat import CaseStat
+from tools import format_error
 
 
-class CaseStat:
-
-    def __init__(self, name):
-        self.name = name
-        self.total = 0
-        self.automated = 0
-        self.not_automated = 0
-        self.na = 0
-
-    # getters
-    def get_name(self):
-        return self.name
-
-    def get_total(self):
-        return self.total
-
-    def get_automated(self):
-        return self.automated
-
-    def get_not_automated(self):
-        return self.not_automated
-
-    def get_na(self):
-        return self.na
-
-    # setters
-    def set_name(self, name):
-        self.name = name
-
-    def set_total(self, total):
-        self.total = total
-
-    def set_automated(self, automated):
-        self.automated = automated
-
-    def set_not_automated(self, not_automated):
-        self.not_automated = not_automated
-
-    def set_na(self, na):
-        self.na = na
-        
-        
 class ATCoverageReporter:
-    def __init__(self, url, email, password, priority=None, project=None, type_platforms=None,
-                 automation_platforms=None, debug=None, ):
+    """
+    Class for generate data for automation coverage reports (or similar data) from TestRails
+    """
+    def __init__(self, url: str, email: str, password: str, priority=None, project=None, type_platforms=None,
+                 automation_platforms=None, suite_id=None, debug=None):
+        """
+        General init
+
+        :param url: url of TestRail, string, required
+        :param email: email of TestRail user with proper access rights, string, required
+        :param password: password of TestRail user with proper access rights, string, required
+        :param priority: default priority level for testcases, integer, usually it's "4" within following list:
+                                                                                  ['Low', 'Medium', 'High', 'Critical']
+        :param project: project id, integer, required
+        :param type_platforms: list of dicts, with sections ids, where dict = {'name': 'UI',
+                                                                               'sections': [16276]}
+        :param automation_platforms: list of dicts of automation platforms, dict = {'name': 'Desktop Chrome',
+                                                                                    'internal_name': 'type_id',
+                                                                                    'sections': [16276]}
+        :param suite_id: suite id, integer, optional, if no suite-management is activated
+        :param debug: debug output is enabled, may be True or False, optional
+        """
         if debug:
             print("\nAT Coverage Reporter init")
         if url is None or email is None or password is None:
@@ -60,17 +40,19 @@ class ATCoverageReporter:
         self.__project = project
         self.__priority = priority
         self.__api = TestRailAPI(url=url, email=email, password=password)
+        self.__suite_id = suite_id
 
-    @staticmethod
-    def __print_error(error):
-        err_msg = ''
-        error = error if isinstance(error, list) else [error]
-        for err in error:
-            err_msg = f'{err_msg} : {err}'
-        return err_msg
+    def __get_sections(self, parent_list: list, project=None, suite_id=None):
+        """
+        Wrapper to get all sections ids of TestRails project/suite
 
-    def __get_sections(self, parent_list, project=None, suite_id=None):
+        :param parent_list: list for all sections, initially top section should be passed
+        :param project: project id, integer, required
+        :param suite_id: suite id, integer, optional, if no suite-management is activated
+        :return: list with ids all of sections
+        """
         project = project if project else self.__project
+        suite_id = suite_id if suite_id else self.__suite_id
         if not project:
             raise ValueError("No project specified, report aborted!")
         all_sections = self.__get_all_sections(project_id=project, suite_id=suite_id)
@@ -80,7 +62,16 @@ class ATCoverageReporter:
         return parent_list
 
     def __get_all_sections(self, project_id=None, suite_id=None, debug=None):
+        """
+        Wrapper to get all sections of TestRails project/suite
+
+        :param project_id: project id, integer, required
+        :param suite_id: suite id, integer, optional, if no suite-management is activated
+        :param debug: debug output is enabled, may be True or False, optional
+        :return: list, contains all of sections
+        """
         project = project_id if project_id else self.__project
+        suite_id = suite_id if suite_id else self.__suite_id
         debug = debug if debug is not None else self.__debug
         sections = []
         if not project:
@@ -93,7 +84,7 @@ class ATCoverageReporter:
                 try:
                     response = self.__api.sections.get_sections(project_id=project, suite_id=suite_id)
                 except Exception as e:
-                    print(f"Get sections failed. Please validate your settings!\nError{self.__print_error(e)}")
+                    print(f"Get sections failed. Please validate your settings!\nError{format_error(e)}")
                     return None
                 first_run = False
             elif response['_links']['next'] is not None:
@@ -106,7 +97,18 @@ class ATCoverageReporter:
         return sections
 
     def __get_all_cases(self, project_id=None, suite_id=None, section_id=None, priority_id=None, debug=None):
+        """
+        Wrapper to get all test cases for selected project, suite, section and priority
+
+        :param project_id: project id, integer, required
+        :param suite_id: suite id, integer, optional, if no suite-management is activated
+        :param section_id: section id, integer, section where testcases should be found, optional
+        :param priority_id: priority, list of integers, id of priority for test case to search
+        :param debug: debug output is enabled, may be True or False, optional
+        :return: list with all cases
+        """
         project_id = project_id if project_id else self.__project
+        suite_id = suite_id if suite_id else self.__suite_id
         debug = debug if debug is not None else self.__debug
         cases_list = []
         first_run = True
@@ -118,7 +120,7 @@ class ATCoverageReporter:
                     response = self.__api.cases.get_cases(project_id=project_id, suite_id=suite_id,
                                                           section_id=section_id, priority_id=priority_id)
                 except Exception as e:
-                    raise ValueError(f"Get cases failed. Please validate your settings!\nError{self.__print_error(e)}")
+                    raise ValueError(f"Get cases failed. Please validate your settings!\nError{format_error(e)}")
                 first_run = False
             elif response['_links']['next'] is not None:
                 offset = int(response['_links']['next'].split("&offset=")[1].split("&")[0])
@@ -134,7 +136,23 @@ class ATCoverageReporter:
 
     def automation_state_report(self, priority=None, project=None, automation_platforms=None,
                                 filename_pattern='current_automation', suite=None, debug=None):
+        """
+        Generates data of automation coverage for stacked bar chart or staked line chart
+        with values "Automated", "Not automated", "N/A". This distribution generated using values form fields
+        with "internal_name" for specific parent section(s)
+
+        :param priority: priority, list of integers, id of priority for test case to search
+        :param project: project id, integer, required
+        :param automation_platforms: list of dicts of automation platforms, dict = {'name': 'Desktop Chrome',
+                                                                                    'internal_name': 'type_id',
+                                                                                    'sections': [16276]}
+        :param filename_pattern: pattern for filename, string
+        :param suite: suite id, integer, optional, if no suite-management is activated
+        :param debug: debug output is enabled, may be True or False, optional
+        :return: list of results in CaseStat format
+        """
         project = project if project else self.__project
+        suite = suite if suite else self.__suite_id
         priority = priority if priority else self.__priority
         automation_platforms = automation_platforms if automation_platforms else self.__automation_platforms
         if not project:
@@ -175,8 +193,17 @@ class ATCoverageReporter:
         return results
     
     def test_case_by_priority(self, project=None, suite=None, debug=None):
+        """
+        Generates data for pie/line chart with priority distribution
+
+        :param project: project id, integer, required
+        :param suite: suite id, integer, optional, if no suite-management is activated
+        :param debug: debug output is enabled, may be True or False, optional
+        :return: list with values (int) for bar chart
+        """
         debug = debug if debug is not None else self.__debug
         project = project if project else self.__project
+        suite = suite if suite else self.__suite_id
         if not project:
             raise ValueError("No project specified, report aborted!")
         if debug:
@@ -190,8 +217,20 @@ class ATCoverageReporter:
     
     def test_case_by_type(self, project=None, type_platforms=None, filename_pattern='current_area_distribution',
                           suite=None, debug=None):
+        """
+        Generates data for pie/line chart with distribution by type of platforms (guided by top section).
+
+        :param project: project id, integer, required
+        :param type_platforms: list of dicts, with sections ids, where dict = {'name': 'UI',
+                                                                               'sections': [16276]}
+        :param filename_pattern: pattern for filename, string
+        :param suite: suite id, integer, optional, if no suite-management is activated
+        :param debug: debug output is enabled, may be True or False, optional
+        :return: list with values (int) for bar chart
+        """
         type_platforms = type_platforms if type_platforms else self.__type_platforms
         project = project if project else self.__project
+        suite = suite if suite else self.__suite_id
         if not project:
             raise ValueError("No project specified, report aborted!")
         if not type_platforms:
