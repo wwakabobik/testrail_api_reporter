@@ -51,7 +51,7 @@ class ATCoverageReporter:
         if debug:
             print("\nAT Coverage Reporter init")
         if url is None or email is None or password is None:
-            raise Exception("No TestRails credentials are provided!")
+            raise ValueError("No TestRails credentials are provided!")
         else:
             pass
         self.__debug = debug if debug is not None else True
@@ -60,17 +60,77 @@ class ATCoverageReporter:
         self.__project = project
         self.__priority = priority
         self.__api = TestRailAPI(url=url, email=email, password=password)
-        self.__api.cases.get_cases()
+
+    @staticmethod
+    def __print_error(error):
+        err_msg = ''
+        error = error if isinstance(error, list) else [error]
+        for err in error:
+            err_msg = f'{err_msg} : {err}'
+        return err_msg
 
     def __get_sections(self, parent_list, project=None, suite_id=None):
         project = project if project else self.__project
         if not project:
-            raise "No project specified, report aborted!"
-        all_sections = self.__api.sections.get_sections(project_id=project, suite_id=suite_id)
+            raise ValueError("No project specified, report aborted!")
+        all_sections = self.__get_all_sections(project_id=project, suite_id=suite_id)
         for section in all_sections:
             if section['parent_id'] in parent_list:
                 parent_list.append(section['id'])
         return parent_list
+
+    def __get_all_sections(self, project_id=None, suite_id=None, debug=None):
+        project = project_id if project_id else self.__project
+        debug = debug if debug is not None else self.__debug
+        sections = []
+        if not project:
+            raise ValueError("No project specified, report aborted!")
+        first_run = True
+        criteria = None
+        response = None
+        while criteria is not None or first_run:
+            if first_run:
+                try:
+                    response = self.__api.sections.get_sections(project_id=project, suite_id=suite_id)
+                except Exception as e:
+                    print(f"Get sections failed. Please validate your settings!\nError{self.__print_error(e)}")
+                    return None
+                first_run = False
+            elif response['_links']['next'] is not None:
+                response = self.__api.sections.get_sections(project_id=project, suite_id=suite_id,
+                                                            offset=int(response['_links']['next'].split("&offset=")[1]))
+            sections = sections + response['sections']
+            criteria = response['_links']['next']
+        if debug:
+            print(f'Found {len(sections)} existing sections in TestRails for project {project_id}, suite {suite_id}')
+        return sections
+
+    def __get_all_cases(self, project_id=None, suite_id=None, section_id=None, priority_id=None, debug=None):
+        project_id = project_id if project_id else self.__project
+        debug = debug if debug is not None else self.__debug
+        cases_list = []
+        first_run = True
+        criteria = None
+        response = None
+        while criteria is not None or first_run:
+            if first_run:
+                try:
+                    response = self.__api.cases.get_cases(project_id=project_id, suite_id=suite_id,
+                                                          section_id=section_id, priority_id=priority_id)
+                except Exception as e:
+                    raise ValueError(f"Get cases failed. Please validate your settings!\nError{self.__print_error(e)}")
+                first_run = False
+            elif response['_links']['next'] is not None:
+                offset = int(response['_links']['next'].split("&offset=")[1].split("&")[0])
+                response = self.__api.cases.get_cases(project_id=project_id, suite_id=suite_id,
+                                                      section_id=section_id, priority_id=priority_id, offset=offset)
+            cases_list = cases_list + response['cases']
+            criteria = response['_links']['next']
+
+        if debug:
+            print(f'Found {len(cases_list)} existing tests in TestRails for project {project_id}, suite {suite_id}, '
+                  f'section {section_id}, priority {priority_id}')
+        return cases_list
 
     def automation_state_report(self, priority=None, project=None, automation_platforms=None,
                                 filename_pattern='current_automation', suite=None, debug=None):
@@ -78,11 +138,11 @@ class ATCoverageReporter:
         priority = priority if priority else self.__priority
         automation_platforms = automation_platforms if automation_platforms else self.__automation_platforms
         if not project:
-            raise "No project specified, report aborted!"
+            raise ValueError("No project specified, report aborted!")
         if not priority:
-            raise "No critical priority specified, report aborted!"
+            raise ValueError("No critical priority specified, report aborted!")
         if not automation_platforms:
-            raise "No automation platforms specified, report aborted!"
+            raise ValueError("No automation platforms specified, report aborted!")
         debug = debug if debug is not None else self.__debug
         if debug:
             print('=== Staring generation of report for current automation state ===')
@@ -96,8 +156,8 @@ class ATCoverageReporter:
             for section in sections:
                 if debug:
                     print('passing section '+str(section))
-                cases = self.__api.cases.get_cases(project_id=project, suite_id=suite, section_id=section,
-                                                   priority_id=priority)
+                cases = self.__get_all_cases(project_id=project, suite_id=suite, section_id=section,
+                                             priority_id=priority)
                 results[index].set_total(results[index].get_total()+len(cases))
                 for case in cases:
                     if (case[platform['internal_name']] == 2 and platform['internal_name'] != 'type_id') \
@@ -118,26 +178,31 @@ class ATCoverageReporter:
         debug = debug if debug is not None else self.__debug
         project = project if project else self.__project
         if not project:
-            raise "No project specified, report aborted!"
+            raise ValueError("No project specified, report aborted!")
         if debug:
             print('=== Staring generation of report for test case priority distribution ===')
         results = []
         for i in range(1, 5):
             if debug:
                 print(f'passing priority {str(i)}')
-            results.append(len(self.__api.cases.get_cases(project_id=project, suite_id=suite, priority_id=str(i))))
+            results.append(len(self.__get_all_cases(project_id=project, suite_id=suite, priority_id=str(i))))
         return results
     
-    def test_case_by_type(self, project=None, filename_pattern='current_area_distribution', suite=None, debug=True):
-        debug = debug if debug is not None else self.__debug
+    def test_case_by_type(self, project=None, type_platforms=None, filename_pattern='current_area_distribution',
+                          suite=None, debug=None):
+        type_platforms = type_platforms if type_platforms else self.__type_platforms
         project = project if project else self.__project
         if not project:
-            raise "No project specified, report aborted!"
+            raise ValueError("No project specified, report aborted!")
+        if not type_platforms:
+            raise ValueError("No platform types are provided, report aborted!")
+        debug = debug if debug is not None else self.__debug
+        project = project if project else self.__project
         if debug:
             print('=== Staring generation of report for test case area distribution ===')
         index = 0
         results = []
-        for platform in self.__type_platforms:
+        for platform in type_platforms:
             if debug:
                 print('processing area ' + platform['name'])
             results.append(CaseStat(platform['name']))
@@ -145,7 +210,7 @@ class ATCoverageReporter:
             for section in sections:
                 if debug:
                     print('passing section '+str(section))
-                cases = self.__api.cases.get_cases(project_id=project, suite_id=suite, section_id=section)
+                cases = self.__get_all_cases(project_id=project, suite_id=suite, section_id=section)
                 results[index].set_total(results[index].get_total()+len(cases))
             # save history data
             filename = f"{filename_pattern}_{results[index].get_name().replace(' ', '_')}.csv"

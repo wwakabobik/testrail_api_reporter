@@ -24,9 +24,9 @@ class PlotlyReporter:
     def draw_automation_state_report(self, filename=None, reports=None, state_markers=None, debug=None):
         debug = debug if debug is not None else self.__debug
         if not reports:
-            raise Exception("No TestRail reports are provided, report aborted!")
+            raise ValueError("No TestRail reports are provided, report aborted!")
         if not filename:
-            raise Exception("No output filename is provided, report aborted!")
+            raise ValueError("No output filename is provided, report aborted!")
         data = []
         axis_x = []
         axis_y_automated = []
@@ -87,9 +87,9 @@ class PlotlyReporter:
     def draw_test_case_by_priority(self, filename=None, values=None, pr_labels=None, pr_colors=None,
                                    lines=None, debug=None):
         if not values:
-            raise Exception("No TestRail values are provided, report aborted!")
+            raise ValueError("No TestRail values are provided, report aborted!")
         if not filename:
-            raise Exception("No output filename is provided, report aborted!")
+            raise ValueError("No output filename is provided, report aborted!")
         pr_labels = pr_labels if pr_labels else self.__pr_labels
         pr_colors = pr_colors if pr_colors else self.__pr_colors
         debug = debug if debug is not None else self.__debug
@@ -110,14 +110,14 @@ class PlotlyReporter:
             ]
         }
         if debug:
-            print('Drawing chart to file {filename}')
+            print(f'Drawing chart to file {filename}')
         plotly.io.write_image(fig, filename)
 
     def draw_test_case_by_area(self, filename=None, cases=None, ar_colors=None, lines=None, debug=None):
         if not cases:
-            raise Exception("No TestRail cases are provided, report aborted!")
+            raise ValueError("No TestRail cases are provided, report aborted!")
         if not filename:
-            raise Exception("No output filename is provided, report aborted!")
+            raise ValueError("No output filename is provided, report aborted!")
         # priority distribution
         debug = debug if debug is not None else self.__debug
         ar_colors = ar_colors if ar_colors else self.__ar_colors
@@ -154,8 +154,6 @@ class PlotlyReporter:
                                  trace2_decor=None, filename_pattern='current_automation'):
         if not chart_name:
             raise "No chart name is provided, report aborted!"
-        if not history_data:
-            raise "No history data is provided, report aborted!"
         debug = debug if debug is not None else self.__debug
         filename = filename if filename else f"{filename_pattern}_{chart_name.replace(' ', '_')}.csv"
         trace1_decor = trace1_decor if trace1_decor else {'fill': 'tonexty',
@@ -192,7 +190,7 @@ class PlotlyReporter:
                                 history_filename_pattern='current_area_distribution', ar_colors=None, lines=None,
                                 debug=None):
         if not filename:
-            raise Exception("No output filename is provided, report aborted!")
+            raise ValueError("No output filename is provided, report aborted!")
         type_platforms = type_platforms if type_platforms else self.__type_platforms
         ar_colors = ar_colors if ar_colors else self.__ar_colors
         data = []

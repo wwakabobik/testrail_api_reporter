@@ -57,6 +57,7 @@ class TestRailResultsReporter:
         first_run = True
         item_id = None
         criteria = None
+        response = None
         while criteria is not None or first_run:
             if first_run:
                 try:
@@ -116,6 +117,7 @@ class TestRailResultsReporter:
         cases_list = []
         first_run = True
         criteria = None
+        response = None
         while criteria is not None or first_run:
             if first_run:
                 try:
