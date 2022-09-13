@@ -53,6 +53,8 @@ Also, you can set up other params separately without need to re-initialize api o
 
 ---
 
+# TestRail coverage / distribution reporter
+
 Second part of reporter it's visualization and reporting for test cases of TestRails.
 Currently, TestRails machine does not contain functionality to track history data of some test cases attributes to make
 reports of dynamics of automation coverage of existing testcases, or distribution by custom areas. 
@@ -111,4 +113,11 @@ plotly_reporter.draw_automation_state_report(filename="pie_chart2.png", reports=
 plotly_reporter.draw_history_type_chart(filename="line_stacked_chart.png")
 for item in automation_platforms:
     plotly_reporter.draw_history_state_chart(chart_name=item['name'])
+```
+
+## Troubleshooting
+
+To make plotly works, you need to setup Orca independently:
+```
+npm install -g electron orca
 ```
