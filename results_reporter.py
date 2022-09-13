@@ -4,7 +4,7 @@ from os.path import exists
 from xmltodict import parse
 from testrail_api import TestRailAPI
 
-from tools import format_error
+from reporter_utils import format_error
 
 
 class TestRailResultsReporter:
