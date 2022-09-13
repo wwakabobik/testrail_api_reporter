@@ -1,4 +1,5 @@
 from atlassian import Confluence
+
 from plotly_reporter import PlotlyReporter
 
 
