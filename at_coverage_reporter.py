@@ -1,3 +1,5 @@
+from testrail_api import TestRailAPI
+
 from csv_parser import CSVParser
 
 
@@ -44,11 +46,11 @@ class CaseStat:
         
         
 class ATCoverageReporter:
-    def __init__(self, url, username, password, priority=None, project=None, type_platforms=None,
+    def __init__(self, url, email, password, priority=None, project=None, type_platforms=None,
                  automation_platforms=None, debug=None, ):
         if debug:
             print("\nAT Coverage Reporter init")
-        if url is None or username is None or password is None:
+        if url is None or email is None or password is None:
             raise Exception("No TestRails credentials are provided!")
         else:
             pass
@@ -57,19 +59,21 @@ class ATCoverageReporter:
         self.__type_platforms = type_platforms  # should be passed with specific TestRails sections
         self.__project = project
         self.__priority = priority
+        self.__api = TestRailAPI(url=url, email=email, password=password)
+        self.__api.cases.get_cases()
 
-    def __get_sections(self, parent_list, project=None):
+    def __get_sections(self, parent_list, project=None, suite_id=None):
         project = project if project else self.__project
         if not project:
             raise "No project specified, report aborted!"
-        all_sections = tr_client.send_get(f'get_sections/{project}')
+        all_sections = self.__api.sections.get_sections(project_id=project, suite_id=suite_id)
         for section in all_sections:
             if section['parent_id'] in parent_list:
                 parent_list.append(section['id'])
         return parent_list
 
     def automation_state_report(self, priority=None, project=None, automation_platforms=None,
-                                filename_pattern='current_automation', debug=None, ):
+                                filename_pattern='current_automation', suite=None, debug=None):
         project = project if project else self.__project
         priority = priority if priority else self.__priority
         automation_platforms = automation_platforms if automation_platforms else self.__automation_platforms
@@ -92,7 +96,8 @@ class ATCoverageReporter:
             for section in sections:
                 if debug:
                     print('passing section '+str(section))
-                cases = tr_client.send_get(f'get_cases/{project}&priority_id={priority}&section_id={section}')
+                cases = self.__api.cases.get_cases(project_id=project, suite_id=suite, section_id=section,
+                                                   priority_id=priority)
                 results[index].set_total(results[index].get_total()+len(cases))
                 for case in cases:
                     if (case[platform['internal_name']] == 2 and platform['internal_name'] != 'type_id') \
@@ -109,7 +114,7 @@ class ATCoverageReporter:
             index += 1
         return results
     
-    def test_case_by_priority(self, project=None, debug=None):
+    def test_case_by_priority(self, project=None, suite=None, debug=None):
         debug = debug if debug is not None else self.__debug
         project = project if project else self.__project
         if not project:
@@ -120,10 +125,10 @@ class ATCoverageReporter:
         for i in range(1, 5):
             if debug:
                 print(f'passing priority {str(i)}')
-            results.append(len(tr_client.send_get(f'get_cases/{project}&priority_id={str(i)}')))
+            results.append(len(self.__api.cases.get_cases(project_id=project, suite_id=suite, priority_id=str(i))))
         return results
     
-    def test_case_by_type(self, project=None, filename_pattern='current_area_distribution', debug=True):
+    def test_case_by_type(self, project=None, filename_pattern='current_area_distribution', suite=None, debug=True):
         debug = debug if debug is not None else self.__debug
         project = project if project else self.__project
         if not project:
@@ -140,7 +145,7 @@ class ATCoverageReporter:
             for section in sections:
                 if debug:
                     print('passing section '+str(section))
-                cases = tr_client.send_get(f'get_cases/{project}&section_id={section}')
+                cases = self.__api.cases.get_cases(project_id=project, suite_id=suite, section_id=section)
                 results[index].set_total(results[index].get_total()+len(cases))
             # save history data
             filename = f"{filename_pattern}_{results[index].get_name().replace(' ', '_')}.csv"

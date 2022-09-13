@@ -16,26 +16,33 @@ class ConfluenceReporter:
         self.__plotly = plotly_engine if plotly_engine else PlotlyReporter(debug=debug)
         self.__automation_platforms = automation_platforms  # should be passed with specific TestRails sections
 
-    def automation_state(self, confluence_page, filename='current_automation.png', debug=None):
-        debug = debug if debug is not None else self.__debug
+    def automation_state(self, confluence_page=None, reports=None, filename='current_automation.png', debug=None):
         if not confluence_page:
             raise Exception("No confluence page is provided, report aborted!")
-        self.__plotly.draw_automation_state_report(debug=debug, filename=filename)
+        if not reports:
+            raise Exception("No TestRail reports are provided, report aborted!")
+        debug = debug if debug is not None else self.__debug
+        self.__plotly.draw_automation_state_report(reports=reports, filename=filename, debug=debug)
         self.__confluence.attach_file(filename, page_id=confluence_page, title='current_automation')
 
-    def test_case_priority_distribution(self, confluence_page, filename='current_priority_distribution.png',
-                                        debug=None):
-        debug = debug if debug is not None else self.__debug
+    def test_case_priority_distribution(self, confluence_page=None, values=None,
+                                        filename='current_priority_distribution.png', debug=None):
         if not confluence_page:
             raise Exception("No confluence page is provided, report aborted!")
-        self.__plotly.draw_test_case_by_priority(debug=debug, filename=filename)
+        if not values:
+            raise Exception("No TestRail reports are provided, report aborted!")
+        debug = debug if debug is not None else self.__debug
+        self.__plotly.draw_test_case_by_priority(values=values, filename=filename, debug=debug)
         self.__confluence.attach_file(filename, page_id=confluence_page, title='current_priority_distribution')
 
-    def test_case_area_distribution(self, confluence_page, filename='current_area_distribution.png', debug=None):
-        debug = debug if debug is not None else self.__debug
+    def test_case_area_distribution(self, confluence_page=None, cases=None, filename='current_area_distribution.png',
+                                    debug=None):
         if not confluence_page:
             raise Exception("No confluence page is provided, report aborted!")
-        self.__plotly.draw_test_case_by_area(debug=debug, filename=filename)
+        if not cases:
+            raise Exception("No TestRail cases are provided, report aborted!")
+        debug = debug if debug is not None else self.__debug
+        self.__plotly.draw_test_case_by_area(cases=cases, filename=filename, debug=debug)
         self.__confluence.attach_file(filename, page_id=confluence_page, title='current_area_distribution')
 
     def history_state_chart(self, confluence_page, automation_platforms=None, debug=None):
