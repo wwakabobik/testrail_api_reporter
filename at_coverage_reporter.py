@@ -1,8 +1,8 @@
 from testrail_api import TestRailAPI
 
-from csv_parser import CSVParser
-from case_stat import CaseStat
-from tools import format_error
+from .csv_parser import CSVParser
+from .case_stat import CaseStat
+from .reporter_utils import format_error
 
 
 class ATCoverageReporter:
