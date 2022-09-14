@@ -21,7 +21,7 @@ def upload_image(filename, api_token):
 
     :param filename: filename or path to image, which should be uploaded
     :param api_token: unique API token for image upload on https://freeimage.host
-    :return: dict with urls with image itself and its thumbinal
+    :return: dict with urls with image itself and its thumbnail
     """
     payload = {
         'type': 'file',

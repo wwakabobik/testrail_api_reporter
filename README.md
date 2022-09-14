@@ -150,6 +150,6 @@ As option, you can do it using https://freeimage.host via function:
 image_uploaded = upload_image(filename=chart_drawings[0], api_token=YOUR_SECRET_TOKEN)
 # now you can extract URL
 image_url = image_uploaded['image']
-# or its thumbinal
+# or its thumbnail
 image_thumb = image_uploaded['thumb']
 ```

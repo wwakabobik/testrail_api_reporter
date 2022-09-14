@@ -5,7 +5,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.image import MIMEImage
 
-from .reporter_utils import format_error
+from ..utils.reporter_utils import format_error
 
 
 class EmailSender:
@@ -143,7 +143,8 @@ class EmailSender:
             # add to body
             if captions:
                 html = f'{html}<tr><div align="center"><b>{captions[j]}</b></div></tr>'
-            html = f'{html}<tr><div align="center"><img src="cid:image_id_{j}" width="{image_width}" height="auto">></div></tr>'
+            html = f'{html}<tr><div align="center"><img src="cid:image_id_{j}" ' \
+                   f'width="{image_width}" height="auto">></div></tr>'
         html = f'{html}</td></tbody></table></body></html>'
         message.attach(MIMEText(html, "html"))
         return message
