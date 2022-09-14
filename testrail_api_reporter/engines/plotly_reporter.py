@@ -1,6 +1,6 @@
 import plotly
 
-from .csv_parser import CSVParser
+from ..utils.csv_parser import CSVParser
 
 # Set path to orca for plotly
 plotly.io.orca.config.executable = '/usr/local/bin/orca'

@@ -1,9 +1,9 @@
 from atlassian import Confluence
 
-from .plotly_reporter import PlotlyReporter
+from ..engines.plotly_reporter import PlotlyReporter
 
 
-class ConfluenceReporter:
+class ConfluenceSender:
     """
     Class contains wrapper for generate and send reports to Confluence
     """

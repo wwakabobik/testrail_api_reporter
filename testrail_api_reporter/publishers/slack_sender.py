@@ -2,7 +2,7 @@ import json
 
 import requests
 
-from .reporter_utils import format_error
+from ..utils.reporter_utils import format_error
 
 
 class SlackSender:
