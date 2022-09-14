@@ -147,7 +147,9 @@ class ATCoverageReporter:
         :param project: project id, integer, required
         :param automation_platforms: list of dicts of automation platforms, dict = {'name': 'Desktop Chrome',
                                                                                     'internal_name': 'type_id',
-                                                                                    'sections': [16276]}
+                                                                                    'sections': [16276],
+                                                                                    'auto_code': 3,
+                                                                                    'na_code': 4}
         :param filename_pattern: pattern for filename, string
         :param suite: suite id, integer, optional, if no suite-management is activated
         :param debug: debug output is enabled, may be True or False, optional
