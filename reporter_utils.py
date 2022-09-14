@@ -29,7 +29,7 @@ def upload_image(filename, api_token):
         'key': api_token
     }
     files = {'source': open(filename, 'rb')}
-    response = requests.post('https://freeimage.host/api/1/upload',
+    response = requests.post(url='https://freeimage.host/api/1/upload',
                              data=payload, timeout=5, verify=True, files=files)
     return {'image': response.json()['image']['file']['resource']['chain']['image'],
             'thumb': response.json()['image']['file']['resource']['chain']['thumb']}
