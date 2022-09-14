@@ -24,7 +24,9 @@ class ATCoverageReporter:
                                                                                'sections': [16276]}
         :param automation_platforms: list of dicts of automation platforms, dict = {'name': 'Desktop Chrome',
                                                                                     'internal_name': 'type_id',
-                                                                                    'sections': [16276]}
+                                                                                    'sections': [16276],
+                                                                                    'auto_code': 3,
+                                                                                    'na_code': 4}
         :param suite_id: suite id, integer, optional, if no suite-management is activated
         :param debug: debug output is enabled, may be True or False, optional
         """
@@ -178,11 +180,10 @@ class ATCoverageReporter:
                                              priority_id=priority)
                 results[index].set_total(results[index].get_total()+len(cases))
                 for case in cases:
-                    if (case[platform['internal_name']] == 2 and platform['internal_name'] != 'type_id') \
-                            or (case[platform['internal_name']] == 3 and platform['internal_name'] == 'type_id'):
+                    if case[platform['internal_name']] == platform['auto_code']:
                         results[index].set_automated(results[index].get_automated()+1)
                     else:
-                        if case[platform['internal_name']] == 3 and platform['internal_name'] != 'type_id':
+                        if case[platform['internal_name']] == platform['na_code']:
                             results[index].set_na(results[index].get_na()+1)
             results[index].set_not_automated(results[index].get_total() - results[index].get_automated() -
                                              results[index].get_na())
