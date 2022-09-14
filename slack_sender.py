@@ -74,7 +74,7 @@ class SlackSender:
         """
         Send message to Slack
 
-        :param files: list of files (images)
+        :param files: list of urls of images
         :param captions: list of captions for files, list of strings, if not provided, no captions will be added
         :param title: header title of message
         :param debug: debug output is enabled, may be True or False, optional

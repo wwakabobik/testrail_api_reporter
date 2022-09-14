@@ -142,3 +142,14 @@ To make plotly works, you need to set up Orca independently:
 ```
 npm install -g electron orca
 ```
+
+Please note, that Slack expecting urls instead of filenames, so, you must upload images to some hosting.
+As option, you can do it using https://freeimage.host via function:
+
+```
+image_uploaded = upload_image(filename=chart_drawings[0], api_token=YOUR_SECRET_TOKEN)
+# now you can extract URL
+image_url = image_uploaded['image']
+# or its thumbinal
+image_thumb = image_uploaded['thumb']
+```
