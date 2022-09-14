@@ -115,9 +115,30 @@ for item in automation_platforms:
     plotly_reporter.draw_history_state_chart(chart_name=item['name'])
 ```
 
+# More ways to share data
+
+If you still want to share reports, you can do it via email using `EmailSender`:
+
+```
+chart_drawings = ['report_chart.png', 'path/to/more_graphics.png']
+chart_captions = ['Priority distribution', 'AT coverage']
+emailer = EmailSender(email="my_personal@email.com",
+                      password="my_secure_password",
+                      server_smtp="smtp.email_server.com",
+                      server_port=587)
+emailer.send_message(files=chart_drawings, captions=chart_captions, recipients=['buddy@email.com', 'boss@email.com'])
+```
+
+Or you can send as Slack message using `SlackSender`
+
+```
+slack_sender = SlackSender(hook_url='https://hooks.slack.com/services/{your}/{api}/{key}')
+slack_sender.send_message(files=chart_drawings, captions=chart_captions)
+```
+
 ## Troubleshooting
 
-To make plotly works, you need to setup Orca independently:
+To make plotly works, you need to set up Orca independently:
 ```
 npm install -g electron orca
 ```

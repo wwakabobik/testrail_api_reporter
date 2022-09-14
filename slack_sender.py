@@ -69,7 +69,8 @@ class SlackSender:
         """
         return {'Content-type': 'application/json', 'Accept': 'text/plain'}
 
-    def send_message(self, files=None, captions=None, title="TestRail report", debug=None):
+    def send_message(self, files=None, captions=None, title=f"Test development & automation coverage report",
+                     debug=None):
         """
         Send message to Slack
 
