@@ -31,6 +31,9 @@ api.send_results()
 After this new testcases, test run and test results will be created. Testrun will have a name like 
 `AT run 2022-09-01T20:25:51`
 
+![Test run created in TestRails](https://github.com/wwakabobik/testrail_api_reporter/blob/master/screenshots/tr_at_run_report.png)
+
+
 If you fill `automation_id` for existing testcases using correct format 
 `path.to.testfile.filename.test_class.test_step`, then in such case results will be added to existing testcases.
 
@@ -42,6 +45,8 @@ Also, you can customize test run by passing:
 - `close_run` - may be `True` (by default) or `False` - if `True`, then every testrun will be closed
 - `run_name` - you may use run name (title) instead of it's ID, in this case run id will be ignored even if it's filled
 - `delete_old_run` - may be `True` or `False` (by default) - if `True`, then specified testrun will be deleted and new one will be created
+
+![Test run details in TestRails](https://github.com/wwakabobik/testrail_api_reporter/blob/master/screenshots/tr_at_run_detailed_report.png)
 
 Also, you can set up other params separately without need to re-initialize api object:
 
@@ -75,6 +80,8 @@ confluence_reporter.contest_case_area_distribution(cases=area_distribution)  # b
 confluence_reporter.test_case_priority_distribution(values=priority_distribution)  # bar chart of priority distribution
 confluence_reporter.automation_state(reports=automation_distribution)  # stacked bar chart using specific field as input
 ```
+
+![Report in Confluence](https://github.com/wwakabobik/testrail_api_reporter/blob/master/screenshots/tr_confluence_report.png)
 
 Ok, most likeley, you wonder when you can obtain these distributions? You can do it by using `ATCoverageReporter`!
 
@@ -129,12 +136,16 @@ emailer = EmailSender(email="my_personal@email.com",
 emailer.send_message(files=chart_drawings, captions=chart_captions, recipients=['buddy@email.com', 'boss@email.com'])
 ```
 
+![Email Report](https://github.com/wwakabobik/testrail_api_reporter/blob/master/screenshots/tr_email_report.png)
+
 Or you can send as Slack message using `SlackSender`
 
 ```
 slack_sender = SlackSender(hook_url='https://hooks.slack.com/services/{your}/{api}/{key}')
 slack_sender.send_message(files=chart_drawings, captions=chart_captions)
 ```
+
+![Slack Report](https://github.com/wwakabobik/testrail_api_reporter/blob/master/screenshots/tr_slack_report.png)
 
 ## Troubleshooting
 
