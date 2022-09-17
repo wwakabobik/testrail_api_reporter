@@ -1,8 +1,8 @@
-*** TestRail reporter ***
+# TestRail reporter
 
 pypi package can be found [here](https://pypi.org/project/testrail-api-reporter/)
 
-##This is Testrail API reporter tools.
+## This is Testrail API reporter tools.
 
 This package contains several tools to interact with TestRail via API.
 
