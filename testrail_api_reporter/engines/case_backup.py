@@ -58,10 +58,10 @@ class TCBackup:
         if not suite:
             suite = self.__suite
         if self.__debug:
-            print(f'\nDownload XML {filename}  from from {self.__url}')
+            print(f'\nDownload XML {filename} from from {self.__url}')
         os.popen(f'curl -b {self.__cookie_name} '
                  f'"{self.__url}/index.php?/suites/export/{suite}" '
-                 f'--output {filename}.xml').read()
+                 f'--output {filename}').read()
         return filename
 
     def get_backup(self, filename=None, suite=None):
