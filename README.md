@@ -174,6 +174,10 @@ gdrive.upload(filename='backup.zip', mime_type='application/zip')
 ```
 
 
+![Backup in Google Drive](https://github.com/wwakabobik/testrail_api_reporter/blob/master/screenshots/tr_gdrive_backup.png)
+
+
+
 ## Troubleshooting
 
 To make plotly works, you need to set up Orca independently:
