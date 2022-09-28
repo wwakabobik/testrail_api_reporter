@@ -1,3 +1,5 @@
+import os
+
 import requests
 
 
@@ -33,3 +35,19 @@ def upload_image(filename, api_token):
                              data=payload, timeout=5, verify=True, files=files)
     return {'image': response.json()['image']['file']['resource']['chain']['image'],
             'thumb': response.json()['image']['file']['resource']['chain']['thumb']}
+
+
+def delete_file(filename, debug=True):
+    os.popen(f'rm {filename}').read()
+    if debug:
+        print(f'Removed {filename}')
+
+
+def zip_file(filename, suffix=None, debug=True):
+    if suffix is None:
+        suffix = ''
+    zipped_file = f'{filename.split(".")[0]}{suffix}.zip'
+    os.popen(f'zip -r {zipped_file} {filename}').read()
+    if debug:
+        print(f'ZIPped {filename} to {zipped_file}')
+    return zipped_file

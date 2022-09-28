@@ -147,6 +147,33 @@ slack_sender.send_message(files=chart_drawings, captions=chart_captions)
 
 ![Slack Report](https://github.com/wwakabobik/testrail_api_reporter/blob/master/screenshots/tr_slack_report.png)
 
+
+# Backup Test Cases
+
+Sometimes you need backup you progress. Minimum what you can do - it's backup test cases. So, you can do it using `TCBackup`
+
+```
+tc_backup = TCBackup(tr_url, tr_email, tr_password, test_rails_suite=3)
+tc_backup.backup()  # this will produce backup.xml file
+tc_backup.get_archive_backup(suffix='')  # this will produce backup.zip file
+```
+
+You still need to save it? Let's use Google Drive and `GoogleDriveUploader`
+
+```
+# Google token needs to be configured firstly, to do it, you have to visit:
+# https://console.developers.google.com/apis/credentials?pli=1
+# Create Credentials => OAuth client ID => TV and limited Input Devices and get client_id and a client_secret
+# Then pass it as google_id = client_id and google_secret = client_secret
+gdrive = GoogleDriveUploader(google_id=client_id, google_secret=client_secret)
+# first run prompts you to enter user_code to your user account and activate API token, 
+# but if you already have access tokens, do following:
+gdrive = GoogleDriveUploader(google_id=client_id, google_secret=client_secret, google_api_refresh_token=refresh_token)
+# now you may upload any file, but by default I assume you will use backup.zip
+gdrive.upload(filename='backup.zip', mime_type='application/zip')
+```
+
+
 ## Troubleshooting
 
 To make plotly works, you need to set up Orca independently:
