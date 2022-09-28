@@ -98,5 +98,5 @@ class TCBackup:
         self.get_backup(filename=filename, suite=suite)
         backup_file = zip_file(filename=filename, suffix=suffix)
         if self.__cleanup_needed:
-            delete_file(filename=self.__backup_filename, debug=self.__debug)
+            delete_file(filename=filename, debug=self.__debug)
         return backup_file

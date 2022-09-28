@@ -118,7 +118,7 @@ class GoogleDriveUploader:
         if not filename:
             filename = self.__backup_filename
         if not mime_type:
-            filename = self.__mime_type
+            mime_type = self.__mime_type
         if self.__debug:
             print(f'Uploading {filename} to GoogleDrive')
         response = json.loads(os.popen(f'curl -X POST -L -H "Authorization: Bearer {self.__g_token}" '
@@ -145,7 +145,7 @@ class GoogleDriveUploader:
         if not filename:
             filename = self.__backup_filename
         if not mime_type:
-            filename = self.__mime_type
+            mime_type = self.__mime_type
         if not self.__g_token:
             self.__refresh_token()
         self.__upload_to_gdrive(filename=filename, mime_type=mime_type)
@@ -160,7 +160,7 @@ class GoogleDriveUploader:
         if not filename:
             filename = self.__backup_filename
         if not mime_type:
-            filename = self.__mime_type
+            mime_type = self.__mime_type
         self.__proceed_upload(filename=filename, mime_type=mime_type)
         if self.__cleanup_needed:
             delete_file(filename=filename, debug=self.__debug)
