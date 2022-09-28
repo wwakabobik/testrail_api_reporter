@@ -106,7 +106,14 @@ class GoogleDriveUploader:
               "After submit please wait at least 5 minutes.")
         input("When 5 minutes passed, press any enter")
 
-        return self.__get_new_oauth_token(device_code=device_code)
+        access_token, refresh_token = self.__get_new_oauth_token(device_code=device_code)
+
+        print(f"Your access token is:\n{access_token}\nYour refresh token is:\n{refresh_token}\n"
+              f"Please save these credentials secure!\nYour access token will be valid for an 1 hour. "
+              f"If you plan use it in advance, you need to refresh it every hour or before use any time. \n"
+              f"Next time init this class with your refresh token to update access token automatically.")
+
+        return access_token, refresh_token
 
     def __upload_to_gdrive(self, filename=None, mime_type=None):
         """
@@ -152,7 +159,7 @@ class GoogleDriveUploader:
 
     def upload(self, filename=None, mime_type=None):
         """
-        Upload file to Google Drive and cleanup, if needed
+        Upload file to Google Drive and cleanup, if needed.
 
         :param filename: filename to upload, string
         :param mime_type: MIME type of file, string
