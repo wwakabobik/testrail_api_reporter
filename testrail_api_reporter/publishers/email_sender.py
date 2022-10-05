@@ -179,6 +179,12 @@ class EmailSender:
         return message
 
     def __gmail_get_credentials(self, debug=None):
+        """
+        Service function to get and convert Google OAuth credential from client_id and client_secret
+
+        :param debug: debug output is enabled, may be True or False, optional
+        :return: none
+        """
         if not debug:
             debug = self.__debug
         home_dir = os.path.expanduser('~')
@@ -197,6 +203,12 @@ class EmailSender:
         return credentials
 
     def __gmail_send_message(self, message):
+        """
+        Send Email via GMail
+
+        :param message: message in MIME type format
+        :return: none
+        """
         credentials = self.__gmail_get_credentials()
         http = credentials.authorize(httplib2.Http())
         service = discovery.build('gmail', 'v1', http=http)
@@ -204,6 +216,15 @@ class EmailSender:
                                            {'raw': base64.urlsafe_b64encode(message.as_bytes()).decode()})
 
     def __gmail_send_message_internal(self, service, user_id, message, debug=None):
+        """
+        Low-level gmail sent function to send email via GMail API service
+
+        :param service: service API
+        :param user_id: user id, the same as "from" email field
+        :param message: formatted in base64 type encoded raw message
+        :param debug: debug output is enabled, may be True or False, optional
+        :return: none
+        """
         if not debug:
             debug = self.__debug
         try:
