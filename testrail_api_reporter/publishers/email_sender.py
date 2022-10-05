@@ -1,15 +1,20 @@
+import os
+import base64
 from datetime import datetime
-
-import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.image import MIMEImage
+
+import smtplib
+import httplib2
+from oauth2client import client, tools, file
+from apiclient import discovery
 
 from ..utils.reporter_utils import format_error
 
 
 class EmailSender:
-    def __init__(self, email=None, password=None, server_smtp=None, server_port=None, debug=True):
+    def __init__(self, email=None, password=None, server_smtp=None, server_port=None, gmail_token=None, debug=True):
         """
         General init
 
@@ -17,20 +22,32 @@ class EmailSender:
         :param password: password of user, from which emails will be sent, string
         :param server_smtp: full smtp address (endpoint) of mail server, string
         :param server_port: mail server port, integer
+        :gmail_token: gmail OAuth secret file (expected json)
         :param debug: debug output is enabled, may be True or False, optional
         """
         if debug:
             print("Email Sender init")
         self.__debug = debug
-        if email is None or password is None or server_smtp is None or server_port is None:
+        self.__method = None
+        if email is not None and password is not None and server_smtp is not None and server_port is not None:
+            self.__method = 'regular'
+        elif gmail_token and email:
+            gmail_token = f'{os.getcwd()}/{gmail_token}' if not os.path.exists(gmail_token) else gmail_token
+            if os.path.exists(gmail_token):
+                self.__method = 'gmail'
+                self.__gmail_scopes = 'https://www.googleapis.com/auth/gmail.send'
+                self.__gmail_app_name = 'Gmail API Python Send Email'
+        if not self.__method:
             raise ValueError("No email credentials are provided, aborted!")
         self.__email = email
         self.__password = password
         self.__server_smtp = server_smtp
         self.__server_port = server_port
+        self.__gmail_token = gmail_token
+        print("INIT OK")
 
     def send_message(self, files=None, captions=None, image_width="400px", title=None, timestamp=None, recipients=None,
-                     debug=None):
+                     method=None, custom_message=None, debug=None):
         """
         Send email to recipients with report (with attached images)
 
@@ -40,18 +57,22 @@ class EmailSender:
         :param title: title of report, string, optional
         :param timestamp: non-default timestamp, string, optional, will be used only when title is not provided
         :param recipients: list of recipient emails, list of strings, optional
+        :param method: method which will be used for sending
+        :param custom_message: custom message, prepared by user at his own, by default it's payload with TR state report
         :param debug: debug output is enabled, may be True or False, optional
         :return: none
         """
         # Check params
-        if not isinstance(files, list):
+        if not method:
+            method = self.__method
+        if not isinstance(files, list) and not custom_message:
             raise ValueError("No file list for report provided, aborted!")
-        if isinstance(recipients, str):
+        if isinstance(recipients, str) and not custom_message:
             recipients = [recipients]
-        elif not isinstance(recipients, list):
+        elif not isinstance(recipients, list) and not custom_message:
             raise ValueError("Wrong list of recipients is provided, aborted!")
         debug = debug if debug is not None else self.__debug
-        if not isinstance(captions, list):
+        if not isinstance(captions, list) or custom_message:
             if debug:
                 print("Caption list is empty, no legend will be displayed")
             captions = None
@@ -64,11 +85,19 @@ class EmailSender:
         title = title if title else f"Test development & automation coverage report for {timestamp}"
 
         # Connect and send message
-        connection = self.__connect_to_server()
-        message = self.__prepare_payload(files=files, captions=captions, image_width=image_width, title=title,
-                                         recipients=recipients)
-        self.__send_to_server(connection=connection, recipients=recipients, message=message)
-        self.__disconnect_from_server(connection=connection)
+        if not custom_message:
+            message = self.__prepare_payload(files=files, captions=captions, image_width=image_width, title=title,
+                                             recipients=recipients)
+        else:
+            if debug:
+                print("Ignoring payload preparations, assuming user custom message is right")
+            message = custom_message
+        if method == 'regular':
+            connection = self.__connect_to_server()
+            self.__send_to_server(connection=connection, recipients=recipients, message=message)
+            self.__disconnect_from_server(connection=connection)
+        elif method == 'gmail':
+            self.__gmail_send_message(message=message)
         if debug:
             print("Email sent!")
 
@@ -148,3 +177,39 @@ class EmailSender:
         html = f'{html}</td></tbody></table></body></html>'
         message.attach(MIMEText(html, "html"))
         return message
+
+    def __gmail_get_credentials(self, debug=None):
+        if not debug:
+            debug = self.__debug
+        home_dir = os.path.expanduser('~')
+        credential_dir = os.path.join(home_dir, '.credentials')
+        if not os.path.exists(credential_dir):
+            os.makedirs(credential_dir)
+        credential_path = os.path.join(credential_dir, 'gmail-python-email-send.json')
+        store = file.Storage(credential_path)
+        credentials = store.get()
+        if not credentials or credentials.invalid:
+            flow = client.flow_from_clientsecrets(self.__gmail_token, self.__gmail_scopes)
+            flow.user_agent = self.__gmail_app_name
+            credentials = tools.run_flow(flow, store)
+            if debug:
+                print('Storing credentials to ' + credential_path)
+        return credentials
+
+    def __gmail_send_message(self, message):
+        credentials = self.__gmail_get_credentials()
+        http = credentials.authorize(httplib2.Http())
+        service = discovery.build('gmail', 'v1', http=http)
+        self.__gmail_send_message_internal(service, self.__email,
+                                           {'raw': base64.urlsafe_b64encode(message.as_bytes()).decode()})
+
+    def __gmail_send_message_internal(self, service, user_id, message, debug=None):
+        if not debug:
+            debug = self.__debug
+        try:
+            message = (service.users().messages().send(userId=user_id, body=message).execute())
+            if debug:
+                print('Message Id: %s' % message['id'])
+            return message
+        except Exception as e:
+            raise ValueError(f"Can't send mail via GMail!\nError{format_error(e)}")
