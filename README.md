@@ -139,6 +139,12 @@ emailer = EmailSender(email="my_personal@email.com",
 emailer.send_message(files=chart_drawings, captions=chart_captions, recipients=['buddy@email.com', 'boss@email.com'])
 ```
 
+Alternatively, you can use GMail API with OAuth token instead of less secure auth:
+```
+emailer = EmailSender(email="my_personal@gmail.com",
+                      gmail_token="token.json")
+```
+
 ![Email Report](https://github.com/wwakabobik/testrail_api_reporter/blob/master/screenshots/tr_email_report.png)
 
 Or you can send as Slack message using `SlackSender`
