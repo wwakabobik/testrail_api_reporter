@@ -44,7 +44,6 @@ class EmailSender:
         self.__server_smtp = server_smtp
         self.__server_port = server_port
         self.__gmail_token = gmail_token
-        print("INIT OK")
 
     def send_message(self, files=None, captions=None, image_width="400px", title=None, timestamp=None, recipients=None,
                      method=None, custom_message=None, debug=None):
