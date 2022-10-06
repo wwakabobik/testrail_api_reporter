@@ -143,7 +143,7 @@ class EmailSender:
         except Exception as e:
             raise ValueError(f"Can't close connection!\nError{format_error(e)}")
 
-    def __prepare_payload(self, files, image_width, title, recipients, captions=None):
+    def __prepare_payload(self, files, image_width, title, recipients, captions=None, method=None):
         """
 
         :param files: list of filenames (maybe with path) with charts to attach to report, list of strings, required
@@ -151,9 +151,10 @@ class EmailSender:
         :param image_width: default image width, string
         :param title: title of report, string
         :param recipients: list of recipient emails, list of strings, optional
+        :param method: specify which method is used to set proper MIMEMultipart type ('gmail' or not)
         :return: formatted multipart message
         """
-        message = MIMEMultipart("alternative")
+        message = MIMEMultipart("alternative") if method != 'gmail' else MIMEMultipart()
         message["Subject"] = title
         message["From"] = self.__email
         message["To"] = ", ".join(recipients)
