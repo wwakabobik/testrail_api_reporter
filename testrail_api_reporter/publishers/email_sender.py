@@ -87,7 +87,7 @@ class EmailSender:
         # Connect and send message
         if not custom_message:
             message = self.__prepare_payload(files=files, captions=captions, image_width=image_width, title=title,
-                                             recipients=recipients)
+                                             recipients=recipients, method=method)
         else:
             if debug:
                 print("Ignoring payload preparations, assuming user custom message is right")
