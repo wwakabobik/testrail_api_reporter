@@ -57,7 +57,7 @@ class EmailSender:
         :param timestamp: non-default timestamp, string, optional, will be used only when title is not provided
         :param recipients: list of recipient emails, list of strings, optional
         :param method: method which will be used for sending
-        :param custom_message: custom message, prepared by user at his own, by default it's payload with TR state report
+        :param custom_message: custom message, prepared by user at his own, by default its payload with TR state report
         :param debug: debug output is enabled, may be True or False, optional
         :return: none
         """
@@ -178,45 +178,70 @@ class EmailSender:
         message.attach(MIMEText(html, "html"))
         return message
 
+    def __gmail_get_credential_path(self, debug=None):
+        """
+        Service function target Google OAuth credentials path to storage
+
+        :param debug: debug output is enabled, may be True or False, optional
+        :return: credentials file path (string)
+        """
+        if not debug:
+            debug = self.__debug
+        home_dir = os.path.join(os.path.expanduser('~'), '.credentials')
+        current_dir = os.path.abspath(os.path.join(__file__, os.pardir))
+        if os.path.exists(home_dir):
+            credential_dir = home_dir
+        elif os.path.exists(current_dir):
+            credential_dir = current_dir
+        else:
+            credential_dir = home_dir
+            error = False
+            try:
+                if debug:
+                    print(f"No credential directory found, creating new one here: {credential_dir}")
+                os.makedirs(credential_dir)
+            except OSError as e:
+                error = True
+                if debug:
+                    print(f"Original Error{format_error(e)}")
+            if error or not os.path.exists(credential_dir):
+                credential_dir = current_dir
+                try:
+                    if debug:
+                        print(f"Can't create directory! Trying to make directory here: {credential_dir}")
+                    os.makedirs(credential_dir)
+                except OSError:
+                    if debug:
+                        print(f"Original Error{format_error(e)}")
+            if not os.path.exists(credential_dir):
+                raise ValueError("Can't create directory!")
+        credential_path = os.path.join(credential_dir, 'gmail-python-email-send.json')
+        return credential_path
+
     def __gmail_get_credentials(self, debug=None):
         """
         Service function to get and convert Google OAuth credential from client_id and client_secret
 
         :param debug: debug output is enabled, may be True or False, optional
-        :return: none
+        :return: credentials
         """
         if not debug:
             debug = self.__debug
-        home_dir = os.path.expanduser('~')
-        credential_dir = os.path.join(home_dir, '.credentials')
-        if not os.path.exists(credential_dir):
-            try:
-                if debug:
-                    print(f"No credential directory found, creating new one here: {credential_dir}")
-                os.makedirs(credential_dir)
-            except OSError:
-                credential_dir = os.path.abspath(os.path.join(__file__, os.pardir))
-                if debug:
-                    print("Can't create directory! Trying to make directory here: {credential_dir}")
-                try:
-                    os.makedirs(credential_dir)
-                except Exception as e:
-                    raise ValueError(f"Can't create directory!\nError{format_error(e)}")
-        credential_path = os.path.join(credential_dir, 'gmail-python-email-send.json')
+        credential_path = self.__gmail_get_credential_path(debug=debug)
         store = file.Storage(credential_path)
         credentials = store.get()
         if not credentials or credentials.invalid:
             try:
                 flow = client.flow_from_clientsecrets(self.__gmail_token, self.__gmail_scopes)
             except Exception as e:
-                raise ValueError(f"Can't obtain new client secrets from Google OAuth\nError{format_error(e)}")
+                raise ValueError(f"Couldn't obtain new client secrets from Google OAuth\nError{format_error(e)}")
             flow.user_agent = self.__gmail_app_name
             try:
                 credentials = tools.run_flow(flow, store)
             except Exception as e:
-                raise ValueError(f"Can't obtain new credential from Google OAuth\nError{format_error(e)}")
+                raise ValueError(f"Couldn't obtain new credential from Google OAuth\nError{format_error(e)}")
             if debug:
-                print('Storing credentials to ' + credential_path)
+                print('Credentials stored to ' + credential_path)
         return credentials
 
     def __gmail_send_message(self, message):
