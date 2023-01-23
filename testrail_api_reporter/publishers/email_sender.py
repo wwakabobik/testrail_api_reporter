@@ -196,7 +196,8 @@ class EmailSender:
                 os.makedirs(credential_dir)
             except OSError:
                 credential_dir = os.path.abspath(os.path.join(__file__, os.pardir))
-                print("Can't create directory! Trying to make directory here: {credential_dir}")
+                if debug:
+                    print("Can't create directory! Trying to make directory here: {credential_dir}")
                 try:
                     os.makedirs(credential_dir)
                 except Exception as e:
