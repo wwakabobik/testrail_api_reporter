@@ -190,7 +190,17 @@ class EmailSender:
         home_dir = os.path.expanduser('~')
         credential_dir = os.path.join(home_dir, '.credentials')
         if not os.path.exists(credential_dir):
-            os.makedirs(credential_dir)
+            try:
+                if debug:
+                    print(f"No credential directory found, creating new one here: {credential_dir}")
+                os.makedirs(credential_dir)
+            except OSError:
+                credential_dir = os.path.abspath(os.path.join(__file__, os.pardir))
+                print("Can't create directory! Trying to make directory here: {credential_dir}")
+                try:
+                    os.makedirs(credential_dir)
+                except Exception as e:
+                    raise ValueError(f"Can't create directory!\nError{format_error(e)}")
         credential_path = os.path.join(credential_dir, 'gmail-python-email-send.json')
         store = file.Storage(credential_path)
         credentials = store.get()
