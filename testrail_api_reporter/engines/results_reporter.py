@@ -108,8 +108,9 @@ class TestRailResultsReporter:
                     return None
                 first_run = False
             elif response['_links']['next'] is not None:
+                offset = int(response['_links']['next'].split("&offset=")[1].split("&")[0])
                 response = self.__api.sections.get_sections(project_id=self.__project_id, suite_id=self.__suite_id,
-                                                            offset=int(response['_links']['next'].split("&offset=")[1]))
+                                                            offset=offset)
             sections = response['sections']
             for item in sections:
                 if item['name'] == title:
