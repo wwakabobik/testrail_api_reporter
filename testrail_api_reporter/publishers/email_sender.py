@@ -1,14 +1,14 @@
-import os
 import base64
 from datetime import datetime
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.image import MIMEImage
+import os
 
-import smtplib
-import httplib2
-from oauth2client import client, tools, file
 from apiclient import discovery
+import httplib2
+import smtplib
+from oauth2client import client, tools, file
 
 from ..utils.reporter_utils import format_error
 
@@ -106,6 +106,8 @@ class EmailSender:
 
         :return: connection handle ( smtplib.SMTP )
         """
+        if self.__debug:
+            print(f'Connecting to custom mail server {self.__server_smtp}:{self.__server_port} using {self.__email}')
         try:
             connection = smtplib.SMTP(self.__server_smtp, self.__server_port)
             connection.ehlo()
@@ -124,19 +126,22 @@ class EmailSender:
         :param message: formatted multipart message
         :return: none
         """
+        if self.__debug:
+            print(f'Sending mail from {self.__email} to {recipients}')
         try:
             connection.sendmail(from_addr=self.__email, to_addrs=recipients, msg=message.as_string())
         except Exception as e:
             raise ValueError(f"Can't send mail!\nError{format_error(e)}")
 
-    @staticmethod
-    def __disconnect_from_server(connection):
+    def __disconnect_from_server(self, connection):
         """
         Connects to mail server
 
         :param connection: connection handle ( smtplib.SMTP )
         :return: none
         """
+        if self.__debug:
+            print(f'Disconnecting from custom server')
         try:
             connection.quit()
         except Exception as e:
@@ -144,6 +149,7 @@ class EmailSender:
 
     def __prepare_payload(self, files, image_width, title, recipients, captions=None, method=None):
         """
+        Prepare payload method (mail content)
 
         :param files: list of filenames (maybe with path) with charts to attach to report, list of strings, required
         :param captions: captions for charts, length should be equal to count of files, list of strings, optional
@@ -178,15 +184,14 @@ class EmailSender:
         message.attach(MIMEText(html, "html"))
         return message
 
-    def __gmail_get_credential_path(self, debug=None):
+    def __gmail_get_credential_path(self):
         """
         Service function target Google OAuth credentials path to storage
 
-        :param debug: debug output is enabled, may be True or False, optional
         :return: credentials file path (string)
         """
-        if not debug:
-            debug = self.__debug
+        if self.__debug:
+            print("Finding GMail credentials path")
         home_dir = os.path.join(os.path.expanduser('~'), '.credentials')
         current_dir = os.path.abspath(os.path.join(__file__, os.pardir))
         if os.path.exists(home_dir):
@@ -197,37 +202,36 @@ class EmailSender:
             credential_dir = home_dir
             error = False
             try:
-                if debug:
+                if self.__debug:
                     print(f"No credential directory found, creating new one here: {credential_dir}")
-                os.makedirs(credential_dir)
+                os.makedirs(credential_dir, exist_ok=True)
             except OSError as e:
                 error = True
-                if debug:
+                if self.__debug:
                     print(f"Original Error{format_error(e)}")
             if error or not os.path.exists(credential_dir):
                 credential_dir = current_dir
                 try:
-                    if debug:
+                    if self.__debug:
                         print(f"Can't create directory! Trying to make directory here: {credential_dir}")
-                    os.makedirs(credential_dir)
-                except OSError:
-                    if debug:
+                    os.makedirs(credential_dir, exist_ok=True)
+                except OSError as e:
+                    if self.__debug:
                         print(f"Original Error{format_error(e)}")
             if not os.path.exists(credential_dir):
                 raise ValueError("Can't create directory!")
         credential_path = os.path.join(credential_dir, 'gmail-python-email-send.json')
         return credential_path
 
-    def __gmail_get_credentials(self, debug=None):
+    def __gmail_get_credentials(self):
         """
         Service function to get and convert Google OAuth credential from client_id and client_secret
 
-        :param debug: debug output is enabled, may be True or False, optional
         :return: credentials
         """
-        if not debug:
-            debug = self.__debug
-        credential_path = self.__gmail_get_credential_path(debug=debug)
+        credential_path = self.__gmail_get_credential_path()
+        if self.__debug:
+            print(f"Obtaining GMail credentials from {credential_path}")
         store = file.Storage(credential_path)
         credentials = store.get()
         if not credentials or credentials.invalid:
@@ -240,7 +244,7 @@ class EmailSender:
                 credentials = tools.run_flow(flow, store)
             except Exception as e:
                 raise ValueError(f"Couldn't obtain new credential from Google OAuth\nError{format_error(e)}")
-            if debug:
+            if self.__debug:
                 print('Credentials stored to ' + credential_path)
         return credentials
 
@@ -251,6 +255,8 @@ class EmailSender:
         :param message: message in MIME type format
         :return: none
         """
+        if self.__debug:
+            print("Sending message using GMail")
         credentials = self.__gmail_get_credentials()
         try:
             http = credentials.authorize(httplib2.Http())
@@ -266,21 +272,18 @@ class EmailSender:
             raise ValueError(f"Can't convert payload to base64\nError{format_error(e)}")
         self.__gmail_send_message_internal(service, self.__email, {'raw': raw})
 
-    def __gmail_send_message_internal(self, service, user_id, message, debug=None):
+    def __gmail_send_message_internal(self, service, user_id, message):
         """
         Low-level gmail sent function to send email via GMail API service
 
         :param service: service API
         :param user_id: user id, the same as "from" email field
         :param message: formatted in base64 type encoded raw message
-        :param debug: debug output is enabled, may be True or False, optional
         :return: message
         """
-        if not debug:
-            debug = self.__debug
         try:
             message = (service.users().messages().send(userId=user_id, body=message).execute())
-            if debug:
+            if self.__debug:
                 print(f'Message Id: {message["id"]}')
             return message
         except Exception as e:
