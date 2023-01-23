@@ -195,9 +195,15 @@ class EmailSender:
         store = file.Storage(credential_path)
         credentials = store.get()
         if not credentials or credentials.invalid:
-            flow = client.flow_from_clientsecrets(self.__gmail_token, self.__gmail_scopes)
+            try:
+                flow = client.flow_from_clientsecrets(self.__gmail_token, self.__gmail_scopes)
+            except Exception as e:
+                raise ValueError(f"Can't obtain new client secrets from Google OAuth\nError{format_error(e)}")
             flow.user_agent = self.__gmail_app_name
-            credentials = tools.run_flow(flow, store)
+            try:
+                credentials = tools.run_flow(flow, store)
+            except Exception as e:
+                raise ValueError(f"Can't obtain new credential from Google OAuth\nError{format_error(e)}")
             if debug:
                 print('Storing credentials to ' + credential_path)
         return credentials
@@ -210,10 +216,19 @@ class EmailSender:
         :return: none
         """
         credentials = self.__gmail_get_credentials()
-        http = credentials.authorize(httplib2.Http())
-        service = discovery.build('gmail', 'v1', http=http)
-        self.__gmail_send_message_internal(service, self.__email,
-                                           {'raw': base64.urlsafe_b64encode(message.as_bytes()).decode()})
+        try:
+            http = credentials.authorize(httplib2.Http())
+        except Exception as e:
+            raise ValueError(f"Can't authorize via Google OAuth\nError{format_error(e)}")
+        try:
+            service = discovery.build('gmail', 'v1', http=http)
+        except Exception as e:
+            raise ValueError(f"Can't build service for Google OAuth\nError{format_error(e)}")
+        try:
+            raw = base64.urlsafe_b64encode(message.as_bytes()).decode()
+        except Exception as e:
+            raise ValueError(f"Can't convert payload to base64\nError{format_error(e)}")
+        self.__gmail_send_message_internal(service, self.__email, {'raw': raw})
 
     def __gmail_send_message_internal(self, service, user_id, message, debug=None):
         """
@@ -223,14 +238,14 @@ class EmailSender:
         :param user_id: user id, the same as "from" email field
         :param message: formatted in base64 type encoded raw message
         :param debug: debug output is enabled, may be True or False, optional
-        :return: none
+        :return: message
         """
         if not debug:
             debug = self.__debug
         try:
             message = (service.users().messages().send(userId=user_id, body=message).execute())
             if debug:
-                print('Message Id: %s' % message['id'])
+                print(f'Message Id: {message["id"]}')
             return message
         except Exception as e:
             raise ValueError(f"Can't send mail via GMail!\nError{format_error(e)}")
