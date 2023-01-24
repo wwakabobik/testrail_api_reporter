@@ -46,7 +46,7 @@ class EmailSender:
         self.__gmail_token = gmail_token
 
     def send_message(self, files=None, captions=None, image_width="400px", title=None, timestamp=None, recipients=None,
-                     method=None, custom_message=None, debug=None):
+                     method=None, custom_message=None, use_home_folder=True, debug=None):
         """
         Send email to recipients with report (with attached images)
 
@@ -58,6 +58,7 @@ class EmailSender:
         :param recipients: list of recipient emails, list of strings, optional
         :param method: method which will be used for sending
         :param custom_message: custom message, prepared by user at his own, by default its payload with TR state report
+        :param use_home_folder: use home folder for gmail credentials storage, by default True, otherwise current folder
         :param debug: debug output is enabled, may be True or False, optional
         :return: none
         """
@@ -96,7 +97,7 @@ class EmailSender:
             self.__send_to_server(connection=connection, recipients=recipients, message=message)
             self.__disconnect_from_server(connection=connection)
         elif method == 'gmail':
-            self.__gmail_send_message(message=message)
+            self.__gmail_send_message(message=message, use_home_folder=use_home_folder)
         if debug:
             print("Email sent!")
 
@@ -184,56 +185,47 @@ class EmailSender:
         message.attach(MIMEText(html, "html"))
         return message
 
-    def __gmail_get_credential_path(self):
+    def __gmail_get_credential_path(self, use_home_folder):
         """
         Service function target Google OAuth credentials path to storage
 
+        :param use_home_folder: use home folder for gmail credentials storage, by default True, otherwise current folder
         :return: credentials file path (string)
         """
-        if self.__debug:
-            print("Finding GMail credentials path")
-        home_dir = os.path.join(os.path.expanduser('~'), '.credentials')
-        current_dir = os.path.abspath(os.path.join(__file__, os.pardir))
-        if os.path.exists(home_dir):
-            credential_dir = home_dir
-        elif os.path.exists(current_dir):
-            credential_dir = current_dir
+        if use_home_folder:
+            credential_dir = os.path.join(os.path.expanduser('~'), '.credentials')
         else:
-            credential_dir = home_dir
-            error = False
-            try:
-                if self.__debug:
-                    print(f"No credential directory found, creating new one here: {credential_dir}")
-                os.makedirs(credential_dir, exist_ok=True)
-            except OSError as e:
-                error = True
-                if self.__debug:
-                    print(f"Original Error{format_error(e)}")
-            if error or not os.path.exists(credential_dir):
-                credential_dir = current_dir
-                try:
-                    if self.__debug:
-                        print(f"Can't create directory! Trying to make directory here: {credential_dir}")
-                    os.makedirs(credential_dir, exist_ok=True)
-                except OSError as e:
-                    if self.__debug:
-                        print(f"Original Error{format_error(e)}")
-            if not os.path.exists(credential_dir):
-                raise ValueError("Can't create directory!")
+            credential_dir = os.path.abspath(os.path.join(__file__, os.pardir))
+        if self.__debug:
+            print(f"Checking GMail credentials path at {credential_dir}")
+        try:
+            if self.__debug:
+                print(f"No credential directory found, creating new one here: {credential_dir}")
+            os.makedirs(credential_dir, exist_ok=True)
+        except OSError as e:
+            if self.__debug:
+                print(f"Original Error{format_error(e)}")
         credential_path = os.path.join(credential_dir, 'gmail-python-email-send.json')
         return credential_path
 
-    def __gmail_get_credentials(self):
+    def __gmail_get_credentials(self, use_home_folder):
         """
         Service function to get and convert Google OAuth credential from client_id and client_secret
 
+        :param use_home_folder: use home folder for gmail credentials storage, by default True, otherwise current folder
         :return: credentials
         """
-        credential_path = self.__gmail_get_credential_path()
+        credential_path = self.__gmail_get_credential_path(use_home_folder=use_home_folder)
         if self.__debug:
             print(f"Obtaining GMail credentials from {credential_path}")
-        store = file.Storage(credential_path)
-        credentials = store.get()
+        try:
+            store = file.Storage(credential_path)
+        except Exception as e:
+            raise ValueError(f"Couldn't open storage\nError{format_error(e)}")
+        try:
+            credentials = store.get()
+        except Exception as e:
+            raise ValueError(f"Obtaining of credentials unexpectedly failed\nError{format_error(e)}")
         if not credentials or credentials.invalid:
             try:
                 flow = client.flow_from_clientsecrets(self.__gmail_token, self.__gmail_scopes)
@@ -248,16 +240,17 @@ class EmailSender:
                 print('Credentials stored to ' + credential_path)
         return credentials
 
-    def __gmail_send_message(self, message):
+    def __gmail_send_message(self, message, use_home_folder):
         """
         Send Email via GMail
 
         :param message: message in MIME type format
+        :param use_home_folder: use home folder for gmail credentials storage, by default True, otherwise current folder
         :return: none
         """
         if self.__debug:
             print("Sending message using GMail")
-        credentials = self.__gmail_get_credentials()
+        credentials = self.__gmail_get_credentials(use_home_folder=use_home_folder)
         try:
             http = credentials.authorize(httplib2.Http())
         except Exception as e:
