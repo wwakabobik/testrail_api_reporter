@@ -46,7 +46,8 @@ class EmailSender:
         self.__gmail_token = gmail_token
 
     def send_message(self, files=None, captions=None, image_width="400px", title=None, timestamp=None, recipients=None,
-                     method=None, custom_message=None, use_home_folder=True, debug=None):
+                     method=None, custom_message=None,
+                     custom_folder=os.path.join(os.path.expanduser('~'), '.credentials'), debug=None):
         """
         Send email to recipients with report (with attached images)
 
@@ -58,7 +59,7 @@ class EmailSender:
         :param recipients: list of recipient emails, list of strings, optional
         :param method: method which will be used for sending
         :param custom_message: custom message, prepared by user at his own, by default its payload with TR state report
-        :param use_home_folder: use home folder for gmail credentials storage, by default True, otherwise current folder
+        :param custom_folder: custom home folder for gmail credentials storage, by default is ~/.credentials
         :param debug: debug output is enabled, may be True or False, optional
         :return: none
         """
@@ -97,7 +98,7 @@ class EmailSender:
             self.__send_to_server(connection=connection, recipients=recipients, message=message)
             self.__disconnect_from_server(connection=connection)
         elif method == 'gmail':
-            self.__gmail_send_message(message=message, use_home_folder=use_home_folder)
+            self.__gmail_send_message(message=message, custom_folder=custom_folder)
         if debug:
             print("Email sent!")
 
@@ -185,37 +186,33 @@ class EmailSender:
         message.attach(MIMEText(html, "html"))
         return message
 
-    def __gmail_get_credential_path(self, use_home_folder):
+    def __gmail_get_credential_path(self, custom_folder=os.path.join(os.path.expanduser('~'), '.credentials')):
         """
         Service function target Google OAuth credentials path to storage
 
-        :param use_home_folder: use home folder for gmail credentials storage, by default True, otherwise current folder
+        :param custom_folder: custom home folder for gmail credentials storage, by default is ~/.credentials
         :return: credentials file path (string)
         """
-        if use_home_folder:
-            credential_dir = os.path.join(os.path.expanduser('~'), '.credentials')
-        else:
-            credential_dir = os.path.abspath(os.path.join(__file__, os.pardir))
         if self.__debug:
-            print(f"Checking GMail credentials path at {credential_dir}")
+            print(f"Checking GMail credentials path at {custom_folder}")
         try:
             if self.__debug:
-                print(f"No credential directory found, creating new one here: {credential_dir}")
-            os.makedirs(credential_dir, exist_ok=True)
+                print(f"No credential directory found, creating new one here: {custom_folder}")
+            os.makedirs(custom_folder, exist_ok=True)
         except OSError as e:
             if self.__debug:
                 print(f"Original Error{format_error(e)}")
-        credential_path = os.path.join(credential_dir, 'gmail-python-email-send.json')
+        credential_path = os.path.join(custom_folder, 'gmail-python-email-send.json')
         return credential_path
 
-    def __gmail_get_credentials(self, use_home_folder):
+    def __gmail_get_credentials(self, custom_folder=os.path.join(os.path.expanduser('~'), '.credentials')):
         """
         Service function to get and convert Google OAuth credential from client_id and client_secret
 
-        :param use_home_folder: use home folder for gmail credentials storage, by default True, otherwise current folder
+        :param custom_folder: custom home folder for gmail credentials storage, by default is ~/.credentials
         :return: credentials
         """
-        credential_path = self.__gmail_get_credential_path(use_home_folder=use_home_folder)
+        credential_path = self.__gmail_get_credential_path(custom_folder=custom_folder)
         if self.__debug:
             print(f"Obtaining GMail credentials from {credential_path}")
         try:
@@ -240,17 +237,17 @@ class EmailSender:
                 print('Credentials stored to ' + credential_path)
         return credentials
 
-    def __gmail_send_message(self, message, use_home_folder):
+    def __gmail_send_message(self, message, custom_folder=os.path.join(os.path.expanduser('~'), '.credentials')):
         """
         Send Email via GMail
 
         :param message: message in MIME type format
-        :param use_home_folder: use home folder for gmail credentials storage, by default True, otherwise current folder
+        :param custom_folder: custom home folder for gmail credentials storage, by default is ~/.credentials
         :return: none
         """
         if self.__debug:
             print("Sending message using GMail")
-        credentials = self.__gmail_get_credentials(use_home_folder=use_home_folder)
+        credentials = self.__gmail_get_credentials(custom_folder=custom_folder)
         try:
             http = credentials.authorize(httplib2.Http())
         except Exception as e:
