@@ -201,7 +201,7 @@ class TestRailResultsReporter:
         """
         parsed_xml = self.__xml_to_dict(filename=self.__xml_report)
         parsed_cases = self.__get_all_auto_cases()
-        if not parsed_xml or not parsed_cases:
+        if not parsed_xml:
             print("Preparation of payload failed, aborted")
             return None
         payload = self.__enrich_with_tc_num(xml_dict_list=parsed_xml, tc_dict_list=parsed_cases)
