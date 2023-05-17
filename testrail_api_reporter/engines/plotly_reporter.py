@@ -226,9 +226,11 @@ class PlotlyReporter:
         debug = debug if debug is not None else self.__debug
         filename = filename if filename else f"{filename_pattern}_{chart_name.replace(' ', '_')}.csv"
         trace1_decor = trace1_decor if trace1_decor else {'fill': 'tonexty',
-                                                          'line': dict(width=0.5, color='rgb(255, 153, 153)')}
+                                                          'line': dict(width=0.5, color='rgb(255, 153, 153)'),
+                                                          'mode': 'none'}
         trace2_decor = trace2_decor if trace2_decor else {'fill': 'tozeroy',
-                                                          'line': dict(width=0.5, color='rgb(34,139,34)')}
+                                                          'line': dict(width=0.5, color='rgb(34,139,34)'),
+                                                          'mode': 'none'}
 
         history_data = history_data if history_data else CSVParser(debug=debug, filename=filename).load_history_data()
         trace1 = plotly.graph_objs.Scatter(
@@ -247,8 +249,16 @@ class PlotlyReporter:
             line=trace2_decor['line'],
         )
 
-        data = [trace2, trace1] if reverse_traces else [trace1, trace2]
-        fig = {'data': data}
+        fig = plotly.graph_objs.Figure()
+        if reverse_traces:
+            fig.add_trace(trace2)
+            fig.add_trace(trace1)
+        else:
+            fig.add_trace(trace1)
+            fig.add_trace(trace2)
+        fig.update_layout(yaxis=dict(nticks=30), autotypenumbers="convert types")
+        fig.update_yaxes(range=[0, max([eval(i) for i in history_data[1]])])
+
         filename = f'{filename[:-3]}png'
         if debug:
             print(f'Drawing chart to file {filename}')
