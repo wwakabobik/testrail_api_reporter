@@ -13,7 +13,7 @@ class CSVParser:
         :param debug: debug output, enabled or not
         """
         if debug:
-            print("\nPlotly Reporter init")
+            print("\nCSV Reporter init")
         self.__debug = debug
         self.__filename = filename
 
@@ -74,8 +74,8 @@ class CSVParser:
             raise ValueError("Filename for load report data is not provided, save history data aborted!")
         timestamps = []
         totals = []
-        automateds = []
-        not_automateds = []
+        automated = []
+        not_automated = []
         nas = []
         if debug:
             print('Loading history data from {}'.format(filename))
@@ -84,9 +84,9 @@ class CSVParser:
                 for row in (csv.reader(csvfile)):
                     timestamps.append(datetime(year=int(row[0]), month=int(row[1]), day=int(row[2])))
                     totals.append(row[3])
-                    automateds.append(row[4])
-                    not_automateds.append(row[5])
+                    automated.append(row[4])
+                    not_automated.append(row[5])
                     nas.append(row[6])
         except FileNotFoundError:
             raise ValueError("Can't open report file, load history data aborted!")
-        return [timestamps, totals, automateds, not_automateds, nas]
+        return [timestamps, totals, automated, not_automated, nas]
