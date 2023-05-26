@@ -15,7 +15,7 @@ class TCBackup:
         :param test_rails_password: TestRails password, string
         :param test_rails_suite: TestRails suite which needs to be downloaded, i.e. 42
         :param backup_filename: output backup file name, string, optional, by default it is backup.xml
-        :param cookie_name: filename where testrails cookie will be stored, string, by default is cookie.txt
+        :param cookie_name: filename where TestRail cookie will be stored, string, by default is cookie.txt
         :param debug: debug output is enabled, may be True or False, optional, by default is True
         """
         if debug:

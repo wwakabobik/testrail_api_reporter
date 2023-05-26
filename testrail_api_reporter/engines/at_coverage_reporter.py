@@ -1,7 +1,7 @@
 from testrail_api import TestRailAPI
 
-from ..utils.csv_parser import CSVParser
 from ..utils.case_stat import CaseStat
+from ..utils.csv_parser import CSVParser
 from ..utils.reporter_utils import format_error
 
 
@@ -9,6 +9,7 @@ class ATCoverageReporter:
     """
     Class for generate data for automation coverage reports (or similar data) from TestRails
     """
+
     def __init__(self, url: str, email: str, password: str, priority=None, project=None, type_platforms=None,
                  automation_platforms=None, suite_id=None, debug=None):
         """
@@ -177,16 +178,16 @@ class ATCoverageReporter:
             sections = self.__get_sections(platform['sections'])
             for section in sections:
                 if debug:
-                    print('passing section '+str(section))
+                    print('passing section ' + str(section))
                 cases = self.__get_all_cases(project_id=project, suite_id=suite, section_id=section,
                                              priority_id=priority)
-                results[index].set_total(results[index].get_total()+len(cases))
+                results[index].set_total(results[index].get_total() + len(cases))
                 for case in cases:
                     if case[platform['internal_name']] == platform['auto_code']:
-                        results[index].set_automated(results[index].get_automated()+1)
+                        results[index].set_automated(results[index].get_automated() + 1)
                     else:
                         if case[platform['internal_name']] == platform['na_code']:
-                            results[index].set_na(results[index].get_na()+1)
+                            results[index].set_na(results[index].get_na() + 1)
             results[index].set_not_automated(results[index].get_total() - results[index].get_automated() -
                                              results[index].get_na())
             # save history data
@@ -194,7 +195,7 @@ class ATCoverageReporter:
             CSVParser(debug=debug, filename=filename).save_history_data(report=results[index])
             index += 1
         return results
-    
+
     def test_case_by_priority(self, project=None, suite=None, debug=None):
         """
         Generates data for pie/line chart with priority distribution
@@ -217,7 +218,7 @@ class ATCoverageReporter:
                 print(f'passing priority {str(i)}')
             results.append(len(self.__get_all_cases(project_id=project, suite_id=suite, priority_id=str(i))))
         return results
-    
+
     def test_case_by_type(self, project=None, type_platforms=None, filename_pattern='current_area_distribution',
                           suite=None, debug=None):
         """
@@ -251,9 +252,9 @@ class ATCoverageReporter:
             sections = self.__get_sections(platform['sections'])
             for section in sections:
                 if debug:
-                    print('passing section '+str(section))
+                    print('passing section ' + str(section))
                 cases = self.__get_all_cases(project_id=project, suite_id=suite, section_id=section)
-                results[index].set_total(results[index].get_total()+len(cases))
+                results[index].set_total(results[index].get_total() + len(cases))
             # save history data
             filename = f"{filename_pattern}_{results[index].get_name().replace(' ', '_')}.csv"
             CSVParser(debug=debug, filename=filename).save_history_data(report=results[index])

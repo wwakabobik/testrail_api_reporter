@@ -7,13 +7,14 @@ from ..utils.reporter_utils import format_error
 
 class SlackSender:
     """ See for details https://api.slack.com/messaging/webhooks """
+
     def __init__(self, hook_url=None, timeout=5, verify=True, debug=True):
         """
         General init
 
         :param hook_url: url for slack API hook, string, required
         :param timeout: timeout for message send, integer, optional
-        :param verify: verification requiered, bool, optional
+        :param verify: verification required, bool, optional
         :param debug: debug output is enabled, may be True or False, optional
         """
         if debug:

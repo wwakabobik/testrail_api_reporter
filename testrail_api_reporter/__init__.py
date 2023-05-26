@@ -1,7 +1,7 @@
 # Engines
 from .engines.at_coverage_reporter import ATCoverageReporter
-from .engines.results_reporter import TestRailResultsReporter
 from .engines.plotly_reporter import PlotlyReporter
+from .engines.results_reporter import TestRailResultsReporter
 # Publishers
 from .publishers.confluence_sender import ConfluenceSender
 from .publishers.email_sender import EmailSender

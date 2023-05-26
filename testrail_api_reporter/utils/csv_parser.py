@@ -5,6 +5,7 @@ from os.path import exists
 
 class CSVParser:
     """ Parser for CSV files """
+
     def __init__(self, filename=None, debug=True):
         """
         Default init
@@ -50,12 +51,12 @@ class CSVParser:
                 writer = csv.writer(csvfile, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
 
                 writer.writerow([datetime.today().strftime('%Y'),
-                                datetime.today().strftime('%m'),
-                                datetime.today().strftime('%d'),
-                                report.get_total(),
-                                report.get_automated(),
-                                report.get_not_automated(),
-                                report.get_na()])
+                                 datetime.today().strftime('%m'),
+                                 datetime.today().strftime('%d'),
+                                 report.get_total(),
+                                 report.get_automated(),
+                                 report.get_not_automated(),
+                                 report.get_na()])
         else:
             if debug:
                 print('Data already stored for today, skipping save')
