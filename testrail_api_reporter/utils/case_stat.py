@@ -2,6 +2,7 @@ class CaseStat:
     """
     Placeholder class for automation statistics
     """
+
     def __init__(self, name):
         self.name = name
         self.total = 0

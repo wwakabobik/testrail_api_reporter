@@ -10,6 +10,7 @@ class PlotlyReporter:
     """
     Class contains wrapper for generate reports (images) via plot charts
     """
+
     def __init__(self, pr_colors=None, pr_labels=None, ar_colors=None, lines=None, type_platforms=None, debug=True):
         """
         General init
@@ -293,10 +294,10 @@ class PlotlyReporter:
             history_filename = f"{history_filename_pattern}_{type_name.replace(' ', '_')}.csv"
             history_data = CSVParser(debug=debug, filename=history_filename).load_history_data()
             data.append(plotly.graph_objs.Scatter(
-                    x=history_data[0],
-                    y=history_data[1],
-                    name=type_name,
-                    marker=dict(color=ar_colors[index], line=lines)
+                x=history_data[0],
+                y=history_data[1],
+                name=type_name,
+                marker=dict(color=ar_colors[index], line=lines)
             ))
             index += 1
         fig = {'data': data}

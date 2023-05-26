@@ -7,6 +7,7 @@ class ConfluenceSender:
     """
     Class contains wrapper for generate and send reports to Confluence
     """
+
     def __init__(self, url=None, username=None, password=None, confluence_page=None, automation_platforms=None,
                  type_platforms=None, plotly_engine=None, debug=True):
         """
@@ -44,7 +45,7 @@ class ConfluenceSender:
         :param confluence_page: confluence page short URL, string - only last part of it (it's id or str), optional
         :param reports: report with stacked distribution, usually it's output of
                         ATCoverageReporter().automation_state_report()
-        :param filename: filename of image (may be with valid path), png expected
+        :param filename: filename of image (with valid path), png expected
         :param debug: debug output is enabled, may be True or False, optional
         :return: none
         """

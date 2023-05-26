@@ -1,5 +1,5 @@
-import os
 import json
+import os
 
 from ..utils.reporter_utils import delete_file
 

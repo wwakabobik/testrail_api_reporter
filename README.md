@@ -1,13 +1,13 @@
 # TestRail reporter
 
-pypi package can be found [here](https://pypi.org/project/testrail-api-reporter/)
+pypi package can be found [here](https://pypi.org/project/testrail-api-reporter/).
 
 ## This is Testrail API reporter tools.
 
-This package contains several tools to interact with TestRail via API.
+This package contains several tools to interact with [TestRail](https://www.testrail.com/) via [API](https://support.testrail.com/hc/en-us/categories/7076541806228-API-Manual).
 
 General part is *TestRailResultsReporter*, which is designed to report test results via api. This part is close to 
-*trcli*,  but without nasty bugs.
+[trcli](https://github.com/gurock/trcli),  but without nasty bugs.
 
 Firstly, you need to obtain test results in xml format. You can do it via running your testsuite, i.e. using pytest:
 
@@ -15,7 +15,7 @@ Firstly, you need to obtain test results in xml format. You can do it via runnin
 pytest --junitxml "junit-report.xml" "./tests"
 ```
 
-Also you need to add custom field (string type) to TestRails with name `automation_id`.
+Also, you need to add custom field (string type) to TestRails with name `automation_id`.
 
 Now, you ready to upload results to TestRails.
 To it, use:
@@ -43,7 +43,7 @@ If you fill `automation_id` for existing testcases using correct format
 Also, you can customize test run by passing:
 - `title` param to send_results function - it will replace whole test run title.
 - `environment` - it will be added to end of string like `AT run 2022-09-01T20:25:51 on Dev`
-- `timestamp` - it will replace timestamp, obtained from XML file)
+- `timestamp` - it will replace timestamp (obtained from XML file)
 - `run_id` - if specified, results will be added to test run, no new testrun will be created
 - `close_run` - may be `True` (by default) or `False` - if `True`, then every testrun will be closed
 - `run_name` - you may use run name (title) instead of it's ID, in this case run id will be ignored even if it's filled
@@ -54,8 +54,8 @@ Also, you can customize test run by passing:
 Also, you can set up other params separately without need to re-initialize api object:
 
 ```set_project_id(project_id)``` - change project id
-```def set_suite_id(suite_id)``` - change suite id
-```def set_xml_filename(xml_filename)``` - change path/filename of xml report
+```set_suite_id(suite_id)``` - change suite id
+```set_xml_filename(xml_filename)``` - change path/filename of xml report
 ```set_at_report_section(section_name)``` - change default folder name where non-linked testcases will be created
 ```set_timestamp(new_timestamp)``` - change default timestamp to custom
 
@@ -79,14 +79,14 @@ confluence_reporter.generate_report(reports=automation_distribution, cases=area_
 # for detailed info refer to code itself, you can use also separate calls:
 confluence_reporter.history_type_chart(type_platforms=my_platforms)  # history report of coverage by sections
 confluence_reporter.history_state_chart(automation_platforms=my_automation_platforms)  # history report of coverage by some attribute
-confluence_reporter.contest_case_area_distribution(cases=area_distribution)  # bar chart of area distribution
+confluence_reporter.test_case_area_distribution(cases=area_distribution)  # bar chart of area distribution
 confluence_reporter.test_case_priority_distribution(values=priority_distribution)  # bar chart of priority distribution
 confluence_reporter.automation_state(reports=automation_distribution)  # stacked bar chart using specific field as input
 ```
 
 ![Report in Confluence](https://github.com/wwakabobik/testrail_api_reporter/blob/master/screenshots/tr_confluence_report.png)
 
-Ok, most likeley, you wonder when you can obtain these distributions? You can do it by using `ATCoverageReporter`!
+Ok, most likely, you wonder when you can obtain these distributions? You can do it by using `ATCoverageReporter`!
 
 ```
 testrails_adapter = ATCoverageReporter(url=tr_url, email=tr_client_email, password=tr_client_password,
@@ -144,6 +144,9 @@ Alternatively, you can use GMail API with OAuth token instead of less secure aut
 emailer = EmailSender(email="my_personal@gmail.com",
                       gmail_token="token.json")
 ```
+
+For setup GMail OAuth credentials see the [Google API Reference](https://developers.google.com/identity/gsi/web/guides/get-google-api-clientid).
+
 
 ![Email Report](https://github.com/wwakabobik/testrail_api_reporter/blob/master/screenshots/tr_email_report.png)
 

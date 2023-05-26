@@ -1,13 +1,13 @@
 import base64
+import os
+import smtplib
 from datetime import datetime
+from email.mime.image import MIMEImage
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-from email.mime.image import MIMEImage
-import os
 
-from apiclient import discovery
 import httplib2
-import smtplib
+from apiclient import discovery
 from oauth2client import client, tools, file
 
 from ..utils.reporter_utils import format_error
@@ -274,7 +274,7 @@ class EmailSender:
         try:
             message = (service.users().messages().send(userId=user_id, body=message).execute())
             if self.__debug:
-                print(f'Message Id: {message["id"]}')
+                print(f'Message sent with Id: "{message["id"]}"!')
             return message
         except Exception as e:
             raise ValueError(f"Can't send mail via GMail!\nError{format_error(e)}")

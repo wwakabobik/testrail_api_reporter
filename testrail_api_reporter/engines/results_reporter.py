@@ -1,14 +1,15 @@
 import datetime
 from os.path import exists
 
-from xmltodict import parse
 from testrail_api import TestRailAPI
+from xmltodict import parse
 
 from ..utils.reporter_utils import format_error
 
 
 class TestRailResultsReporter:
     """ Reporter to TestRails from xml report results, obtained by pytest """
+
     def __init__(self, url: str, email: str, password: str, project_id: int, xml_report='junit-report.xml',
                  suite_id=None, debug=True):
         """
@@ -368,6 +369,7 @@ class TestRailResultsReporter:
         first_run = True
         criteria = None
         while criteria is not None or first_run:
+            response = None
             if first_run:
                 try:
                     response = self.__api.runs.get_runs(project_id=self.__project_id, suite_id=self.__suite_id)
