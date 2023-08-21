@@ -91,8 +91,8 @@ class ATCoverageReporter:
                     return None
                 first_run = False
             elif response['_links']['next'] is not None:
-                response = self.__api.sections.get_sections(project_id=project, suite_id=suite_id,
-                                                            offset=int(response['_links']['next'].split("&offset=")[1]))
+                offset = int(response['_links']['next'].partition('offset=')[2].partition('&')[0])
+                response = self.__api.sections.get_sections(project_id=project, suite_id=suite_id, offset=offset)
             sections = sections + response['sections']
             criteria = response['_links']['next']
         if debug:
@@ -126,7 +126,7 @@ class ATCoverageReporter:
                     raise ValueError(f"Get cases failed. Please validate your settings!\nError{format_error(e)}")
                 first_run = False
             elif response['_links']['next'] is not None:
-                offset = int(response['_links']['next'].split("&offset=")[1].split("&")[0])
+                offset = int(response['_links']['next'].partition('offset=')[2].partition('&')[0])
                 response = self.__api.cases.get_cases(project_id=project_id, suite_id=suite_id,
                                                       section_id=section_id, priority_id=priority_id, offset=offset)
             cases_list = cases_list + response['cases']
