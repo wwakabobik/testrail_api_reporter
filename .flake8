@@ -1,0 +1,7 @@
+[flake8]
+max-line-length = 120
+inline-quotes = "
+multiline-quotes = """
+docstring-quotes = """
+avoid-escape = False
+ignore = Q000,WPS306,I001,I005,WPS229,D400,WPS317,S101,WPS507
