@@ -47,12 +47,8 @@ class ATCoverageReporter:
         if url is None or email is None or password is None:
             raise ValueError("No TestRails credentials are provided!")
         self.__debug = debug if debug is not None else True
-        self.__automation_platforms = (
-            automation_platforms  # should be passed with specific TestRails sections
-        )
-        self.__type_platforms = (
-            type_platforms  # should be passed with specific TestRails sections
-        )
+        self.__automation_platforms = automation_platforms  # should be passed with specific TestRails sections
+        self.__type_platforms = type_platforms  # should be passed with specific TestRails sections
         self.__project = project
         self.__priority = priority
         self.__api = TestRailAPI(url=url, email=email, password=password)
@@ -98,37 +94,22 @@ class ATCoverageReporter:
         while criteria is not None or first_run:
             if first_run:
                 try:
-                    response = self.__api.sections.get_sections(
-                        project_id=project, suite_id=suite_id
-                    )
+                    response = self.__api.sections.get_sections(project_id=project, suite_id=suite_id)
                 except Exception as error:  # pylint: disable=broad-except
-                    print(
-                        f"Get sections failed. Please validate your settings!\nError{format_error(error)}"
-                    )
+                    print(f"Get sections failed. Please validate your settings!\nError{format_error(error)}")
                     return None
                 first_run = False
-            elif (
-                response["_links"]["next"]  # pylint: disable=unsubscriptable-object
-                is not None
-            ):
+            elif response["_links"]["next"] is not None:  # pylint: disable=unsubscriptable-object
                 offset = int(
                     response["_links"]["next"]  # pylint: disable=unsubscriptable-object
                     .partition("offset=")[2]
                     .partition("&")[0]
                 )
-                response = self.__api.sections.get_sections(
-                    project_id=project, suite_id=suite_id, offset=offset
-                )
-            sections = (
-                sections + response["sections"]
-            )  # pylint: disable=unsubscriptable-object
-            criteria = response["_links"][
-                "next"
-            ]  # pylint: disable=unsubscriptable-object
+                response = self.__api.sections.get_sections(project_id=project, suite_id=suite_id, offset=offset)
+            sections = sections + response["sections"]  # pylint: disable=unsubscriptable-object
+            criteria = response["_links"]["next"]  # pylint: disable=unsubscriptable-object
         if debug:
-            print(
-                f"Found {len(sections)} existing sections in TestRails for project {project_id}, suite {suite_id}"
-            )
+            print(f"Found {len(sections)} existing sections in TestRails for project {project_id}, suite {suite_id}")
         return sections
 
     def __get_all_cases(
@@ -170,10 +151,7 @@ class ATCoverageReporter:
                         f"Get cases failed. Please validate your settings!\nError{format_error(error)}"
                     ) from error
                 first_run = False
-            elif (
-                response["_links"]["next"]  # pylint: disable=unsubscriptable-object
-                is not None
-            ):
+            elif response["_links"]["next"] is not None:  # pylint: disable=unsubscriptable-object
                 offset = int(
                     response["_links"]["next"]  # pylint: disable=unsubscriptable-object
                     .partition("offset=")[2]
@@ -186,12 +164,8 @@ class ATCoverageReporter:
                     priority_id=priority_id,
                     offset=offset,
                 )
-            cases_list = (
-                cases_list + response["cases"]
-            )  # pylint: disable=unsubscriptable-object
-            criteria = response["_links"][
-                "next"
-            ]  # pylint: disable=unsubscriptable-object
+            cases_list = cases_list + response["cases"]  # pylint: disable=unsubscriptable-object
+            criteria = response["_links"]["next"]  # pylint: disable=unsubscriptable-object
 
         if debug:
             print(
@@ -229,11 +203,7 @@ class ATCoverageReporter:
         project = project if project else self.__project
         suite = suite if suite else self.__suite_id
         priority = priority if priority else self.__priority
-        automation_platforms = (
-            automation_platforms
-            if automation_platforms
-            else self.__automation_platforms
-        )
+        automation_platforms = automation_platforms if automation_platforms else self.__automation_platforms
         if not project:
             raise ValueError("No project specified, report aborted!")
         if not priority:
@@ -267,17 +237,11 @@ class ATCoverageReporter:
                         if case[platform["internal_name"]] == platform["na_code"]:
                             results[index].set_na(results[index].get_na() + 1)
             results[index].set_not_automated(
-                results[index].get_total()
-                - results[index].get_automated()
-                - results[index].get_na()
+                results[index].get_total() - results[index].get_automated() - results[index].get_na()
             )
             # save history data
-            filename = (
-                f"{filename_pattern}_{results[index].get_name().replace(' ', '_')}.csv"
-            )
-            CSVParser(debug=debug, filename=filename).save_history_data(
-                report=results[index]
-            )
+            filename = f"{filename_pattern}_{results[index].get_name().replace(' ', '_')}.csv"
+            CSVParser(debug=debug, filename=filename).save_history_data(report=results[index])
             index += 1
         return results
 
@@ -296,20 +260,12 @@ class ATCoverageReporter:
         if not project:
             raise ValueError("No project specified, report aborted!")
         if debug:
-            print(
-                "=== Staring generation of report for test case priority distribution ==="
-            )
+            print("=== Staring generation of report for test case priority distribution ===")
         results = []
         for i in range(1, 5):
             if debug:
                 print(f"passing priority {str(i)}")
-            results.append(
-                len(
-                    self.__get_all_cases(
-                        project_id=project, suite_id=suite, priority_id=str(i)
-                    )
-                )
-            )
+            results.append(len(self.__get_all_cases(project_id=project, suite_id=suite, priority_id=str(i))))
         return results
 
     def test_case_by_type(
@@ -341,9 +297,7 @@ class ATCoverageReporter:
         debug = debug if debug is not None else self.__debug
         project = project if project else self.__project
         if debug:
-            print(
-                "=== Staring generation of report for test case area distribution ==="
-            )
+            print("=== Staring generation of report for test case area distribution ===")
         index = 0
         results = []
         for platform in type_platforms:
@@ -354,16 +308,10 @@ class ATCoverageReporter:
             for section in sections:
                 if debug:
                     print("passing section " + str(section))
-                cases = self.__get_all_cases(
-                    project_id=project, suite_id=suite, section_id=section
-                )
+                cases = self.__get_all_cases(project_id=project, suite_id=suite, section_id=section)
                 results[index].set_total(results[index].get_total() + len(cases))
             # save history data
-            filename = (
-                f"{filename_pattern}_{results[index].get_name().replace(' ', '_')}.csv"
-            )
-            CSVParser(debug=debug, filename=filename).save_history_data(
-                report=results[index]
-            )
+            filename = f"{filename_pattern}_{results[index].get_name().replace(' ', '_')}.csv"
+            CSVParser(debug=debug, filename=filename).save_history_data(report=results[index])
             index += 1
         return results
