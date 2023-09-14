@@ -155,10 +155,9 @@ class ATCoverageReporter:
                         retry += 1
                         print(f"Timeout error, retrying {retry}/{retries}...")
                         continue
-                    else:
-                        raise ValueError(
-                            f"Get cases failed. Please validate your settings!\nError{format_error(error)}"
-                        ) from error
+                    raise ValueError(
+                        f"Get cases failed. Please validate your settings!\nError{format_error(error)}"
+                    ) from error
                 except Exception as error:  # pylint: disable=broad-except
                     raise ValueError(
                         f"Get cases failed. Please validate your settings!\nError{format_error(error)}"
@@ -184,10 +183,9 @@ class ATCoverageReporter:
                         retry += 1
                         print(f"Timeout error, retrying {retry}/{retries}...")
                         continue
-                    else:
-                        raise ValueError(
-                            f"Get cases failed. Please validate your settings!\nError{format_error(error)}"
-                        ) from error
+                    raise ValueError(
+                        f"Get cases failed. Please validate your settings!\nError{format_error(error)}"
+                    ) from error
                 except Exception as error:
                     raise ValueError(
                         f"Get cases failed. Please validate your settings!\nError{format_error(error)}"

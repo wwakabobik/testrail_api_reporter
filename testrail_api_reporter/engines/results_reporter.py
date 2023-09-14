@@ -1,3 +1,4 @@
+""" Module for reporting results to TestRails from xml report results, obtained by pytest """
 import datetime
 from os.path import exists
 
@@ -117,8 +118,8 @@ class TestRailResultsReporter:
             if first_run:
                 try:
                     response = self.__api.sections.get_sections(project_id=self.__project_id, suite_id=self.__suite_id)
-                except Exception as e:
-                    print(f"Get sections failed. Please validate your settings!\nError{format_error(e)}")
+                except Exception as error:
+                    print(f"Get sections failed. Please validate your settings!\nError{format_error(error)}")
                     self.__self_check()
                     return None
                 first_run = False
@@ -137,8 +138,8 @@ class TestRailResultsReporter:
                 item_id = self.__api.sections.add_section(
                     project_id=self.__project_id, suite_id=self.__suite_id, name=title
                 )["id"]
-            except Exception as e:
-                print(f"Can't add section. Something nasty happened. Error{format_error(e)}")
+            except Exception as error:
+                print(f"Can't add section. Something nasty happened. Error{format_error(error)}")
                 self.__self_check()
                 return None
             print(f"No default automation folder is found, created new one with name'{title}'")
@@ -167,8 +168,8 @@ class TestRailResultsReporter:
                             custom_automation_id=item["automation_id"],
                         )
                     ]
-                except Exception as e:
-                    print(f"Add case failed. Please validate your settings!\nError{format_error(e)}")
+                except Exception as error:
+                    print(f"Add case failed. Please validate your settings!\nError{format_error(error)}")
                     self.__self_check()
                     return None
                 missed_tests_counter = missed_tests_counter + 1
@@ -213,12 +214,11 @@ class TestRailResultsReporter:
                         retry += 1
                         print(f"Timeout error, retrying {retry}/{retries}...")
                         continue
-                    else:
-                        raise ValueError(
-                            f"Get cases failed. Please validate your settings!\nError{format_error(error)}"
-                        ) from error
-                except Exception as e:
-                    print(f"Get cases failed. Please validate your settings!\nError{format_error(e)}")
+                    raise ValueError(
+                        f"Get cases failed. Please validate your settings!\nError{format_error(error)}"
+                    ) from error
+                except Exception as error:
+                    print(f"Get cases failed. Please validate your settings!\nError{format_error(error)}")
                     self.__self_check()
                     return None
                 first_run = False
@@ -234,10 +234,9 @@ class TestRailResultsReporter:
                         retry += 1
                         print(f"Timeout error, retrying {retry}/{retries}...")
                         continue
-                    else:
-                        raise ValueError(
-                            f"Get cases failed. Please validate your settings!\nError{format_error(error)}"
-                        ) from error
+                    raise ValueError(
+                        f"Get cases failed. Please validate your settings!\nError{format_error(error)}"
+                    ) from error
                 retry = 0
             cases = response["cases"]
             for item in cases:
@@ -321,20 +320,45 @@ class TestRailResultsReporter:
         return retval
 
     def set_project_id(self, project_id):
+        """
+        Set project id
+
+        :param project_id: project id, integer
+        """
         self.__project_id = project_id if self.__check_project(project_id=project_id) else None
 
     def set_suite_id(self, suite_id):
+        """
+        Set suite id
+
+        :param suite_id: suite id, integer
+        """
         if self.__check_project():
             self.__suite_id = suite_id if self.__check_suite(suite_id=suite_id) else None
 
     def set_xml_filename(self, xml_filename):
+        """
+        Set xml filename
+
+        :param xml_filename: filename of xml report, string
+        """
         self.__xml_report = xml_filename if self.__check_report_exists(xml_report=xml_filename) else None
 
     def set_at_report_section(self, section_name):
+        """
+        Set section name for AT report
+
+        :param section_name: name of section, string
+        """
         if self.__check_project() and self.__check_suite():
             self.__at_section = self.__ensure_automation_section(title=section_name)
 
     def set_timestamp(self, new_timestamp):
+        """
+        Set timestamp
+
+        :param new_timestamp: timestamp, string
+        """
         self.__timestamp = new_timestamp
 
     def __check_project(self, project_id=None):
@@ -347,8 +371,8 @@ class TestRailResultsReporter:
         retval = True
         try:
             self.__api.projects.get_project(project_id=project_id)
-        except Exception as e:
-            print(f"No such project is found, please set valid project ID.\nError{format_error(e)}")
+        except Exception as error:
+            print(f"No such project is found, please set valid project ID.\nError{format_error(error)}")
             retval = False
         return retval
 
@@ -362,8 +386,8 @@ class TestRailResultsReporter:
         retval = True
         try:
             self.__api.suites.get_suite(suite_id=suite_id)
-        except Exception as e:
-            print(f"No such suite is found, please set valid AT report section.\nError{format_error(e)}")
+        except Exception as error:
+            print(f"No such suite is found, please set valid AT report section.\nError{format_error(error)}")
             retval = False
         return retval
 
@@ -377,8 +401,8 @@ class TestRailResultsReporter:
         retval = True
         try:
             self.__api.sections.get_section(section_id=section_id)
-        except Exception as e:
-            print(f"No default section found, please set valid suite ID.\nError{format_error(e)}")
+        except Exception as error:
+            print(f"No default section found, please set valid suite ID.\nError{format_error(error)}")
             retval = False
         return retval
 
@@ -409,8 +433,8 @@ class TestRailResultsReporter:
         retval = True
         try:
             self.__api.runs.get_run(run_id=run_id)
-        except Exception as e:
-            print(f"No specified run found, please use correct one or use default (None)." f"\nError{format_error(e)}")
+        except Exception as error:
+            print(f"No specified run found, please use correct one or use default (None).\nError{format_error(error)}")
             retval = False
         return retval
 
@@ -438,8 +462,8 @@ class TestRailResultsReporter:
             if first_run:
                 try:
                     response = self.__api.runs.get_runs(project_id=self.__project_id, suite_id=self.__suite_id)
-                except Exception as e:
-                    print(f"Can't get run list. Something nasty happened.\nError{format_error(e)}")
+                except Exception as error:
+                    print(f"Can't get run list. Something nasty happened.\nError{format_error(error)}")
                     break
                 first_run = False
             elif response["_links"]["next"] is not None:
@@ -462,8 +486,8 @@ class TestRailResultsReporter:
         retval = True
         try:
             self.__api.runs.delete_run(run_id=run_id)
-        except Exception as e:
-            print(f"Can't delete run. Something nasty happened." f"\nError{format_error(e)}")
+        except Exception as error:
+            print(f"Can't delete run. Something nasty happened." f"\nError{format_error(error)}")
             retval = False
         return retval
 
@@ -486,8 +510,8 @@ class TestRailResultsReporter:
                 include_all=include_all,
                 case_ids=cases_list,
             )["id"]
-        except Exception as e:
-            print(f"Add run failed. Please validate your settings!\nError{format_error(e)}")
+        except Exception as error:
+            print(f"Add run failed. Please validate your settings!\nError{format_error(error)}")
             self.__self_check()
         return retval
 
@@ -502,8 +526,8 @@ class TestRailResultsReporter:
         try:
             self.__api.results.add_results_for_cases(run_id=run_id, results=results)
             return run_id
-        except Exception as e:
-            print(f"Add results failed. Please validate your settings!\nError{format_error(e)}")
+        except Exception as error:
+            print(f"Add results failed. Please validate your settings!\nError{format_error(error)}")
             self.__self_check()
             self.__check_run_exists(run_id=run_id)
         return retval
@@ -544,7 +568,7 @@ class TestRailResultsReporter:
         try:
             self.__api.runs.close_run(run_id=run_id)
             print(f"Test run '{title}' is closed")
-        except Exception as e:
-            print(f"Can't close run! Something nasty happened.\nError{format_error(e)}")
+        except Exception as error:
+            print(f"Can't close run! Something nasty happened.\nError{format_error(error)}")
             retval = False
         return retval
