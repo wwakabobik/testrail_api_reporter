@@ -128,7 +128,7 @@ class TestRailResultsReporter:
                     return None
                 first_run = False
             elif response["_links"]["next"] is not None:  # pylint: disable=E1136
-                offset = int(response["_links"]["next"].split("&offset=")[1].split("&")[0])
+                offset = int(response["_links"]["next"].split("&offset=")[1].split("&")[0])  # pylint: disable=E1136
                 response = self.__api.sections.get_sections(
                     project_id=self.__project_id, suite_id=self.__suite_id, offset=offset
                 )
@@ -235,7 +235,7 @@ class TestRailResultsReporter:
                 first_run = False
                 retry = 0
             elif response["_links"]["next"] is not None:  # pylint: disable=E1136
-                offset = int(response["_links"]["next"].split("&offset=")[1].split("&")[0])
+                offset = int(response["_links"]["next"].split("&offset=")[1].split("&")[0])  # pylint: disable=E1136
                 try:
                     response = self.__api.cases.get_cases(
                         project_id=self.__project_id, suite_id=self.__suite_id, offset=offset
@@ -484,7 +484,7 @@ class TestRailResultsReporter:
                     break
                 first_run = False
             elif response["_links"]["next"] is not None:  # pylint: disable=E1136
-                offset = int(response["_links"]["next"].split("&offset=")[1].split("&")[0])
+                offset = int(response["_links"]["next"].split("&offset=")[1].split("&")[0])  # pylint: disable=E1136
                 response = self.__api.runs.get_runs(
                     project_id=self.__project_id, suite_id=self.__suite_id, offset=offset
                 )
