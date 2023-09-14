@@ -37,8 +37,7 @@ class TestRailResultsReporter:
             print("\nTestrail Api Reporter init")
         if url is None or email is None or password is None:
             raise ValueError("No TestRails credentials are provided!")
-        else:
-            self.__api = TestRailAPI(url, email, password)
+        self.__api = TestRailAPI(url, email, password)
         self.__xml_report = xml_report if self.__check_report_exists(xml_report=xml_report) else None
         self.__project_id = project_id if self.__check_project(project_id=project_id) else None
         self.__suite_id = suite_id if self.__check_suite(suite_id=suite_id) else None
@@ -128,7 +127,8 @@ class TestRailResultsReporter:
                     self.__self_check()
                     return None
                 first_run = False
-            elif response is not None and response["_links"]["next"] is not None:
+            # pylint: disable=E1136
+            elif response["_links"]["next"] is not None:
                 offset = int(response["_links"]["next"].split("&offset=")[1].split("&")[0])
                 response = self.__api.sections.get_sections(
                     project_id=self.__project_id, suite_id=self.__suite_id, offset=offset
@@ -234,7 +234,8 @@ class TestRailResultsReporter:
                     return None
                 first_run = False
                 retry = 0
-            elif response is not None and response["_links"]["next"] is not None:
+            # pylint: disable=E1136
+            elif response["_links"]["next"] is not None:
                 offset = int(response["_links"]["next"].split("&offset=")[1].split("&")[0])
                 try:
                     response = self.__api.cases.get_cases(
@@ -483,7 +484,8 @@ class TestRailResultsReporter:
                     print(f"Can't get run list. Something nasty happened.\nError{format_error(error)}")
                     break
                 first_run = False
-            elif response is not None and response["_links"]["next"] is not None:
+            # pylint: disable=E1136
+            elif response["_links"]["next"] is not None:
                 offset = int(response["_links"]["next"].split("&offset=")[1].split("&")[0])
                 response = self.__api.runs.get_runs(
                     project_id=self.__project_id, suite_id=self.__suite_id, offset=offset
