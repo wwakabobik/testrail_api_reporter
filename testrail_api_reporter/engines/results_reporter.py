@@ -1,6 +1,7 @@
 import datetime
 from os.path import exists
 
+from requests.exceptions import ReadTimeout
 from testrail_api import TestRailAPI
 from xmltodict import parse
 
@@ -8,10 +9,18 @@ from ..utils.reporter_utils import format_error
 
 
 class TestRailResultsReporter:
-    """ Reporter to TestRails from xml report results, obtained by pytest """
+    """Reporter to TestRails from xml report results, obtained by pytest"""
 
-    def __init__(self, url: str, email: str, password: str, project_id: int, xml_report='junit-report.xml',
-                 suite_id=None, debug=True):
+    def __init__(
+        self,
+        url: str,
+        email: str,
+        password: str,
+        project_id: int,
+        xml_report="junit-report.xml",
+        suite_id=None,
+        debug=True,
+    ):
         """
         Default init
 
@@ -37,7 +46,7 @@ class TestRailResultsReporter:
         self.__timestamp = datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
         self.__debug = debug
 
-    def __xml_to_dict(self, filename='junit-report.xml'):
+    def __xml_to_dict(self, filename="junit-report.xml"):
         """
         Converts xml file to python dict
         :param filename: filename, string, maybe with path
@@ -45,31 +54,36 @@ class TestRailResultsReporter:
         """
         if not self.__check_report_exists(xml_report=self.__xml_report):
             return None
-        with open(filename, 'r', encoding='utf-8') as file:
+        with open(filename, "r", encoding="utf-8") as file:
             xml = file.read()
 
         list_of_cases = []
 
         parsed_xml = parse(xml)
-        self.__timestamp = parsed_xml['testsuites']['testsuite']['@timestamp'].split(".")[0]
+        self.__timestamp = parsed_xml["testsuites"]["testsuite"]["@timestamp"].split(".")[0]
 
-        cases = parsed_xml['testsuites']['testsuite']['testcase']
+        cases = parsed_xml["testsuites"]["testsuite"]["testcase"]
         cases = cases if isinstance(cases, list) else [cases]
         for item in cases:
             status = 1
-            if 'failure' in item.keys():
+            if "failure" in item.keys():
                 status = 5
-            if 'skipped' in item.keys():
-                if item['skipped']['@type'] == 'pytest.xfail':
+            if "skipped" in item.keys():
+                if item["skipped"]["@type"] == "pytest.xfail":
                     status = 5
                 else:
                     status = 7
-            list_of_cases.append({'automation_id': f'{item["@classname"]}.{item["@name"]}',
-                                  'time': item["@time"],
-                                  'status': status,
-                                  'message': f'{item["failure"]["@message"]} : '
-                                             f'{item["failure"]["#text"]}' if 'failure' in item.keys() else ''})
-        print(f'Found test run at {self.__timestamp}, found {len(list_of_cases)} test results')
+            list_of_cases.append(
+                {
+                    "automation_id": f'{item["@classname"]}.{item["@name"]}',
+                    "time": item["@time"],
+                    "status": status,
+                    "message": f'{item["failure"]["@message"]} : ' f'{item["failure"]["#text"]}'
+                    if "failure" in item.keys()
+                    else "",
+                }
+            )
+        print(f"Found test run at {self.__timestamp}, found {len(list_of_cases)} test results")
         return list_of_cases
 
     @staticmethod
@@ -108,19 +122,21 @@ class TestRailResultsReporter:
                     self.__self_check()
                     return None
                 first_run = False
-            elif response['_links']['next'] is not None:
-                offset = int(response['_links']['next'].split("&offset=")[1].split("&")[0])
-                response = self.__api.sections.get_sections(project_id=self.__project_id, suite_id=self.__suite_id,
-                                                            offset=offset)
-            sections = response['sections']
+            elif response["_links"]["next"] is not None:
+                offset = int(response["_links"]["next"].split("&offset=")[1].split("&")[0])
+                response = self.__api.sections.get_sections(
+                    project_id=self.__project_id, suite_id=self.__suite_id, offset=offset
+                )
+            sections = response["sections"]
             for item in sections:
-                if item['name'] == title:
-                    item_id = item['id']
-            criteria = response['_links']['next']
+                if item["name"] == title:
+                    item_id = item["id"]
+            criteria = response["_links"]["next"]
         if not item_id:
             try:
-                item_id = self.__api.sections.add_section(project_id=self.__project_id, suite_id=self.__suite_id,
-                                                          name=title)['id']
+                item_id = self.__api.sections.add_section(
+                    project_id=self.__project_id, suite_id=self.__suite_id, name=title
+                )["id"]
             except Exception as e:
                 print(f"Can't add section. Something nasty happened. Error{format_error(e)}")
                 self.__self_check()
@@ -139,12 +155,18 @@ class TestRailResultsReporter:
         enriched_list = []
         missed_tests_counter = 0
         for item in xml_dict_list:
-            cases = self.__search_for_item(searched_value=item['automation_id'], list_to_seek=tc_dict_list,
-                                           field='custom_automation_id')
+            cases = self.__search_for_item(
+                searched_value=item["automation_id"], list_to_seek=tc_dict_list, field="custom_automation_id"
+            )
             if not cases:
                 try:
-                    cases = [self.__api.cases.add_case(section_id=self.__at_section, title=item['automation_id'],
-                                                       custom_automation_id=item['automation_id'])]
+                    cases = [
+                        self.__api.cases.add_case(
+                            section_id=self.__at_section,
+                            title=item["automation_id"],
+                            custom_automation_id=item["automation_id"],
+                        )
+                    ]
                 except Exception as e:
                     print(f"Add case failed. Please validate your settings!\nError{format_error(e)}")
                     self.__self_check()
@@ -152,19 +174,28 @@ class TestRailResultsReporter:
                 missed_tests_counter = missed_tests_counter + 1
             cases = cases if isinstance(cases, list) else [cases]
             for case in cases:
-                comment = item['message'] if 'failure' in item.keys() else ''
-                elapsed = item['time'].split(".")[0]
+                comment = item["message"] if "failure" in item.keys() else ""
+                elapsed = item["time"].split(".")[0]
                 elapsed = 1 if elapsed == 0 else elapsed
-                enriched_list.append({'case_id': case['id'], 'status_id': item['status'], 'comment': comment,
-                                      'elapsed': elapsed, 'attachments': []})
+                enriched_list.append(
+                    {
+                        "case_id": case["id"],
+                        "status_id": item["status"],
+                        "comment": comment,
+                        "elapsed": elapsed,
+                        "attachments": [],
+                    }
+                )
         if missed_tests_counter:
             print(f"{missed_tests_counter} test cases were missed, they was automatically created.")
         print(f"{len(enriched_list)} test results were prepared for send.")
         return enriched_list
 
-    def __get_all_auto_cases(self):
+    def __get_all_auto_cases(self, retries=3):
         """
         Collects all test cases from TestRails with non-empty automation_id
+
+        :param retries: number of retries, integer
 
         :return: list of dict with cases
         """
@@ -172,26 +203,49 @@ class TestRailResultsReporter:
         first_run = True
         criteria = None
         response = None
+        retry = 0
         while criteria is not None or first_run:
             if first_run:
                 try:
                     response = self.__api.cases.get_cases(project_id=self.__project_id, suite_id=self.__suite_id)
+                except ReadTimeout as error:
+                    if retry < retries:
+                        retry += 1
+                        print(f"Timeout error, retrying {retry}/{retries}...")
+                        continue
+                    else:
+                        raise ValueError(
+                            f"Get cases failed. Please validate your settings!\nError{format_error(error)}"
+                        ) from error
                 except Exception as e:
                     print(f"Get cases failed. Please validate your settings!\nError{format_error(e)}")
                     self.__self_check()
                     return None
                 first_run = False
-            elif response['_links']['next'] is not None:
-                offset = int(response['_links']['next'].split("&offset=")[1].split("&")[0])
-                response = self.__api.cases.get_cases(project_id=self.__project_id, suite_id=self.__suite_id,
-                                                      offset=offset)
-            cases = response['cases']
+                retry = 0
+            elif response["_links"]["next"] is not None:
+                offset = int(response["_links"]["next"].split("&offset=")[1].split("&")[0])
+                try:
+                    response = self.__api.cases.get_cases(
+                        project_id=self.__project_id, suite_id=self.__suite_id, offset=offset
+                    )
+                except ReadTimeout as error:
+                    if retry < retries:
+                        retry += 1
+                        print(f"Timeout error, retrying {retry}/{retries}...")
+                        continue
+                    else:
+                        raise ValueError(
+                            f"Get cases failed. Please validate your settings!\nError{format_error(error)}"
+                        ) from error
+                retry = 0
+            cases = response["cases"]
             for item in cases:
-                if item['custom_automation_id'] is not None:
-                    cases_list.append({'id': item['id'], 'custom_automation_id': item['custom_automation_id']})
-            criteria = response['_links']['next']
+                if item["custom_automation_id"] is not None:
+                    cases_list.append({"id": item["id"], "custom_automation_id": item["custom_automation_id"]})
+            criteria = response["_links"]["next"]
 
-        print(f'Found {len(cases_list)} existing tests in TestRails with automation_id')
+        print(f"Found {len(cases_list)} existing tests in TestRails with automation_id")
         return cases_list
 
     def __prepare_payload(self):
@@ -223,8 +277,16 @@ class TestRailResultsReporter:
             title = f"{title} on {environment}"
         return title
 
-    def send_results(self, run_id=None, environment=None, title=None, timestamp=None, close_run=True, run_name=None,
-                     delete_old_run=False):
+    def send_results(
+        self,
+        run_id=None,
+        environment=None,
+        title=None,
+        timestamp=None,
+        close_run=True,
+        run_name=None,
+        delete_old_run=False,
+    ):
         """
         Send results to TestRail
 
@@ -238,16 +300,20 @@ class TestRailResultsReporter:
         :return: run id where results were submitted
         """
         print("\n")
-        if not self.__project_id or not self.__at_section \
-                or not self.__check_report_exists(xml_report=self.__xml_report):
+        if (
+            not self.__project_id
+            or not self.__at_section
+            or not self.__check_report_exists(xml_report=self.__xml_report)
+        ):
             print("Error! Please specify all required params!")
             self.__self_check()
             return True
         title = self.__prepare_title(environment, timestamp) if not title else title
         title = run_name if run_name else title
         payload = self.__prepare_payload()
-        run_id = self.__prepare_runs(cases=payload, title=title, run_id=run_id, run_name=run_name,
-                                     delete_run=delete_old_run)
+        run_id = self.__prepare_runs(
+            cases=payload, title=title, run_id=run_id, run_name=run_name, delete_run=delete_old_run
+        )
         retval = self.__add_results(run_id=run_id, results=payload)
         if close_run:
             self.__close_run(run_id=run_id, title=title)
@@ -344,8 +410,7 @@ class TestRailResultsReporter:
         try:
             self.__api.runs.get_run(run_id=run_id)
         except Exception as e:
-            print(f"No specified run found, please use correct one or use default (None)."
-                  f"\nError{format_error(e)}")
+            print(f"No specified run found, please use correct one or use default (None)." f"\nError{format_error(e)}")
             retval = False
         return retval
 
@@ -377,14 +442,15 @@ class TestRailResultsReporter:
                     print(f"Can't get run list. Something nasty happened.\nError{format_error(e)}")
                     break
                 first_run = False
-            elif response['_links']['next'] is not None:
-                offset = int(response['_links']['next'].split("&offset=")[1].split("&")[0])
-                response = self.__api.runs.get_runs(project_id=self.__project_id, suite_id=self.__suite_id,
-                                                    offset=offset)
-            if response['runs']['name'] == title:
-                retval = response['runs']['id']
+            elif response["_links"]["next"] is not None:
+                offset = int(response["_links"]["next"].split("&offset=")[1].split("&")[0])
+                response = self.__api.runs.get_runs(
+                    project_id=self.__project_id, suite_id=self.__suite_id, offset=offset
+                )
+            if response["runs"]["name"] == title:
+                retval = response["runs"]["id"]
                 break
-            criteria = response['_links']['next']
+            criteria = response["_links"]["next"]
         return retval
 
     def __delete_run(self, run_id=None):
@@ -397,8 +463,7 @@ class TestRailResultsReporter:
         try:
             self.__api.runs.delete_run(run_id=run_id)
         except Exception as e:
-            print(f"Can't delete run. Something nasty happened."
-                  f"\nError{format_error(e)}")
+            print(f"Can't delete run. Something nasty happened." f"\nError{format_error(e)}")
             retval = False
         return retval
 
@@ -414,8 +479,13 @@ class TestRailResultsReporter:
         retval = None
         print(f"Creating new test run '{title}'")
         try:
-            retval = self.__api.runs.add_run(project_id=self.__project_id, suite_id=self.__suite_id, name=title,
-                                             include_all=include_all, case_ids=cases_list)['id']
+            retval = self.__api.runs.add_run(
+                project_id=self.__project_id,
+                suite_id=self.__suite_id,
+                name=title,
+                include_all=include_all,
+                case_ids=cases_list,
+            )["id"]
         except Exception as e:
             print(f"Add run failed. Please validate your settings!\nError{format_error(e)}")
             self.__self_check()
@@ -451,7 +521,7 @@ class TestRailResultsReporter:
         """
         cases_list = []
         for item in cases:
-            cases_list.append(item['case_id'])
+            cases_list.append(item["case_id"])
         if run_name:
             run_id = self.__search_for_run_by_name(title=run_name)
             if not run_id:
