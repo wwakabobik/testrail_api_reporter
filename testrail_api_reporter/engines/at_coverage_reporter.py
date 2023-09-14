@@ -1,4 +1,5 @@
 """ Engine to generate obtain TestRail data and prepare reports """
+from requests.exceptions import ReadTimeout
 from testrail_api import TestRailAPI  # type: ignore
 
 from ..utils.case_stat import CaseStat
@@ -119,6 +120,7 @@ class ATCoverageReporter:
         section_id=None,
         priority_id=None,
         debug=None,
+        retries=3,
     ):
         """
         Wrapper to get all test cases for selected project, suite, section and priority
@@ -128,6 +130,7 @@ class ATCoverageReporter:
         :param section_id: section id, integer, section where testcases should be found, optional
         :param priority_id: priority, list of integers, id of priority for test case to search
         :param debug: debug output is enabled, may be True or False, optional
+        :param retries: number of retries, integer, optional
         :return: list with all cases
         """
         project_id = project_id if project_id else self.__project
@@ -137,6 +140,7 @@ class ATCoverageReporter:
         first_run = True
         criteria = None
         response = None
+        retry = 0
         while criteria is not None or first_run:
             if first_run:
                 try:
@@ -146,24 +150,50 @@ class ATCoverageReporter:
                         section_id=section_id,
                         priority_id=priority_id,
                     )
+                except ReadTimeout as error:
+                    if retry < retries:
+                        retry += 1
+                        if debug:
+                            print(f"Timeout error, retrying {retry}/{retries}...")
+                        continue
+                    raise ValueError(
+                        f"Get cases failed. Please validate your settings!\nError{format_error(error)}"
+                    ) from error
                 except Exception as error:  # pylint: disable=broad-except
                     raise ValueError(
                         f"Get cases failed. Please validate your settings!\nError{format_error(error)}"
                     ) from error
                 first_run = False
+                retry = 0
             elif response["_links"]["next"] is not None:  # pylint: disable=unsubscriptable-object
                 offset = int(
                     response["_links"]["next"]  # pylint: disable=unsubscriptable-object
                     .partition("offset=")[2]
                     .partition("&")[0]
                 )
-                response = self.__api.cases.get_cases(
-                    project_id=project_id,
-                    suite_id=suite_id,
-                    section_id=section_id,
-                    priority_id=priority_id,
-                    offset=offset,
-                )
+                try:
+                    response = self.__api.cases.get_cases(
+                        project_id=project_id,
+                        suite_id=suite_id,
+                        section_id=section_id,
+                        priority_id=priority_id,
+                        offset=offset,
+                    )
+                except ReadTimeout as error:
+                    if retry < retries:
+                        retry += 1
+                        if debug:
+                            print(f"Timeout error, retrying {retry}/{retries}...")
+                        continue
+                    raise ValueError(
+                        f"Get cases failed. Please validate your settings!\nError{format_error(error)}"
+                    ) from error
+                except Exception as error:
+                    raise ValueError(
+                        f"Get cases failed. Please validate your settings!\nError{format_error(error)}"
+                    ) from error
+                retry = 0
+
             cases_list = cases_list + response["cases"]  # pylint: disable=unsubscriptable-object
             criteria = response["_links"]["next"]  # pylint: disable=unsubscriptable-object
 
@@ -212,7 +242,7 @@ class ATCoverageReporter:
             raise ValueError("No automation platforms specified, report aborted!")
         debug = debug if debug is not None else self.__debug
         if debug:
-            print("=== Staring generation of report for current automation state ===")
+            print("=== Starting generation of report for current automation state ===")
         index = 0
         results = []
         for platform in automation_platforms:
@@ -260,7 +290,7 @@ class ATCoverageReporter:
         if not project:
             raise ValueError("No project specified, report aborted!")
         if debug:
-            print("=== Staring generation of report for test case priority distribution ===")
+            print("=== Starting generation of report for test case priority distribution ===")
         results = []
         for i in range(1, 5):
             if debug:
@@ -297,7 +327,7 @@ class ATCoverageReporter:
         debug = debug if debug is not None else self.__debug
         project = project if project else self.__project
         if debug:
-            print("=== Staring generation of report for test case area distribution ===")
+            print("=== Starting generation of report for test case area distribution ===")
         index = 0
         results = []
         for platform in type_platforms:

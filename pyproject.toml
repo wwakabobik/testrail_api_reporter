@@ -17,3 +17,9 @@ extend-ignore = """
 
 [tool.pylint]
 max-line-length = 120
+
+[tool.mypy]
+
+[[tool.mypy.overrides]]
+module = "testrail_api.*"
+ignore_missing_imports = true
