@@ -153,7 +153,8 @@ class ATCoverageReporter:
                 except ReadTimeout as error:
                     if retry < retries:
                         retry += 1
-                        print(f"Timeout error, retrying {retry}/{retries}...")
+                        if debug:
+                            print(f"Timeout error, retrying {retry}/{retries}...")
                         continue
                     raise ValueError(
                         f"Get cases failed. Please validate your settings!\nError{format_error(error)}"
@@ -181,7 +182,8 @@ class ATCoverageReporter:
                 except ReadTimeout as error:
                     if retry < retries:
                         retry += 1
-                        print(f"Timeout error, retrying {retry}/{retries}...")
+                        if debug:
+                            print(f"Timeout error, retrying {retry}/{retries}...")
                         continue
                     raise ValueError(
                         f"Get cases failed. Please validate your settings!\nError{format_error(error)}"
@@ -240,7 +242,7 @@ class ATCoverageReporter:
             raise ValueError("No automation platforms specified, report aborted!")
         debug = debug if debug is not None else self.__debug
         if debug:
-            print("=== Staring generation of report for current automation state ===")
+            print("=== Starting generation of report for current automation state ===")
         index = 0
         results = []
         for platform in automation_platforms:
@@ -288,7 +290,7 @@ class ATCoverageReporter:
         if not project:
             raise ValueError("No project specified, report aborted!")
         if debug:
-            print("=== Staring generation of report for test case priority distribution ===")
+            print("=== Starting generation of report for test case priority distribution ===")
         results = []
         for i in range(1, 5):
             if debug:
@@ -325,7 +327,7 @@ class ATCoverageReporter:
         debug = debug if debug is not None else self.__debug
         project = project if project else self.__project
         if debug:
-            print("=== Staring generation of report for test case area distribution ===")
+            print("=== Starting generation of report for test case area distribution ===")
         index = 0
         results = []
         for platform in type_platforms:
