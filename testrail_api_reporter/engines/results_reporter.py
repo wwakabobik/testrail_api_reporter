@@ -437,7 +437,7 @@ class TestRailResultsReporter:
             if exists(xml_report):
                 retval = True
         if not retval:
-            print(f"Please specify correct path.\nError 404: No XML file found")
+            print("Please specify correct path.\nError 404: No XML file found")
         return retval
 
     def __check_run_exists(self, run_id=None):
