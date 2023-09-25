@@ -207,9 +207,7 @@ class TestRailResultsReporter:
             if debug:
                 print(f"Timeout error, retrying {retry}/{retries}...")
             return retry, True
-        raise ValueError(
-            f"Get cases failed. Please validate your settings!nError{format_error(error)}"
-        ) from error
+        raise ValueError(f"Get cases failed. Please validate your settings!nError{format_error(error)}") from error
 
     # pylint: disable=R0912
     def __get_all_auto_cases(self, retries=3, debug=None):
