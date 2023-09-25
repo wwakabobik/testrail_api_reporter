@@ -25,7 +25,7 @@ class PlotlyReporter:
         if debug:
             print("\nPlotly Reporter init")
         if not type_platforms:
-            raise "Platform types is not provided, Plotly Reporter cannot be initialized!"
+            raise ValueError("Platform types is not provided, Plotly Reporter cannot be initialized!")
         self.__debug = debug
         self.__pr_labels = pr_labels if pr_labels else ["Low", "Medium", "High", "Critical"]
         self.__pr_colors = (
@@ -256,7 +256,7 @@ class PlotlyReporter:
         :return: none
         """
         if not chart_name:
-            raise "No chart name is provided, report aborted!"
+            raise ValueError("No chart name is provided, report aborted!")
         debug = debug if debug is not None else self.__debug
         filename = filename if filename else f"{filename_pattern}_{chart_name.replace(' ', '_')}.csv"
         trace1_decor = (
@@ -294,7 +294,7 @@ class PlotlyReporter:
             fig.add_trace(trace1)
             fig.add_trace(trace2)
         fig.update_layout(yaxis={"nticks": 30}, autotypenumbers="convert types")
-        fig.update_yaxes(range=[0, max((eval(i) for i in history_data[1]))])
+        fig.update_yaxes(range=[0, max((eval(i) for i in history_data[1]))])  # pylint: disable=eval-used
 
         filename = f"{filename[:-3]}png"
         if debug:
