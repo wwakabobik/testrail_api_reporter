@@ -1,3 +1,4 @@
+""" This module contains service functions for reporter """
 import os
 
 import requests
@@ -38,12 +39,26 @@ def upload_image(filename, api_token):
 
 
 def delete_file(filename, debug=True):
+    """
+    Service function to delete file from filesystem
+
+    :param filename: filename or path to file, which should be deleted
+    :param debug: debug output is enabled, may be True or False, optional, by default is True
+    """
     os.popen(f'rm {filename}').read()
     if debug:
         print(f'Removed {filename}')
 
 
 def zip_file(filename, suffix=None, debug=True):
+    """
+    Service function to ZIP file
+
+    :param filename: filename or path to file, which should be zipped
+    :param suffix: suffix for zipped file, optional
+    :param debug: debug output is enabled, may be True or False, optional, by default is True
+    :return: zipped filename
+    """
     if suffix is None:
         suffix = ''
     zipped_file = f'{filename.split(".")[0]}{suffix}.zip'

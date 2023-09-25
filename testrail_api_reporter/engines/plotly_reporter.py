@@ -1,3 +1,4 @@
+""" Confluence sender module """
 import plotly
 
 from ..utils.csv_parser import CSVParser
@@ -7,9 +8,7 @@ plotly.io.orca.config.executable = '/usr/local/bin/orca'
 
 
 class PlotlyReporter:
-    """
-    Class contains wrapper for generate reports (images) via plot charts
-    """
+    """ Class contains wrapper for generate reports (images) via plot charts """
 
     def __init__(self, pr_colors=None, pr_labels=None, ar_colors=None, lines=None, type_platforms=None, debug=True):
         """

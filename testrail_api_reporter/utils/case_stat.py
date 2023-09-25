@@ -1,3 +1,6 @@
+""" CaseStat class """
+
+
 class CaseStat:
     """
     Placeholder class for automation statistics

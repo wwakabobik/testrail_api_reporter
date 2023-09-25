@@ -1,3 +1,4 @@
+""" TestRails backup module """
 import os
 from datetime import datetime
 
@@ -5,6 +6,8 @@ from ..utils.reporter_utils import delete_file, zip_file
 
 
 class TCBackup:
+    """ TestRails backup class """
+
     def __init__(self, test_rails_url, test_rails_username, test_rails_password, test_rails_suite,
                  cleanup_needed=True, backup_filename='backup.xml', cookie_name='cookie.txt', debug=True):
         """

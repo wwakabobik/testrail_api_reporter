@@ -13,14 +13,14 @@ class TestRailResultsReporter:
     """Reporter to TestRails from xml report results, obtained by pytest"""
 
     def __init__(
-        self,
-        url: str,
-        email: str,
-        password: str,
-        project_id: int,
-        xml_report="junit-report.xml",
-        suite_id=None,
-        debug=True,
+            self,
+            url: str,
+            email: str,
+            password: str,
+            project_id: int,
+            xml_report="junit-report.xml",
+            suite_id=None,
+            debug=True,
     ):
         """
         Default init
@@ -289,15 +289,15 @@ class TestRailResultsReporter:
         return title
 
     def send_results(
-        self,
-        run_id=None,
-        environment=None,
-        title=None,
-        timestamp=None,
-        close_run=True,
-        run_name=None,
-        delete_old_run=False,
-        debug=None,
+            self,
+            run_id=None,
+            environment=None,
+            title=None,
+            timestamp=None,
+            close_run=True,
+            run_name=None,
+            delete_old_run=False,
+            debug=None,
     ):
         """
         Send results to TestRail
@@ -316,9 +316,9 @@ class TestRailResultsReporter:
         if debug:
             print("\n")
         if (
-            not self.__project_id
-            or not self.__at_section
-            or not self.__check_report_exists(xml_report=self.__xml_report)
+                not self.__project_id
+                or not self.__at_section
+                or not self.__check_report_exists(xml_report=self.__xml_report)
         ):
             print("Error! Please specify all required params!")
             self.__self_check()
@@ -497,6 +497,7 @@ class TestRailResultsReporter:
     def __delete_run(self, run_id=None):
         """
         Delete run
+
         :param run_id: run id, integer
         :return: True if deleted, False in case of error
         """
@@ -538,6 +539,7 @@ class TestRailResultsReporter:
     def __add_results(self, run_id=None, results=None):
         """
         Add results for test cases to TestRail
+
         :param run_id: run id
         :param results: payload (list of dicts)
         :return: run id or False in case of error
@@ -580,6 +582,7 @@ class TestRailResultsReporter:
     def __close_run(self, title=None, run_id=None, debug=None):
         """
         Closes run
+
         :param title: title of test run
         :param run_id: run id, integer
         :param debug: debug output is enabled, may be True or False, optional

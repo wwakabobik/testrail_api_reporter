@@ -1,3 +1,4 @@
+""" Confluence sender module """
 from atlassian import Confluence
 
 from ..engines.plotly_reporter import PlotlyReporter
@@ -143,6 +144,24 @@ class ConfluenceSender:
 
     def generate_report(self, confluence_page=None, reports=None, cases=None, values=None, type_platforms=None,
                         automation_platforms=None, debug=None):
+        """
+        Generates and sends (attach) an image file (png) to confluence page with state distribution (staked line chart)
+
+        :param confluence_page: confluence page short URL, string - only last part of it (it's id or str), optional
+        :param reports: report with stacked distribution, usually it's output of
+                        ATCoverageReporter().automation_state_report()
+        :param cases: list of values to draw report with priority distribution, usually it's output from
+                      ATCoverageReporter().test_case_by_type()
+        :param values: list of values to draw report with priority distribution, usually it's output from
+                       ATCoverageReporter().test_case_by_priority()
+        :param type_platforms: list of dicts, with sections ids, where dict = {'name': 'UI',
+                                                                               'sections': [16276]}, optional
+        :param automation_platforms: list of dicts of automation platforms, dict = {'name': 'Desktop Chrome',
+                                                                                    'internal_name': 'type_id',
+                                                                                    'sections': [16276]}, optional
+        :param debug: debug output is enabled, may be True or False, optional
+        :return: none
+        """
         confluence_page = confluence_page if confluence_page else self.__confluence_page
         if not confluence_page:
             raise ValueError("No confluence page is provided, report aborted!")

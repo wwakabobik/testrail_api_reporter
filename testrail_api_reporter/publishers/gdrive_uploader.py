@@ -1,3 +1,4 @@
+""" Google Drive uploader module """
 import json
 import os
 
@@ -5,6 +6,7 @@ from ..utils.reporter_utils import delete_file
 
 
 class GoogleDriveUploader:
+    """ Google Drive uploader class """
     # Google token needs to be configured firstly, to do it, you have to visit:
     # https://console.developers.google.com/apis/credentials?pli=1
     # Create Credentials => OAuth client ID => TV and limited Input Devices and get client_id and a client_secret

@@ -1,3 +1,4 @@
+""" Slack sender module """
 import json
 
 import requests
@@ -6,7 +7,7 @@ from ..utils.reporter_utils import format_error
 
 
 class SlackSender:
-    """ See for details https://api.slack.com/messaging/webhooks """
+    """ Slack sender class, see for details https://api.slack.com/messaging/webhooks """
 
     def __init__(self, hook_url=None, timeout=5, verify=True, debug=True):
         """
@@ -47,6 +48,12 @@ class SlackSender:
 
     @staticmethod
     def __prepare_blocks(title):
+        """
+        Prepares blocks
+
+        :param title: header title of message
+        :return: list of dict with blocks info
+        """
         return [{'type': 'header', 'text': {'type': 'plain_text', 'text': title, 'emoji': True}}]
 
     def __prepare_payload(self, title, files, captions):

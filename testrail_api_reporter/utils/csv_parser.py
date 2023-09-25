@@ -1,3 +1,4 @@
+""" CSV parser for TestRail API Reporter """
 import csv
 from datetime import datetime
 from os.path import exists

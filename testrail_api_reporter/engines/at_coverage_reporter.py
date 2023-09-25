@@ -13,16 +13,16 @@ class ATCoverageReporter:
     """
 
     def __init__(
-        self,
-        url: str,
-        email: str,
-        password: str,
-        priority=None,
-        project=None,
-        type_platforms=None,
-        automation_platforms=None,
-        suite_id=None,
-        debug=None,
+            self,
+            url: str,
+            email: str,
+            password: str,
+            priority=None,
+            project=None,
+            type_platforms=None,
+            automation_platforms=None,
+            suite_id=None,
+            debug=None,
     ):
         """
         General init
@@ -114,13 +114,13 @@ class ATCoverageReporter:
         return sections
 
     def __get_all_cases(
-        self,
-        project_id=None,
-        suite_id=None,
-        section_id=None,
-        priority_id=None,
-        debug=None,
-        retries=3,
+            self,
+            project_id=None,
+            suite_id=None,
+            section_id=None,
+            priority_id=None,
+            debug=None,
+            retries=3,
     ):
         """
         Wrapper to get all test cases for selected project, suite, section and priority
@@ -205,13 +205,13 @@ class ATCoverageReporter:
         return cases_list
 
     def automation_state_report(
-        self,
-        priority=None,
-        project=None,
-        automation_platforms=None,
-        filename_pattern="current_automation",
-        suite=None,
-        debug=None,
+            self,
+            priority=None,
+            project=None,
+            automation_platforms=None,
+            filename_pattern="current_automation",
+            suite=None,
+            debug=None,
     ):
         """
         Generates data of automation coverage for stacked bar chart or staked line chart
@@ -299,12 +299,12 @@ class ATCoverageReporter:
         return results
 
     def test_case_by_type(
-        self,
-        project=None,
-        type_platforms=None,
-        filename_pattern="current_area_distribution",
-        suite=None,
-        debug=None,
+            self,
+            project=None,
+            type_platforms=None,
+            filename_pattern="current_area_distribution",
+            suite=None,
+            debug=None,
     ):
         """
         Generates data for pie/line chart with distribution by type of platforms (guided by top section).
