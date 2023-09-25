@@ -6,7 +6,7 @@ from requests.exceptions import ReadTimeout
 from testrail_api import TestRailAPI
 from xmltodict import parse
 
-from ..utils.reporter_utils import format_error
+from ..utils.reporter_utils import format_error, init_get_cases_process
 
 
 class TestRailResultsReporter:
@@ -200,6 +200,15 @@ class TestRailResultsReporter:
             print(f"{len(enriched_list)} test results were prepared for send.")
         return enriched_list
 
+    @staticmethod
+    def ___handle_read_timeout(retry, retries, debug, error):
+        if retry < retries:
+            retry += 1
+            if debug:
+                print(f"Timeout error, retrying {retry}/{retries}...")
+            return retry, True
+        raise ValueError(f"Get cases failed. Please validate your settings!nError{format_error(error)}") from error
+
     # pylint: disable=R0912
     def __get_all_auto_cases(self, retries=3, debug=None):
         """
@@ -209,25 +218,15 @@ class TestRailResultsReporter:
         :param debug: debug output is enabled, may be True or False, optional
         :return: list of dict with cases
         """
-        debug = debug if debug is not None else self.__debug
-        cases_list = []
-        first_run = True
-        criteria = None
-        response = None
-        retry = 0
+        debug, cases_list, first_run, criteria, response, retry = init_get_cases_process(debug, self.__debug)
         while criteria is not None or first_run:
             if first_run:
                 try:
                     response = self.__api.cases.get_cases(project_id=self.__project_id, suite_id=self.__suite_id)
                 except ReadTimeout as error:
-                    if retry < retries:
-                        retry += 1
-                        if debug:
-                            print(f"Timeout error, retrying {retry}/{retries}...")
+                    retry, should_continue = self.___handle_read_timeout(retry, retries, debug, error)
+                    if should_continue:
                         continue
-                    raise ValueError(
-                        f"Get cases failed. Please validate your settings!\nError{format_error(error)}"
-                    ) from error
                 except Exception as error:
                     print(f"Get cases failed. Please validate your settings!\nError{format_error(error)}")
                     self.__self_check()
@@ -241,14 +240,9 @@ class TestRailResultsReporter:
                         project_id=self.__project_id, suite_id=self.__suite_id, offset=offset
                     )
                 except ReadTimeout as error:
-                    if retry < retries:
-                        retry += 1
-                        if debug:
-                            print(f"Timeout error, retrying {retry}/{retries}...")
+                    retry, should_continue = self.___handle_read_timeout(retry, retries, debug, error)
+                    if should_continue:
                         continue
-                    raise ValueError(
-                        f"Get cases failed. Please validate your settings!\nError{format_error(error)}"
-                    ) from error
                 retry = 0
             cases = response["cases"]
             for item in cases:
@@ -497,6 +491,7 @@ class TestRailResultsReporter:
     def __delete_run(self, run_id=None):
         """
         Delete run
+
         :param run_id: run id, integer
         :return: True if deleted, False in case of error
         """
@@ -538,6 +533,7 @@ class TestRailResultsReporter:
     def __add_results(self, run_id=None, results=None):
         """
         Add results for test cases to TestRail
+
         :param run_id: run id
         :param results: payload (list of dicts)
         :return: run id or False in case of error
@@ -580,6 +576,7 @@ class TestRailResultsReporter:
     def __close_run(self, title=None, run_id=None, debug=None):
         """
         Closes run
+
         :param title: title of test run
         :param run_id: run id, integer
         :param debug: debug output is enabled, may be True or False, optional

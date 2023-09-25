@@ -1,12 +1,13 @@
+""" Slack sender module """
 import json
 
 import requests
 
-from ..utils.reporter_utils import format_error
+from ..utils.reporter_utils import format_error, check_captions_and_files
 
 
 class SlackSender:
-    """ See for details https://api.slack.com/messaging/webhooks """
+    """Slack sender class, see for details https://api.slack.com/messaging/webhooks"""
 
     def __init__(self, hook_url=None, timeout=5, verify=True, debug=True):
         """
@@ -37,17 +38,25 @@ class SlackSender:
         """
         legacy_attachments = []
         for j, file in enumerate(files):
-            legacy_attachments.append({
-                'pretext': '----',
-                'text': captions[j] if captions else '',
-                'mrkdwn_in': ['text', 'pretext'],
-                "image_url": file,
-            })
+            legacy_attachments.append(
+                {
+                    "pretext": "----",
+                    "text": captions[j] if captions else "",
+                    "mrkdwn_in": ["text", "pretext"],
+                    "image_url": file,
+                }
+            )
         return legacy_attachments
 
     @staticmethod
     def __prepare_blocks(title):
-        return [{'type': 'header', 'text': {'type': 'plain_text', 'text': title, 'emoji': True}}]
+        """
+        Prepares blocks
+
+        :param title: header title of message
+        :return: list of dict with blocks info
+        """
+        return [{"type": "header", "text": {"type": "plain_text", "text": title, "emoji": True}}]
 
     def __prepare_payload(self, title, files, captions):
         """
@@ -58,8 +67,12 @@ class SlackSender:
         :param captions: list of captions for files, list of strings, if not provided, no captions will be added
         :return: json with payload
         """
-        return json.dumps({'attachments': self.__prepare_attachments(files=files, captions=captions),
-                           'blocks': self.__prepare_blocks(title=title)})
+        return json.dumps(
+            {
+                "attachments": self.__prepare_attachments(files=files, captions=captions),
+                "blocks": self.__prepare_blocks(title=title),
+            }
+        )
 
     @staticmethod
     def __prepare_headers():
@@ -68,10 +81,11 @@ class SlackSender:
 
         :return: json with headers
         """
-        return {'Content-type': 'application/json', 'Accept': 'text/plain'}
+        return {"Content-type": "application/json", "Accept": "text/plain"}
 
-    def send_message(self, files=None, captions=None, title=f"Test development & automation coverage report",
-                     debug=None):
+    def send_message(
+        self, files=None, captions=None, title="Test development & automation coverage report", debug=None
+    ):
         """
         Send message to Slack
 
@@ -85,25 +99,22 @@ class SlackSender:
         if not isinstance(files, list):
             raise ValueError("No file list for report provided, aborted!")
         debug = debug if debug is not None else self.__debug
-        if not isinstance(captions, list):
-            if debug:
-                print("Caption list is empty, no legend will be displayed")
-            captions = None
-        elif len(captions) != len(files):
-            if debug:
-                print(f"Caption and file lists are not the same length {len(captions)} != {len(files)} thus "
-                      f"no legend will be displayed")
-            captions = None
-
+        captions = check_captions_and_files(captions=captions, files=files, debug=debug)
         # Send to slack
         try:
-            response = requests.post(url=self.__hook_url,
-                                     data=self.__prepare_payload(title=title, files=files, captions=captions),
-                                     timeout=self.__timeout, verify=self.__verify, headers=self.__prepare_headers())
+            response = requests.post(
+                url=self.__hook_url,
+                data=self.__prepare_payload(title=title, files=files, captions=captions),
+                timeout=self.__timeout,
+                verify=self.__verify,
+                headers=self.__prepare_headers(),
+            )
             if response.status_code != 200:
-                raise ValueError(f"Message can't be sent! Error {response.status_code}: {response.text}: "
-                                 f"{response.raise_for_status()}")
-            elif debug:
+                raise ValueError(
+                    f"Message can't be sent! Error {response.status_code}: {response.text}: "
+                    f"{response.raise_for_status()}"
+                )
+            if debug:
                 print("Message sent!")
-        except Exception as e:
-            raise ValueError(f"Message can't be sent!\nError{format_error(e)}")
+        except Exception as error:
+            raise ValueError(f"Message can't be sent!\nError{format_error(error)}") from error
