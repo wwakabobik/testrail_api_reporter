@@ -37,6 +37,7 @@ class TestRailResultsReporter:
             print("\nTestrail Api Reporter init")
         if url is None or email is None or password is None:
             raise ValueError("No TestRails credentials are provided!")
+        self.__debug = debug
         self.__api = TestRailAPI(url, email, password)
         self.__xml_report = xml_report if self.__check_report_exists(xml_report=xml_report) else None
         self.__project_id = project_id if self.__check_project(project_id=project_id) else None
@@ -44,7 +45,6 @@ class TestRailResultsReporter:
         self.__at_section = self.__ensure_automation_section() if self.__project_id else None
         self.__check_section(section_id=self.__at_section)
         self.__timestamp = datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
-        self.__debug = debug
 
     def __xml_to_dict(self, filename="junit-report.xml", debug=None):
         """
