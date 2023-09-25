@@ -11,4 +11,3 @@ from testrail_api_reporter.publishers.slack_sender import SlackSender
 from testrail_api_reporter.publishers.gdrive_uploader import GoogleDriveUploader
 # Utils
 from testrail_api_reporter.utils.reporter_utils import upload_image, zip_file, delete_file
-
