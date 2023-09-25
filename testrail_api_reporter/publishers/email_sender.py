@@ -11,7 +11,7 @@ import httplib2
 from apiclient import discovery
 from oauth2client import client, tools, file
 
-from ..utils.reporter_utils import format_error
+from ..utils.reporter_utils import format_error, check_captions_and_files
 
 
 class EmailSender:
@@ -86,17 +86,10 @@ class EmailSender:
         elif not isinstance(recipients, list) and not custom_message:
             raise ValueError("Wrong list of recipients is provided, aborted!")
         debug = debug if debug is not None else self.__debug
-        if not isinstance(captions, list) or custom_message:
+        captions = check_captions_and_files(captions=captions, files=files, debug=debug)
+        if not captions or custom_message:
             if debug:
-                print("Caption list is empty, no legend will be displayed")
-            captions = None
-        elif len(captions) != len(files):
-            if debug:
-                print(
-                    f"Caption and file lists are not the same length {len(captions)} != {len(files)} thus "
-                    f"no legend will be displayed"
-                )
-            captions = None
+                print("Caption list override by custom message, no legend will be displayed")
         timestamp = timestamp if timestamp else datetime.now().strftime("%Y-%m-%d")
         title = title if title else f"Test development & automation coverage report for {timestamp}"
 

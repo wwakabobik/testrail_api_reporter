@@ -4,7 +4,7 @@ from testrail_api import TestRailAPI  # type: ignore
 
 from ..utils.case_stat import CaseStat
 from ..utils.csv_parser import CSVParser
-from ..utils.reporter_utils import format_error
+from ..utils.reporter_utils import format_error, init_get_cases_process
 
 
 class ATCoverageReporter:
@@ -135,12 +135,7 @@ class ATCoverageReporter:
         """
         project_id = project_id if project_id else self.__project
         suite_id = suite_id if suite_id else self.__suite_id
-        debug = debug if debug is not None else self.__debug
-        cases_list = []
-        first_run = True
-        criteria = None
-        response = None
-        retry = 0
+        debug, cases_list, first_run, criteria, response, retry = init_get_cases_process(debug, self.__debug)
         while criteria is not None or first_run:
             if first_run:
                 try:

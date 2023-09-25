@@ -47,7 +47,7 @@ class CSVParser:
             raise ValueError("Can't open report file, save history data aborted!") from FileNotFoundError
         if last_date != date:
             if debug:
-                print("Saving data in {0} for {1}".format(filename, date))
+                print(f"Saving data in {filename} for {date}")
             with open(filename, "a+", newline="", encoding="utf-8") as csvfile:
                 writer = csv.writer(csvfile, delimiter=",", quotechar="|", quoting=csv.QUOTE_MINIMAL)
 

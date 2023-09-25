@@ -66,3 +66,44 @@ def zip_file(filename, suffix=None, debug=True):
     if debug:
         print(f"ZIPped {filename} to {zipped_file}")
     return zipped_file
+
+
+def check_captions_and_files(captions, files, debug):
+    """
+    Service function to check captions and files lists
+
+    :param captions: list of captions for files, list of strings, if not provided, no captions will be added
+    :param files: list of urls of images
+    :param debug: debug output is enabled, may be True or False, optional
+    :return: captions list or None
+    """
+    return_value = captions
+    if not isinstance(captions, list):
+        if debug:
+            print("Caption list is empty, no legend will be displayed")
+        return_value = None
+    elif len(captions) != len(files):
+        if debug:
+            print(
+                f"Caption and file lists are not the same length {len(captions)} != {len(files)} thus "
+                f"no legend will be displayed"
+            )
+        return_value = None
+    return return_value
+
+
+def init_get_cases_process(debug, default_debug):
+    """
+    Service function to initialize process
+
+    :param debug: debug output is enabled, may be True or False, optional
+    :param default_debug: default debug output is enabled, may be True or False, optional
+    :return: debug, cases_list, first_run, criteria, response, retry
+    """
+    debug = debug if debug is not None else default_debug
+    cases_list = []
+    first_run = True
+    criteria = None
+    response = None
+    retry = 0
+    return debug, cases_list, first_run, criteria, response, retry

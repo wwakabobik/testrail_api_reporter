@@ -3,7 +3,7 @@ import json
 
 import requests
 
-from ..utils.reporter_utils import format_error
+from ..utils.reporter_utils import format_error, check_captions_and_files
 
 
 class SlackSender:
@@ -99,18 +99,7 @@ class SlackSender:
         if not isinstance(files, list):
             raise ValueError("No file list for report provided, aborted!")
         debug = debug if debug is not None else self.__debug
-        if not isinstance(captions, list):
-            if debug:
-                print("Caption list is empty, no legend will be displayed")
-            captions = None
-        elif len(captions) != len(files):
-            if debug:
-                print(
-                    f"Caption and file lists are not the same length {len(captions)} != {len(files)} thus "
-                    "no legend will be displayed"
-                )
-            captions = None
-
+        captions = check_captions_and_files(captions=captions, files=files, debug=debug)
         # Send to slack
         try:
             response = requests.post(
