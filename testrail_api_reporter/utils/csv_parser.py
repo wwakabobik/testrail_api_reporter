@@ -38,17 +38,17 @@ class CSVParser:
         last_date = ""
         mode = "r" if exists(filename) else "w"
         try:
-            with open(filename, mode) as csvfile:
+            with open(filename, mode, encoding="utf-8") as csvfile:
                 if mode == "r":
                     for row in reversed(list(csv.reader(csvfile))):
-                        last_date = "{0}-{1}-{2}".format(row[0], row[1], row[2])
+                        last_date = f"{row[0]}-{row[1]}-{row[2]}"
                         break
         except FileNotFoundError:
             raise ValueError("Can't open report file, save history data aborted!") from FileNotFoundError
         if last_date != date:
             if debug:
                 print("Saving data in {0} for {1}".format(filename, date))
-            with open(filename, "a+", newline="") as csvfile:
+            with open(filename, "a+", newline="", encoding="utf-8") as csvfile:
                 writer = csv.writer(csvfile, delimiter=",", quotechar="|", quoting=csv.QUOTE_MINIMAL)
 
                 writer.writerow(
@@ -84,9 +84,9 @@ class CSVParser:
         not_automated = []
         nas = []
         if debug:
-            print("Loading history data from {}".format(filename))
+            print(f"Loading history data from {filename}")
         try:
-            with open(filename, "r") as csvfile:
+            with open(filename, "r", encoding="utf-8") as csvfile:
                 for row in csv.reader(csvfile):
                     timestamps.append(datetime(year=int(row[0]), month=int(row[1]), day=int(row[2])))
                     totals.append(row[3])

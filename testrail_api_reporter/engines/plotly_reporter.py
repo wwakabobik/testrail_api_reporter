@@ -54,10 +54,11 @@ class PlotlyReporter:
         :param reports: report with stacked distribution, usually it's output of
                         ATCoverageReporter().automation_state_report()
         :param state_markers: list of dicts, contains settings for markers on chart like following:
-                                {'Automated': {'marker': dict(color='rgb(34,139,34)',
-                                                        line=dict(color='rgb(0,0,51)',
-                                                        width=1.5)),
-                                               'opacity': 0.6, 'textposition': 'auto'}
+                                {
+                                "marker": {"color": "rgb(34,139,34)", "line": {"color": "rgb(0,0,51)", "width": 1.5}},
+                                "opacity": 0.6,
+                                "textposition": "auto",
+                                }
         :param debug: debug output is enabled, may be True or False, optional
         :return: none
         """
@@ -81,17 +82,17 @@ class PlotlyReporter:
         if not state_markers:
             state_markers = {
                 "Automated": {
-                    "marker": dict(color="rgb(34,139,34)", line=dict(color="rgb(0,0,51)", width=1.5)),
+                    "marker": {"color": "rgb(34,139,34)", "line": {"color": "rgb(0,0,51)", "width": 1.5}},
                     "opacity": 0.6,
                     "textposition": "auto",
                 },
                 "Not automated": {
-                    "marker": dict(color="rgb(255, 153, 153)", line=dict(color="rgb(0,0,51)", width=1.5)),
+                    "marker": {"color": "rgb(255, 153, 153)", "line": {"color": "rgb(0,0,51)", "width": 1.5}},
                     "opacity": 0.6,
                     "textposition": "auto",
                 },
                 "N/A": {
-                    "marker": dict(color="rgb(192, 192, 192)", line=dict(color="rgb(0,0,51)", width=1.5)),
+                    "marker": {"color": "rgb(192, 192, 192)", "line": {"color": "rgb(0,0,51)", "width": 1.5}},
                     "opacity": 0.6,
                     "textposition": "auto",
                 },
@@ -241,12 +242,14 @@ class PlotlyReporter:
         :param chart_name: chart name, string, required
         :param history_data: history data, previously stored in CSV, by default it is CSVParser().load_history_data()
         :param filename: output filename for image, png expected, optional
-        :param trace1_decor: decoration for distribution stack (1), dict like {'fill': 'tonexty',
-                                                                           'line': dict(width=0.5,
-                                                                                        color='rgb(255, 153, 153)')}
-        :param trace2_decor: decoration for distribution stack (2), dict like {'fill': 'tozeroy',
-                                                                           'line': dict(width=0.5,
-                                                                                        color='rgb(255, 153, 153)')}
+        :param trace1_decor: decoration for distribution stack (1), dict like {"fill": "tonexty",
+                                                                               "line": {"width": 0.5,
+                                                                                        "color": "rgb(255, 153, 153)"},
+                                                                               "mode": "none"}
+        :param trace2_decor: decoration for distribution stack (2), dict like {"fill": "tozeroy",
+                                                                               "line": {"width": 0.5,
+                                                                                        "color": "rgb(34,139,34)"},
+                                                                                "mode": "none"}
         :param filename_pattern: pattern, what is prefix will be for filename, string, optional
         :param reverse_traces: reverse traces order
         :param debug: debug output is enabled, may be True or False, optional
@@ -259,12 +262,12 @@ class PlotlyReporter:
         trace1_decor = (
             trace1_decor
             if trace1_decor
-            else {"fill": "tonexty", "line": dict(width=0.5, color="rgb(255, 153, 153)"), "mode": "none"}
+            else {"fill": "tonexty", "line": {"width": 0.5, "color": "rgb(255, 153, 153)"}, "mode": "none"}
         )
         trace2_decor = (
             trace2_decor
             if trace2_decor
-            else {"fill": "tozeroy", "line": dict(width=0.5, color="rgb(34,139,34)"), "mode": "none"}
+            else {"fill": "tozeroy", "line": {"width": 0.5, "color": "rgb(34,139,34)"}, "mode": "none"}
         )
 
         history_data = history_data if history_data else CSVParser(debug=debug, filename=filename).load_history_data()
@@ -290,8 +293,8 @@ class PlotlyReporter:
         else:
             fig.add_trace(trace1)
             fig.add_trace(trace2)
-        fig.update_layout(yaxis=dict(nticks=30), autotypenumbers="convert types")
-        fig.update_yaxes(range=[0, max([eval(i) for i in history_data[1]])])
+        fig.update_layout(yaxis={"nticks": 30}, autotypenumbers="convert types")
+        fig.update_yaxes(range=[0, max((eval(i) for i in history_data[1]))])
 
         filename = f"{filename[:-3]}png"
         if debug:
@@ -337,7 +340,7 @@ class PlotlyReporter:
                     x=history_data[0],
                     y=history_data[1],
                     name=type_name,
-                    marker=dict(color=ar_colors[index], line=lines),
+                    marker={"color": ar_colors[index], "line": lines},
                 )
             )
             index += 1

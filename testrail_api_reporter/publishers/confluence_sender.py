@@ -37,8 +37,7 @@ class ConfluenceSender:
             print("\nConfluence Reporter init")
         if url is None or username is None or password is None:
             raise ValueError("No confluence credentials are provided!")
-        else:
-            self.__confluence = Confluence(url=url, username=username, password=password)
+        self.__confluence = Confluence(url=url, username=username, password=password)
         self.__confluence_page = confluence_page  # confluence page may vary for each report if needed, None is possible
         self.__debug = debug
         self.__plotly = plotly_engine if plotly_engine else PlotlyReporter(type_platforms=type_platforms, debug=debug)

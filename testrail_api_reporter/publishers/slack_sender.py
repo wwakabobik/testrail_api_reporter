@@ -84,7 +84,7 @@ class SlackSender:
         return {"Content-type": "application/json", "Accept": "text/plain"}
 
     def send_message(
-        self, files=None, captions=None, title=f"Test development & automation coverage report", debug=None
+        self, files=None, captions=None, title="Test development & automation coverage report", debug=None
     ):
         """
         Send message to Slack
@@ -107,7 +107,7 @@ class SlackSender:
             if debug:
                 print(
                     f"Caption and file lists are not the same length {len(captions)} != {len(files)} thus "
-                    f"no legend will be displayed"
+                    "no legend will be displayed"
                 )
             captions = None
 
@@ -128,4 +128,4 @@ class SlackSender:
             if debug:
                 print("Message sent!")
         except Exception as error:
-            raise ValueError(f"Message can't be sent!\nError{format_error(error)}")
+            raise ValueError(f"Message can't be sent!\nError{format_error(error)}") from error

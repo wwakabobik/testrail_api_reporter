@@ -164,7 +164,7 @@ class EmailSender:
         :return: none
         """
         if self.__debug:
-            print(f"Disconnecting from custom server")
+            print("Disconnecting from custom server")
         try:
             connection.quit()
         except Exception as error:
@@ -193,7 +193,7 @@ class EmailSender:
             '</h3></div><table border="0px" width="100%"><tbody><td>'
         )
         for j, val in enumerate(files):
-            with open("{}".format(val), "rb") as attachment:
+            with open(f"{val}", "rb") as attachment:
                 mime_image = MIMEImage(attachment.read())
 
             # Define the image's ID with counter as you will reference it.
