@@ -11,7 +11,7 @@ General part is *TestRailResultsReporter*, which is designed to report test resu
 
 Firstly, you need to obtain test results in xml format. You can do it via running your testsuite, i.e. using pytest:
 
-```
+```bash
 pytest --junitxml "junit-report.xml" "./tests"
 ```
 
@@ -20,10 +20,10 @@ Also, you need to add custom field (string type) to TestRails with name `automat
 Now, you ready to upload results to TestRails.
 To it, use:
 
-```
-url=https://your_tr.testrail.io`
-email=your@email.com
-password=your_password
+```python
+url='https://your_tr.testrail.io'
+email='your@email.com'
+password='your_password'
 project_number=42
 test_suite_number=66
 api=TestRailResultsReporter(url=url, email=email, password=password, project_id=project_id,
@@ -32,7 +32,7 @@ api=TestRailResultsReporter(url=url, email=email, password=password, project_id=
 api.send_results()
 ```
 After this new testcases, test run and test results will be created. Testrun will have a name like 
-`AT run 2022-09-01T20:25:51`
+```AT run 2022-09-01T20:25:51```
 
 ![Test run created in TestRails](https://github.com/wwakabobik/testrail_api_reporter/blob/master/screenshots/tr_at_run_report.png)
 
@@ -70,7 +70,7 @@ Also, it would be great to pass results as charts and report it to, for example,
 
 So, I have a solution, you can use `ConfluenceReporter`!
 
-```
+```python
 # Create reporter
 confluence_reporter = ConfluenceReporter(username='Liberator', password='NoWar', url="https://my.confluence.com", confluence_page="1234")
 # Now, generate several report at once!
@@ -88,7 +88,7 @@ confluence_reporter.automation_state(reports=automation_distribution)  # stacked
 
 Ok, most likely, you wonder when you can obtain these distributions? You can do it by using `ATCoverageReporter`!
 
-```
+```python
 testrails_adapter = ATCoverageReporter(url=tr_url, email=tr_client_email, password=tr_client_password,
                                  project=tr_default_project, priority=4, type_platforms=my_platforms,
                                  automation_platforms=automation_platforms)
@@ -100,7 +100,7 @@ reports = tr_reporter.automation_state_report()
 
 So, I guess you still confused, what is the "platforms"? It's the settings, where and which data needs to be collected
 
-```
+```python
 # You need specify where (at which top section) test cases for specific platform (or test type, whatever) is stored
 # Also you need to specify by which field is used as criteria for automation, default 'internal_name' is 'type_id' and
 # it is by default "Automated", "Functional", "Other", etc.
@@ -115,7 +115,7 @@ type_platforms = (
 
 I hope now it's clear. But what if you do not use Confluence? Ok, well, you can draw charts directly:
 
-```
+```python
 plotly_reporter = PlotlyReporter(type_platforms=type_platforms)
 plotly_reporter.draw_test_case_by_priority(filename='stacked_bar_chart.png', values=values)
 plotly_reporter.draw_test_case_by_area(filename='pie_chart1.png', cases=cases)
@@ -129,7 +129,7 @@ for item in automation_platforms:
 
 If you still want to share reports, you can do it via email using `EmailSender`:
 
-```
+```python
 chart_drawings = ['report_chart.png', 'path/to/more_graphics.png']
 chart_captions = ['Priority distribution', 'AT coverage']
 emailer = EmailSender(email="my_personal@email.com",
@@ -140,7 +140,7 @@ emailer.send_message(files=chart_drawings, captions=chart_captions, recipients=[
 ```
 
 Alternatively, you can use GMail API with OAuth token instead of less secure auth:
-```
+```python
 emailer = EmailSender(email="my_personal@gmail.com",
                       gmail_token="token.json")
 ```
@@ -152,7 +152,7 @@ For setup GMail OAuth credentials see the [Google API Reference](https://develop
 
 Or you can send as Slack message using `SlackSender`
 
-```
+```python
 slack_sender = SlackSender(hook_url='https://hooks.slack.com/services/{your}/{api}/{key}')
 slack_sender.send_message(files=chart_drawings, captions=chart_captions)
 ```
@@ -164,7 +164,7 @@ slack_sender.send_message(files=chart_drawings, captions=chart_captions)
 
 Sometimes you need backup you progress. Minimum what you can do - it's backup test cases. So, you can do it using `TCBackup`
 
-```
+```python
 tc_backup = TCBackup(tr_url, tr_email, tr_password, test_rails_suite=3)
 tc_backup.backup()  # this will produce backup.xml file
 tc_backup.get_archive_backup(suffix='')  # this will produce backup.zip file
@@ -172,7 +172,7 @@ tc_backup.get_archive_backup(suffix='')  # this will produce backup.zip file
 
 You still need to save it? Let's use Google Drive and `GoogleDriveUploader`
 
-```
+```python
 # Google token needs to be configured firstly, to do it, you have to visit:
 # https://console.developers.google.com/apis/credentials?pli=1
 # Create Credentials => OAuth client ID => TV and limited Input Devices and get client_id and a client_secret
@@ -193,17 +193,20 @@ gdrive.upload(filename='backup.zip', mime_type='application/zip')
 ## Troubleshooting
 
 To make plotly works, you need to set up Orca independently:
-```
+```bash
 npm install -g electron orca
 ```
 
 Please note, that Slack expecting urls instead of filenames, so, you must upload images to some hosting.
 As option, you can do it using https://freeimage.host via function:
 
-```
+```python
 image_uploaded = upload_image(filename=chart_drawings[0], api_token=YOUR_SECRET_TOKEN)
 # now you can extract URL
 image_url = image_uploaded['image']
 # or its thumbnail
 image_thumb = image_uploaded['thumb']
 ```
+
+## Donations
+If you like this project, you can support it by donating via [DonationAlerts](https://www.donationalerts.com/r/rocketsciencegeek).
