@@ -3,3 +3,6 @@ max-line-length=120
 
 [MESSAGES CONTROL]
 disable=E1101,R0913,W0718
+
+[DESIGN]
+max-attributes=10

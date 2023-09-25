@@ -18,6 +18,9 @@ extend-ignore = """
 [tool.pylint]
 max-line-length = 120
 
+[tool.pylint.'DESIGN']
+max-attributes = 15
+
 [tool.mypy]
 
 [[tool.mypy.overrides]]

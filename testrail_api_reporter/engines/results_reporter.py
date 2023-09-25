@@ -13,14 +13,14 @@ class TestRailResultsReporter:
     """Reporter to TestRails from xml report results, obtained by pytest"""
 
     def __init__(
-            self,
-            url: str,
-            email: str,
-            password: str,
-            project_id: int,
-            xml_report="junit-report.xml",
-            suite_id=None,
-            debug=True,
+        self,
+        url: str,
+        email: str,
+        password: str,
+        project_id: int,
+        xml_report="junit-report.xml",
+        suite_id=None,
+        debug=True,
     ):
         """
         Default init
@@ -289,15 +289,15 @@ class TestRailResultsReporter:
         return title
 
     def send_results(
-            self,
-            run_id=None,
-            environment=None,
-            title=None,
-            timestamp=None,
-            close_run=True,
-            run_name=None,
-            delete_old_run=False,
-            debug=None,
+        self,
+        run_id=None,
+        environment=None,
+        title=None,
+        timestamp=None,
+        close_run=True,
+        run_name=None,
+        delete_old_run=False,
+        debug=None,
     ):
         """
         Send results to TestRail
@@ -316,9 +316,9 @@ class TestRailResultsReporter:
         if debug:
             print("\n")
         if (
-                not self.__project_id
-                or not self.__at_section
-                or not self.__check_report_exists(xml_report=self.__xml_report)
+            not self.__project_id
+            or not self.__at_section
+            or not self.__check_report_exists(xml_report=self.__xml_report)
         ):
             print("Error! Please specify all required params!")
             self.__self_check()

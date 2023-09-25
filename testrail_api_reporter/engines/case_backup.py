@@ -6,10 +6,19 @@ from ..utils.reporter_utils import delete_file, zip_file
 
 
 class TCBackup:
-    """ TestRails backup class """
+    """TestRails backup class"""
 
-    def __init__(self, test_rails_url, test_rails_username, test_rails_password, test_rails_suite,
-                 cleanup_needed=True, backup_filename='backup.xml', cookie_name='cookie.txt', debug=True):
+    def __init__(
+        self,
+        test_rails_url,
+        test_rails_username,
+        test_rails_password,
+        test_rails_suite,
+        cleanup_needed=True,
+        backup_filename="backup.xml",
+        cookie_name="cookie.txt",
+        debug=True,
+    ):
         """
         General init
 
@@ -42,11 +51,13 @@ class TCBackup:
         :return: None
         """
         if self.__debug:
-            print(f'\nGet cookie {self.__cookie_name} from {self.__url} for {self.__username}')
-        os.popen(f'curl -c {self.__cookie_name} '
-                 f'-H "Content-Type: application/x-www-form-urlencoded" '
-                 f'-d "name={self.__username}&password={self.__password}" -X POST '
-                 f'"{self.__url}/index.php?/auth/login"').read()
+            print(f"\nGet cookie {self.__cookie_name} from {self.__url} for {self.__username}")
+        os.popen(
+            f"curl -c {self.__cookie_name} "
+            f'-H "Content-Type: application/x-www-form-urlencoded" '
+            f'-d "name={self.__username}&password={self.__password}" -X POST '
+            f'"{self.__url}/index.php?/auth/login"'
+        ).read()
 
     def __download_tr_xml(self, filename=None, suite=None):
         """
@@ -61,10 +72,10 @@ class TCBackup:
         if not suite:
             suite = self.__suite
         if self.__debug:
-            print(f'\nDownload XML {filename} from from {self.__url}')
-        os.popen(f'curl -b {self.__cookie_name} '
-                 f'"{self.__url}/index.php?/suites/export/{suite}" '
-                 f'--output {filename}').read()
+            print(f"\nDownload XML {filename} from from {self.__url}")
+        os.popen(
+            f"curl -b {self.__cookie_name} " f'"{self.__url}/index.php?/suites/export/{suite}" ' f"--output {filename}"
+        ).read()
         return filename
 
     def get_backup(self, filename=None, suite=None):

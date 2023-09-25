@@ -11,10 +11,10 @@ def format_error(error):
     :param error: initial error
     :return: formatted string with error details
     """
-    err_msg = ''
+    err_msg = ""
     error = error if isinstance(error, list) else [error]
     for err in error:
-        err_msg = f'{err_msg} : {err}'
+        err_msg = f"{err_msg} : {err}"
     return err_msg
 
 
@@ -26,16 +26,15 @@ def upload_image(filename, api_token):
     :param api_token: unique API token for image upload on https://freeimage.host
     :return: dict with urls with image itself and its thumbnail
     """
-    payload = {
-        'type': 'file',
-        'action': 'upload',
-        'key': api_token
+    payload = {"type": "file", "action": "upload", "key": api_token}
+    files = {"source": open(filename, "rb")}
+    response = requests.post(
+        url="https://freeimage.host/api/1/upload", data=payload, timeout=5, verify=True, files=files
+    )
+    return {
+        "image": response.json()["image"]["file"]["resource"]["chain"]["image"],
+        "thumb": response.json()["image"]["file"]["resource"]["chain"]["thumb"],
     }
-    files = {'source': open(filename, 'rb')}
-    response = requests.post(url='https://freeimage.host/api/1/upload',
-                             data=payload, timeout=5, verify=True, files=files)
-    return {'image': response.json()['image']['file']['resource']['chain']['image'],
-            'thumb': response.json()['image']['file']['resource']['chain']['thumb']}
 
 
 def delete_file(filename, debug=True):
@@ -45,9 +44,9 @@ def delete_file(filename, debug=True):
     :param filename: filename or path to file, which should be deleted
     :param debug: debug output is enabled, may be True or False, optional, by default is True
     """
-    os.popen(f'rm {filename}').read()
+    os.popen(f"rm {filename}").read()
     if debug:
-        print(f'Removed {filename}')
+        print(f"Removed {filename}")
 
 
 def zip_file(filename, suffix=None, debug=True):
@@ -60,9 +59,9 @@ def zip_file(filename, suffix=None, debug=True):
     :return: zipped filename
     """
     if suffix is None:
-        suffix = ''
+        suffix = ""
     zipped_file = f'{filename.split(".")[0]}{suffix}.zip'
-    os.popen(f'zip -r {zipped_file} {filename}').read()
+    os.popen(f"zip -r {zipped_file} {filename}").read()
     if debug:
-        print(f'ZIPped {filename} to {zipped_file}')
+        print(f"ZIPped {filename} to {zipped_file}")
     return zipped_file

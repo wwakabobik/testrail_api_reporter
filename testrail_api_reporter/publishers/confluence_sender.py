@@ -5,12 +5,19 @@ from ..engines.plotly_reporter import PlotlyReporter
 
 
 class ConfluenceSender:
-    """
-    Class contains wrapper for generate and send reports to Confluence
-    """
+    """Class contains wrapper for generate and send reports to Confluence"""
 
-    def __init__(self, url=None, username=None, password=None, confluence_page=None, automation_platforms=None,
-                 type_platforms=None, plotly_engine=None, debug=True):
+    def __init__(
+        self,
+        url=None,
+        username=None,
+        password=None,
+        confluence_page=None,
+        automation_platforms=None,
+        type_platforms=None,
+        plotly_engine=None,
+        debug=True,
+    ):
         """
         General init
 
@@ -38,7 +45,7 @@ class ConfluenceSender:
         self.__automation_platforms = automation_platforms  # should be passed with specific TestRails sections
         self.__type_platforms = type_platforms
 
-    def automation_state(self, confluence_page=None, reports=None, filename='current_automation.png', debug=None):
+    def automation_state(self, confluence_page=None, reports=None, filename="current_automation.png", debug=None):
         """
         Generates and sends (attach) an image file (png) to confluence page with staked distribution (bar chart)
         with automation type coverage (or similar).
@@ -56,10 +63,11 @@ class ConfluenceSender:
             raise ValueError("No TestRail reports are provided, report aborted!")
         debug = debug if debug is not None else self.__debug
         self.__plotly.draw_automation_state_report(reports=reports, filename=filename, debug=debug)
-        self.__confluence.attach_file(filename, page_id=confluence_page, title='current_automation')
+        self.__confluence.attach_file(filename, page_id=confluence_page, title="current_automation")
 
-    def test_case_priority_distribution(self, confluence_page=None, values=None,
-                                        filename='current_priority_distribution.png', debug=None):
+    def test_case_priority_distribution(
+        self, confluence_page=None, values=None, filename="current_priority_distribution.png", debug=None
+    ):
         """
         Generates and sends (attach) an image file (png) to confluence page with priority distribution (pie chart)
 
@@ -76,10 +84,11 @@ class ConfluenceSender:
             raise ValueError("No TestRail reports are provided, report aborted!")
         debug = debug if debug is not None else self.__debug
         self.__plotly.draw_test_case_by_priority(values=values, filename=filename, debug=debug)
-        self.__confluence.attach_file(filename, page_id=confluence_page, title='current_priority_distribution')
+        self.__confluence.attach_file(filename, page_id=confluence_page, title="current_priority_distribution")
 
-    def test_case_area_distribution(self, confluence_page=None, cases=None, filename='current_area_distribution.png',
-                                    debug=None):
+    def test_case_area_distribution(
+        self, confluence_page=None, cases=None, filename="current_area_distribution.png", debug=None
+    ):
         """
         Generates and sends (attach) an image file (png) to confluence page with sections distribution (pie chart)
 
@@ -96,7 +105,7 @@ class ConfluenceSender:
             raise ValueError("No TestRail cases are provided, report aborted!")
         debug = debug if debug is not None else self.__debug
         self.__plotly.draw_test_case_by_area(cases=cases, filename=filename, debug=debug)
-        self.__confluence.attach_file(filename, page_id=confluence_page, title='current_area_distribution')
+        self.__confluence.attach_file(filename, page_id=confluence_page, title="current_area_distribution")
 
     def history_state_chart(self, confluence_page=None, automation_platforms=None, debug=None):
         """
@@ -118,11 +127,12 @@ class ConfluenceSender:
         for item in automation_platforms:
             if debug:
                 print(f"generating chart for {item['name']}")
-            filename = self.__plotly.draw_history_state_chart(debug=debug, chart_name=item['name'])
+            filename = self.__plotly.draw_history_state_chart(debug=debug, chart_name=item["name"])
             self.__confluence.attach_file(filename, page_id=confluence_page, title=filename[:-4])
 
-    def history_type_chart(self, confluence_page=None, type_platforms=None,
-                           filename='current_area_distribution_history.png', debug=None):
+    def history_type_chart(
+        self, confluence_page=None, type_platforms=None, filename="current_area_distribution_history.png", debug=None
+    ):
         """
         Generates and sends (attach) an image file (png) to confluence page with state distribution (staked line chart)
 
@@ -140,10 +150,18 @@ class ConfluenceSender:
         if not type_platforms:
             raise ValueError("No type platforms specified, report aborted!")
         self.__plotly.draw_history_type_chart(debug=debug, type_platforms=type_platforms, filename=filename)
-        self.__confluence.attach_file(filename, page_id=confluence_page, title='current_area_distribution_history')
+        self.__confluence.attach_file(filename, page_id=confluence_page, title="current_area_distribution_history")
 
-    def generate_report(self, confluence_page=None, reports=None, cases=None, values=None, type_platforms=None,
-                        automation_platforms=None, debug=None):
+    def generate_report(
+        self,
+        confluence_page=None,
+        reports=None,
+        cases=None,
+        values=None,
+        type_platforms=None,
+        automation_platforms=None,
+        debug=None,
+    ):
         """
         Generates and sends (attach) an image file (png) to confluence page with state distribution (staked line chart)
 

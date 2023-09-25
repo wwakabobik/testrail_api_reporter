@@ -5,7 +5,7 @@ from os.path import exists
 
 
 class CSVParser:
-    """ Parser for CSV files """
+    """Parser for CSV files"""
 
     def __init__(self, filename=None, debug=True):
         """
@@ -34,33 +34,37 @@ class CSVParser:
             raise ValueError("Filename for save report data is not provided, save history data aborted!")
         if not report:
             raise ValueError("Report couldn't be found, save history data aborted!")
-        date = datetime.today().strftime('%Y-%m-%d')
-        last_date = ''
-        mode = 'r' if exists(filename) else 'w'
+        date = datetime.today().strftime("%Y-%m-%d")
+        last_date = ""
+        mode = "r" if exists(filename) else "w"
         try:
             with open(filename, mode) as csvfile:
-                if mode == 'r':
+                if mode == "r":
                     for row in reversed(list(csv.reader(csvfile))):
-                        last_date = '{0}-{1}-{2}'.format(row[0], row[1], row[2])
+                        last_date = "{0}-{1}-{2}".format(row[0], row[1], row[2])
                         break
         except FileNotFoundError:
-            raise ValueError("Can't open report file, save history data aborted!")
+            raise ValueError("Can't open report file, save history data aborted!") from FileNotFoundError
         if last_date != date:
             if debug:
-                print('Saving data in {0} for {1}'.format(filename, date))
-            with open(filename, 'a+', newline='') as csvfile:
-                writer = csv.writer(csvfile, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
+                print("Saving data in {0} for {1}".format(filename, date))
+            with open(filename, "a+", newline="") as csvfile:
+                writer = csv.writer(csvfile, delimiter=",", quotechar="|", quoting=csv.QUOTE_MINIMAL)
 
-                writer.writerow([datetime.today().strftime('%Y'),
-                                 datetime.today().strftime('%m'),
-                                 datetime.today().strftime('%d'),
-                                 report.get_total(),
-                                 report.get_automated(),
-                                 report.get_not_automated(),
-                                 report.get_na()])
+                writer.writerow(
+                    [
+                        datetime.today().strftime("%Y"),
+                        datetime.today().strftime("%m"),
+                        datetime.today().strftime("%d"),
+                        report.get_total(),
+                        report.get_automated(),
+                        report.get_not_automated(),
+                        report.get_not_applicable(),
+                    ]
+                )
         else:
             if debug:
-                print('Data already stored for today, skipping save')
+                print("Data already stored for today, skipping save")
 
     def load_history_data(self, filename=None, debug=None):
         """
@@ -80,15 +84,15 @@ class CSVParser:
         not_automated = []
         nas = []
         if debug:
-            print('Loading history data from {}'.format(filename))
+            print("Loading history data from {}".format(filename))
         try:
-            with open(filename, 'r') as csvfile:
-                for row in (csv.reader(csvfile)):
+            with open(filename, "r") as csvfile:
+                for row in csv.reader(csvfile):
                     timestamps.append(datetime(year=int(row[0]), month=int(row[1]), day=int(row[2])))
                     totals.append(row[3])
                     automated.append(row[4])
                     not_automated.append(row[5])
                     nas.append(row[6])
         except FileNotFoundError:
-            raise ValueError("Can't open report file, load history data aborted!")
+            raise ValueError("Can't open report file, load history data aborted!") from FileNotFoundError
         return [timestamps, totals, automated, not_automated, nas]
