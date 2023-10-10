@@ -95,18 +95,15 @@ def check_captions_and_files(captions, files, debug):
     return return_value
 
 
-def init_get_cases_process(debug, default_debug):
+def init_get_cases_process():
     """
     Service function to initialize process
 
-    :param debug: debug output is enabled, may be True or False, optional
-    :param default_debug: default debug output is enabled, may be True or False, optional
-    :return: debug, cases_list, first_run, criteria, response, retry
+    :return: cases_list, first_run, criteria, response, retry
     """
-    debug = debug if debug is not None else default_debug
     cases_list = []
     first_run = True
     criteria = None
     response = None
     retry = 0
-    return debug, cases_list, first_run, criteria, response, retry
+    return cases_list, first_run, criteria, response, retry

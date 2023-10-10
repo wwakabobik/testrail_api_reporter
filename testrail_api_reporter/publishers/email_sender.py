@@ -11,13 +11,15 @@ import httplib2
 from apiclient import discovery
 from oauth2client import client, tools, file
 
+from ..utils.logger_config import setup_logger, DEFAULT_LOGGING_LEVEL
 from ..utils.reporter_utils import format_error, check_captions_and_files
 
 
 class EmailSender:
     """Email sender class"""
 
-    def __init__(self, email=None, password=None, server_smtp=None, server_port=None, gmail_token=None, debug=True):
+    def __init__(self, email=None, password=None, server_smtp=None, server_port=None, gmail_token=None, logger=None,
+                 log_level=DEFAULT_LOGGING_LEVEL):
         """
         General init
 
@@ -26,11 +28,14 @@ class EmailSender:
         :param server_smtp: full smtp address (endpoint) of mail server, string
         :param server_port: mail server port, integer
         :gmail_token: gmail OAuth secret file (expected json)
-        :param debug: debug output is enabled, may be True or False, optional
+        :param logger: logger object
+        :param log_level: logging level, optional, by default is logging.DEBUG
         """
-        if debug:
-            print("Email Sender init")
-        self.__debug = debug
+        if not logger:
+            self.___logger = setup_logger(name="EmailSender", log_file="email_sender.log", level=log_level)
+        else:
+            self.___logger = logger
+        self.___logger.debug("EmailSender init")
         self.__method = None
         if email is not None and password is not None and server_smtp is not None and server_port is not None:
             self.__method = "regular"
@@ -49,17 +54,16 @@ class EmailSender:
         self.__gmail_token = gmail_token
 
     def send_message(  # pylint: disable=too-many-branches
-        self,
-        files=None,
-        captions=None,
-        image_width="400px",
-        title=None,
-        timestamp=None,
-        recipients=None,
-        method=None,
-        custom_message=None,
-        custom_folder=os.path.join(os.path.expanduser("~"), ".credentials"),
-        debug=None,
+            self,
+            files=None,
+            captions=None,
+            image_width="400px",
+            title=None,
+            timestamp=None,
+            recipients=None,
+            method=None,
+            custom_message=None,
+            custom_folder=os.path.join(os.path.expanduser("~"), ".credentials"),
     ):
         """
         Send email to recipients with report (with attached images)
@@ -73,7 +77,6 @@ class EmailSender:
         :param method: method which will be used for sending
         :param custom_message: custom message, prepared by user at his own, by default its payload with TR state report
         :param custom_folder: custom home folder for gmail credentials storage, by default is ~/.credentials
-        :param debug: debug output is enabled, may be True or False, optional
         :return: none
         """
         # Check params
@@ -85,11 +88,9 @@ class EmailSender:
             recipients = [recipients]
         elif not isinstance(recipients, list) and not custom_message:
             raise ValueError("Wrong list of recipients is provided, aborted!")
-        debug = debug if debug is not None else self.__debug
-        captions = check_captions_and_files(captions=captions, files=files, debug=debug)
+        captions = check_captions_and_files(captions=captions, files=files, debug=True if self.___logger.level == DEFAULT_LOGGING_LEVEL else False)
         if not captions or custom_message:
-            if debug:
-                print("Caption list override by custom message, no legend will be displayed")
+            self.___logger.debug("No captions provided, no legend will be displayed")
         timestamp = timestamp if timestamp else datetime.now().strftime("%Y-%m-%d")
         title = title if title else f"Test development & automation coverage report for {timestamp}"
 
@@ -104,8 +105,7 @@ class EmailSender:
                 method=method,
             )
         else:
-            if debug:
-                print("Ignoring payload preparations, assuming user custom message is right")
+            self.___logger.debug("Ignoring payload preparations, assuming user custom message is right")
             message = custom_message
         if method == "regular":
             connection = self.__connect_to_server()
@@ -113,8 +113,7 @@ class EmailSender:
             self.__disconnect_from_server(connection=connection)
         elif method == "gmail":
             self.__gmail_send_message(message=message, custom_folder=custom_folder)
-        if debug:
-            print("Email sent!")
+        self.___logger.debug("Email sent!")
 
     def __connect_to_server(self):
         """
@@ -122,8 +121,8 @@ class EmailSender:
 
         :return: connection handle ( smtplib.SMTP )
         """
-        if self.__debug:
-            print(f"Connecting to custom mail server {self.__server_smtp}:{self.__server_port} using {self.__email}")
+        self.___logger.debug("Connecting to custom mail server %s:%s using %s", self.__server_smtp, self.__server_port,
+                             self.__email)
         try:
             connection = smtplib.SMTP(self.__server_smtp, self.__server_port)
             connection.ehlo()
@@ -142,8 +141,7 @@ class EmailSender:
         :param message: formatted multipart message
         :return: none
         """
-        if self.__debug:
-            print(f"Sending mail from {self.__email} to {recipients}")
+        self.___logger.debug("Sending mail from %s to %s", self.__email, recipients)
         try:
             connection.sendmail(from_addr=self.__email, to_addrs=recipients, msg=message.as_string())
         except Exception as error:
@@ -156,8 +154,7 @@ class EmailSender:
         :param connection: connection handle ( smtplib.SMTP )
         :return: none
         """
-        if self.__debug:
-            print("Disconnecting from custom server")
+        self.___logger.debug("Disconnecting from custom mail server %s:%s", self.__server_smtp, self.__server_port)
         try:
             connection.quit()
         except Exception as error:
@@ -211,15 +208,12 @@ class EmailSender:
         :param custom_folder: custom home folder for gmail credentials storage, by default is ~/.credentials
         :return: credentials file path (string)
         """
-        if self.__debug:
-            print(f"Checking GMail credentials path at {custom_folder}")
+        self.___logger.debug("Checking GMail credentials path at %s", custom_folder)
         try:
-            if self.__debug:
-                print(f"No credential directory found, creating new one here: {custom_folder}")
+            self.___logger.debug("No credential directory found, creating new one here: %s", custom_folder)
             os.makedirs(custom_folder, exist_ok=True)
         except OSError as error:
-            if self.__debug:
-                print(f"Original Error{format_error(error)}")
+            self.___logger.error("Can't create credential directory!\nError%s", format_error(error))
         credential_path = os.path.join(custom_folder, "gmail-python-email-send.json")
         return credential_path
 
@@ -231,8 +225,7 @@ class EmailSender:
         :return: credentials
         """
         credential_path = self.__gmail_get_credential_path(custom_folder=custom_folder)
-        if self.__debug:
-            print(f"Obtaining GMail credentials from {credential_path}")
+        self.___logger.debug("Obtaining GMail credentials from %s", credential_path)
         try:
             store = file.Storage(credential_path)
         except Exception as error:
@@ -255,8 +248,7 @@ class EmailSender:
                 raise ValueError(
                     f"Couldn't obtain new credential from Google OAuth\nError{format_error(error)}"
                 ) from error
-            if self.__debug:
-                print("Credentials stored to " + credential_path)
+            self.___logger.debug("Storing credentials to %s", credential_path)
         return credentials
 
     def __gmail_send_message(self, message, custom_folder=os.path.join(os.path.expanduser("~"), ".credentials")):
@@ -267,8 +259,7 @@ class EmailSender:
         :param custom_folder: custom home folder for gmail credentials storage, by default is ~/.credentials
         :return: none
         """
-        if self.__debug:
-            print("Sending message using GMail")
+        self.___logger.debug("Sending message using GMail")
         credentials = self.__gmail_get_credentials(custom_folder=custom_folder)
         try:
             http = credentials.authorize(httplib2.Http())
@@ -295,8 +286,7 @@ class EmailSender:
         """
         try:
             message = service.users().messages().send(userId=user_id, body=message).execute()
-            if self.__debug:
-                print(f'Message sent with Id: "{message["id"]}"!')
+            self.___logger.debug("Message sent with Id: %s", message["id"])
             return message
         except Exception as error:
             raise ValueError(f"Can't send mail via GMail!\nError{format_error(error)}") from error

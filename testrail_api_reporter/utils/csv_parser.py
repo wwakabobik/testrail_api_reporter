@@ -3,32 +3,35 @@ import csv
 from datetime import datetime
 from os.path import exists
 
+from .logger_config import setup_logger, DEFAULT_LOGGING_LEVEL
+
 
 class CSVParser:
     """Parser for CSV files"""
 
-    def __init__(self, filename=None, debug=True):
+    def __init__(self, filename=None, logger=None, log_level=DEFAULT_LOGGING_LEVEL):
         """
         Default init
 
         :param filename: filename for csv file
-        :param debug: debug output, enabled or not
+        :param logger: logger object, optional
+        :param log_level: logging level, optional, by default is logging.DEBUG
         """
-        if debug:
-            print("\nCSV Reporter init")
-        self.__debug = debug
+        if not logger:
+            self.___logger = setup_logger(name="CSVParser", log_file="CSVParser.log", level=log_level)
+        else:
+            self.___logger = logger
+        self.___logger.debug("Initializing CSV Parser")
         self.__filename = filename
 
-    def save_history_data(self, filename=None, report=None, debug=None):
+    def save_history_data(self, filename=None, report=None):
         """
         Save history data to CSV
 
         :param filename: file name of output file, required
         :param report: report with distribution in CaseStat format
-        :param debug: debug output, enabled or not
         :return:
         """
-        debug = debug if debug is not None else self.__debug
         filename = filename if filename else self.__filename
         if not filename:
             raise ValueError("Filename for save report data is not provided, save history data aborted!")
@@ -46,8 +49,7 @@ class CSVParser:
         except FileNotFoundError:
             raise ValueError("Can't open report file, save history data aborted!") from FileNotFoundError
         if last_date != date:
-            if debug:
-                print(f"Saving data in {filename} for {date}")
+            self.___logger.debug("Last date in file: %s for %s", filename, last_date)
             with open(filename, "a+", newline="", encoding="utf-8") as csvfile:
                 writer = csv.writer(csvfile, delimiter=",", quotechar="|", quoting=csv.QUOTE_MINIMAL)
 
@@ -63,18 +65,15 @@ class CSVParser:
                     ]
                 )
         else:
-            if debug:
-                print("Data already stored for today, skipping save")
+            self.___logger.debug("Data already stored for today, skipping save")
 
-    def load_history_data(self, filename=None, debug=None):
+    def load_history_data(self, filename=None):
         """
         Load history data to CSV
 
         :param filename: file name of output file, required
-        :param debug: debug output, enabled or not
         :return: list with results
         """
-        debug = debug if debug is not None else self.__debug
         filename = filename if filename else self.__filename
         if not filename:
             raise ValueError("Filename for load report data is not provided, save history data aborted!")
@@ -83,8 +82,7 @@ class CSVParser:
         automated = []
         not_automated = []
         nas = []
-        if debug:
-            print(f"Loading history data from {filename}")
+        self.___logger.debug("Loading history data from %s", filename)
         try:
             with open(filename, "r", encoding="utf-8") as csvfile:
                 for row in csv.reader(csvfile):
