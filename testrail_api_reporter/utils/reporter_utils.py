@@ -33,7 +33,7 @@ def upload_image(filename, api_token):
             data=payload,
             timeout=5,
             verify=True,
-            files={"source": source_file}
+            files={"source": source_file},
         )
     return {
         "image": response.json()["image"]["file"]["resource"]["chain"]["image"],
