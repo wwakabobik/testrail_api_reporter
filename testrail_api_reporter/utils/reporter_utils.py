@@ -36,8 +36,8 @@ def upload_image(filename, api_token):
             files={"source": source_file},
         )
     return {
-        "image": response.json()["image"]["file"]["resource"]["chain"]["image"],
-        "thumb": response.json()["image"]["file"]["resource"]["chain"]["thumb"],
+        "image": response.json()["image"]["url"],
+        "thumb": response.json()["image"]["thumb"]["url"],
     }
 
 
