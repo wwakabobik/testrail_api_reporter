@@ -26,7 +26,7 @@ def upload_image(filename, api_token):
     :param api_token: unique API token for image upload on https://freeimage.host
     :return: dict with urls with image itself and its thumbnail
     """
-    payload = {"type": "file", "action": "upload", "key": api_token}
+    payload = {"action": "upload", "key": api_token, "format": "json"}
     with open(filename, "rb") as source_file:
         response = requests.post(
             url="https://freeimage.host/api/1/upload",
@@ -36,8 +36,8 @@ def upload_image(filename, api_token):
             files={"source": source_file},
         )
     return {
-        "image": response.json()["image"]["file"]["resource"]["chain"]["image"],
-        "thumb": response.json()["image"]["file"]["resource"]["chain"]["thumb"],
+        "image": response.json()["image"]["url"],
+        "thumb": response.json()["image"]["thumb"]["url"],
     }
 
 
