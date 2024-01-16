@@ -1,12 +1,13 @@
 requests==2.31.0
 xmltodict==0.13.0
-testrail-api==1.12.1
+testrail-api>=1.12.1
 plotly==5.18.0
 psutil==5.9.7
-atlassian-python-api==3.41.4
+atlassian-python-api==3.41.6
 kaleido==0.2.1
 httplib2==0.22.0
 google-auth-httplib2==0.2.0
 google-auth-oauthlib==1.2.0
-google-api-python-client==2.111.0
+google-api-python-client==2.113.0
 oauth2client==4.1.3
+beautifulsoup4==4.12.2
