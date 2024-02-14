@@ -11,3 +11,4 @@ from .publishers.slack_sender import SlackSender
 
 # Utils
 from .utils.reporter_utils import upload_image, delete_file, zip_file
+from .utils.logger_config import setup_logger

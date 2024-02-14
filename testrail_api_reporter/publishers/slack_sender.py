@@ -3,27 +3,31 @@ import json
 
 import requests
 
+from ..utils.logger_config import setup_logger, DEFAULT_LOGGING_LEVEL
 from ..utils.reporter_utils import format_error, check_captions_and_files
 
 
 class SlackSender:
     """Slack sender class, see for details https://api.slack.com/messaging/webhooks"""
 
-    def __init__(self, hook_url=None, timeout=5, verify=True, debug=True):
+    def __init__(self, hook_url=None, timeout=5, verify=True, logger=None, log_level=DEFAULT_LOGGING_LEVEL):
         """
         General init
 
         :param hook_url: url for slack API hook, string, required
         :param timeout: timeout for message send, integer, optional
         :param verify: verification required, bool, optional
-        :param debug: debug output is enabled, may be True or False, optional
+        :param logger: logger object, optional
+        :param log_level: logging level, optional, by default is logging.DEBUG
         """
-        if debug:
-            print("Slack Sender init")
+        if not logger:
+            self.___logger = setup_logger(name="SlackSender", log_file="SlackSender.log", level=log_level)
+        else:
+            self.___logger = logger
+        self.___logger.debug("Initializing Slack Sender")
         if not hook_url:
             raise ValueError("No Slack hook url provided, aborted!")
         self.__hook_url = hook_url
-        self.__debug = debug
         self.__timeout = timeout
         self.__verify = verify
 
@@ -83,23 +87,20 @@ class SlackSender:
         """
         return {"Content-type": "application/json", "Accept": "text/plain"}
 
-    def send_message(
-        self, files=None, captions=None, title="Test development & automation coverage report", debug=None
-    ):
+    def send_message(self, files=None, captions=None, title="Test development & automation coverage report"):
         """
         Send message to Slack
 
         :param files: list of urls of images
         :param captions: list of captions for files, list of strings, if not provided, no captions will be added
         :param title: header title of message
-        :param debug: debug output is enabled, may be True or False, optional
         :return: none
         """
         # check params
         if not isinstance(files, list):
             raise ValueError("No file list for report provided, aborted!")
-        debug = debug if debug is not None else self.__debug
-        captions = check_captions_and_files(captions=captions, files=files, debug=debug)
+        captions = check_captions_and_files(captions=captions, files=files,
+                                            debug=True if self.___logger.level == DEFAULT_LOGGING_LEVEL else False)
         # Send to slack
         try:
             response = requests.post(
@@ -114,7 +115,6 @@ class SlackSender:
                     f"Message can't be sent! Error {response.status_code}: {response.text}: "
                     f"{response.raise_for_status()}"
                 )
-            if debug:
-                print("Message sent!")
+            self.___logger.debug("Message sent!")
         except Exception as error:
             raise ValueError(f"Message can't be sent!\nError{format_error(error)}") from error
