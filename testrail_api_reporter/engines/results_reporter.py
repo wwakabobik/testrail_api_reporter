@@ -1,4 +1,5 @@
 """ Module for reporting results to TestRails from xml report results, obtained by pytest """
+
 import datetime
 from os.path import exists
 
@@ -14,15 +15,15 @@ class TestRailResultsReporter:
     """Reporter to TestRails from xml report results, obtained by pytest"""
 
     def __init__(
-            self,
-            url: str,
-            email: str,
-            password: str,
-            project_id: int,
-            xml_report="junit-report.xml",
-            suite_id=None,
-            logger=None,
-            log_level=DEFAULT_LOGGING_LEVEL,
+        self,
+        url: str,
+        email: str,
+        password: str,
+        project_id: int,
+        xml_report="junit-report.xml",
+        suite_id=None,
+        logger=None,
+        log_level=DEFAULT_LOGGING_LEVEL,
     ):
         """
         Default init
@@ -34,11 +35,12 @@ class TestRailResultsReporter:
         :param xml_report: filename (maybe with path) of xml test report
         :param suite_id: suite id, integer, optional, if no suite-management is activated
         :param logger: logger object, optional
-        :param log_level: logging level, optional, by default is logging.DEBUG
+        :param log_level: logging level, optional, by default is 'logging.DEBUG'
         """
         if not logger:
-            self.___logger = setup_logger(name="TestRailResultsReporter", log_file="TestRailResultsReporter.log",
-                                          level=log_level)
+            self.___logger = setup_logger(
+                name="TestRailResultsReporter", log_file="TestRailResultsReporter.log", level=log_level
+            )
         else:
             self.___logger = logger
         self.___logger.debug("Initializing TestRail Results Reporter")
@@ -56,7 +58,7 @@ class TestRailResultsReporter:
         """
         Converts xml file to python dict
         :param filename: filename, string, maybe with path
-        :return: dict with list of cases
+        :return: dict with a list of cases
         """
         if not self.__check_report_exists(xml_report=self.__xml_report):
             return None
@@ -84,9 +86,11 @@ class TestRailResultsReporter:
                     "automation_id": f'{item["@classname"]}.{item["@name"]}',
                     "time": item["@time"],
                     "status": status,
-                    "message": f'{item["failure"]["@message"]} : ' f'{item["failure"]["#text"]}'
-                    if "failure" in item.keys()
-                    else "",
+                    "message": (
+                        f'{item["failure"]["@message"]} : ' f'{item["failure"]["#text"]}'
+                        if "failure" in item.keys()
+                        else ""
+                    ),
                 }
             )
         self.___logger.debug("Found test run at %s, found %s test results", self.__timestamp, len(list_of_cases))
@@ -95,11 +99,11 @@ class TestRailResultsReporter:
     @staticmethod
     def __search_for_item(searched_value, list_to_seek, field):
         """
-        Item seeker by value within list of dicts
+        Item seeker by value within a list of dicts
 
         :param searched_value: value what we're looking for
-        :param list_to_seek: list where we perform search
-        :param field: field of list dict
+        :param list_to_seek: a list where we perform the search
+        :param field: field of a list dict
         :return: element
         """
         for item in list_to_seek:
@@ -113,7 +117,7 @@ class TestRailResultsReporter:
         Service function, checks that special (default) placeholder for automation non-classified tests exists
 
         :param title: title for default folder, string
-        :return: id of section
+        :return: id of a section
         """
         first_run = True
         item_id = None
@@ -124,8 +128,9 @@ class TestRailResultsReporter:
                 try:
                     response = self.__api.sections.get_sections(project_id=self.__project_id, suite_id=self.__suite_id)
                 except Exception as error:
-                    self.___logger.error("Get sections failed. Please validate your settings!\nError%s",
-                                         format_error(error))
+                    self.___logger.error(
+                        "Get sections failed. Please validate your settings!\nError%s", format_error(error)
+                    )
                     self.__self_check()
                     return None
                 first_run = False
@@ -153,7 +158,7 @@ class TestRailResultsReporter:
 
     def __enrich_with_tc_num(self, xml_dict_list, tc_dict_list):
         """
-        Add test case id to case result
+        Add a test case id to case result
 
         :param xml_dict_list: list of dict, with test cases, obtained from xml report
         :param tc_dict_list: list of dict, with test cases, obtained from TestRails
@@ -175,7 +180,9 @@ class TestRailResultsReporter:
                         )
                     ]
                 except Exception as error:
-                    self.___logger.error(f"Add case failed. Please validate your settings!\nError{format_error(error)}")
+                    self.___logger.error(
+                        "Add case failed. Please validate your settings!\nError: %s", format_error(error)
+                    )
                     self.__self_check()
                     return None
                 missed_tests_counter = missed_tests_counter + 1
@@ -186,7 +193,7 @@ class TestRailResultsReporter:
                 elapsed = 1 if elapsed == 0 else elapsed
                 enriched_list.append(
                     {
-                        "case_id": case["id"],
+                        "case_id": case["id"],  # type: ignore
                         "status_id": item["status"],
                         "comment": comment,
                         "elapsed": elapsed,
@@ -223,8 +230,9 @@ class TestRailResultsReporter:
                     if should_continue:
                         continue
                 except Exception as error:
-                    self.___logger.error("Get cases failed. Please validate your settings!\nError%s",
-                                         format_error(error))
+                    self.___logger.error(
+                        "Get cases failed. Please validate your settings!\nError%s", format_error(error)
+                    )
                     self.__self_check()
                     return None
                 first_run = False
@@ -266,7 +274,7 @@ class TestRailResultsReporter:
         """
         Format test run name based on input string (most probably environment) and timestamp
 
-        :param environment: some string identifier of run
+        :param environment: some string run identifier
         :param timestamp: custom timestamp
         :return: string of prepared string for AT run name
         """
@@ -278,14 +286,14 @@ class TestRailResultsReporter:
         return title
 
     def send_results(
-            self,
-            run_id=None,
-            environment=None,
-            title=None,
-            timestamp=None,
-            close_run=True,
-            run_name=None,
-            delete_old_run=False,
+        self,
+        run_id=None,
+        environment=None,
+        title=None,
+        timestamp=None,
+        close_run=True,
+        run_name=None,
+        delete_old_run=False,
     ):
         """
         Send results to TestRail
@@ -296,13 +304,13 @@ class TestRailResultsReporter:
         :param timestamp: custom timestamp, optional
         :param close_run: close or not run, True or False
         :param run_name: name of test run, will be used if provided at top priority
-        :param delete_old_run: delete or not previous run if old one exists with same name
+        :param delete_old_run: delete or not previous run if old one exists with the same name
         :return: run id where results were submitted
         """
         if (
-                not self.__project_id
-                or not self.__at_section
-                or not self.__check_report_exists(xml_report=self.__xml_report)
+            not self.__project_id
+            or not self.__at_section
+            or not self.__check_report_exists(xml_report=self.__xml_report)
         ):
             self.___logger.error("Error! Please specify all required params!")
             self.__self_check()
@@ -346,9 +354,9 @@ class TestRailResultsReporter:
 
     def set_at_report_section(self, section_name):
         """
-        Set section name for AT report
+        Set section name for AT a report
 
-        :param section_name: name of section, string
+        :param section_name: name of a section, string
         """
         if self.__check_project() and self.__check_suite():
             self.__at_section = self.__ensure_automation_section(title=section_name)
@@ -452,7 +460,7 @@ class TestRailResultsReporter:
         Search run by name
 
         :param title: name of the run
-        :return: run id, integer
+        :return:  id, integer
         """
         retval = None
         first_run = True
@@ -538,7 +546,7 @@ class TestRailResultsReporter:
         """
         Prepare run for submitting
 
-        :param cases: list of cases, list of dicts
+        :param cases: list of cases (list of dicts)
         :param title: title of test run (which will be submitted)
         :param run_id: run id
         :param run_name:

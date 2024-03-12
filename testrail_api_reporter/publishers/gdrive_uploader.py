@@ -1,4 +1,5 @@
 """ Google Drive uploader module """
+
 import json
 import os
 
@@ -34,10 +35,12 @@ class GoogleDriveUploader:
         :param backup_filename: custom backup filename, which will be uploaded to GDrive, string, optional
         :param mime_type: MIME type of file for upload, string, by default is 'application/zip'
         :param logger: logger object, optional
-        :param log_level: logging level, optional, by default is logging.DEBUG
+        :param log_level: logging level, optional, by default is 'logging.DEBUG'
         """
         if not logger:
-            self.___logger = setup_logger(name="GoogleDriveUploader", log_file="GoogleDriveUploader.log", level=log_level)
+            self.___logger = setup_logger(
+                name="GoogleDriveUploader", log_file="GoogleDriveUploader.log", level=log_level
+            )
         else:
             self.___logger = logger
         self.___logger.debug("Initializing Google Drive Uploader")
@@ -57,7 +60,7 @@ class GoogleDriveUploader:
 
     def __get_new_device_codes(self):
         """
-        Get OAuth codes from Google Drive for new device (device code and one-time user code)
+        Get OAuth codes from Google Drive for a new device (device code and one-time user code)
 
         :return: device_code, user_code, verification_url (strings)
         """
@@ -93,7 +96,7 @@ class GoogleDriveUploader:
     def __refresh_token(self):
         """
         Refresh Google OAuth token
-        Google token has a limited lifetime (1 hour), so, it's need to be updated from time-to-time
+        Google token has a limited lifetime (1 hour), so, it needs to be updated from time-to-time
 
         :return: Google OAuth access token (string)
         """
@@ -114,7 +117,7 @@ class GoogleDriveUploader:
         In case when user did not provide refresh_token, new access and refresh tokens should be obtained.
         To do that, need to:
         1) Generate new device code and get user_code confirmation
-        2) Fill this code to google account (i.e. via web browser)
+        2) Fill this code to a Google account (i.e., via web browser)
         3) Activate API access token permissions
         4) Generate new access tokens and refresh tokens
 
@@ -154,7 +157,7 @@ class GoogleDriveUploader:
             filename = self.__backup_filename
         if not mime_type:
             mime_type = self.__mime_type
-        self.___logger.debug(f"Uploading %s to GoogleDrive", filename)
+        self.___logger.debug("Uploading %s to GoogleDrive", filename)
         response = json.loads(
             os.popen(
                 f'curl -X POST -L -H "Authorization: Bearer {self.__g_token}" '
@@ -174,7 +177,7 @@ class GoogleDriveUploader:
 
     def __proceed_upload(self, filename=None, mime_type=None):
         """
-        Prepare valid token (update if needed), then upload file to Google Drive using access token
+        Prepare valid token (update if needed), then upload the file to Google Drive using access token
 
         :param filename: filename to upload, string
         :param mime_type: MIME type of file, string
@@ -200,4 +203,8 @@ class GoogleDriveUploader:
             mime_type = self.__mime_type
         self.__proceed_upload(filename=filename, mime_type=mime_type)
         if self.__cleanup_needed:
-            delete_file(filename=filename, debug=True if self.___logger.debug == DEFAULT_LOGGING_LEVEL else False)
+            delete_file(
+                filename=filename,
+                debug=self.___logger.debug == DEFAULT_LOGGING_LEVEL,
+                logger=self.___logger,
+            )

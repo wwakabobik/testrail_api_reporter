@@ -1,4 +1,5 @@
 """ Slack sender module """
+
 import json
 
 import requests
@@ -14,11 +15,11 @@ class SlackSender:
         """
         General init
 
-        :param hook_url: url for slack API hook, string, required
+        :param hook_url: url for Slack API hook, string, required
         :param timeout: timeout for message send, integer, optional
         :param verify: verification required, bool, optional
         :param logger: logger object, optional
-        :param log_level: logging level, optional, by default is logging.DEBUG
+        :param log_level: logging level, optional, by default, is 'logging.DEBUG'
         """
         if not logger:
             self.___logger = setup_logger(name="SlackSender", log_file="SlackSender.log", level=log_level)
@@ -38,7 +39,7 @@ class SlackSender:
 
         :param files: list of files (images)
         :param captions: list of captions for files, list of strings, if not provided, no captions will be added
-        :return: list of dict with attachments info
+        :return: list of dict with attachment info
         """
         legacy_attachments = []
         for j, file in enumerate(files):
@@ -57,7 +58,7 @@ class SlackSender:
         """
         Prepares blocks
 
-        :param title: header title of message
+        :param title: header message title
         :return: list of dict with blocks info
         """
         return [{"type": "header", "text": {"type": "plain_text", "text": title, "emoji": True}}]
@@ -66,9 +67,9 @@ class SlackSender:
         """
         Prepares whole payload
 
-        :param title: header title of message
+        :param title: header message title
         :param files: list of files (images)
-        :param captions: list of captions for files, list of strings, if not provided, no captions will be added
+        :param captions: list of captions for files, list of strings, if not provided, no captions will be added to
         :return: json with payload
         """
         return json.dumps(
@@ -89,7 +90,7 @@ class SlackSender:
 
     def send_message(self, files=None, captions=None, title="Test development & automation coverage report"):
         """
-        Send message to Slack
+        Send a message to Slack
 
         :param files: list of urls of images
         :param captions: list of captions for files, list of strings, if not provided, no captions will be added
@@ -99,8 +100,12 @@ class SlackSender:
         # check params
         if not isinstance(files, list):
             raise ValueError("No file list for report provided, aborted!")
-        captions = check_captions_and_files(captions=captions, files=files,
-                                            debug=True if self.___logger.level == DEFAULT_LOGGING_LEVEL else False)
+        captions = check_captions_and_files(
+            captions=captions,
+            files=files,
+            debug=self.___logger.level == DEFAULT_LOGGING_LEVEL,
+            logger=self.___logger,
+        )
         # Send to slack
         try:
             response = requests.post(

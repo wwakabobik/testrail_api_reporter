@@ -1,4 +1,5 @@
 """ Confluence sender module """
+
 import plotly
 
 from ..utils.csv_parser import CSVParser
@@ -9,10 +10,18 @@ plotly.io.orca.config.executable = "/usr/local/bin/orca"
 
 
 class PlotlyReporter:
-    """Class contains wrapper for generate reports (images) via plot charts"""
+    """Class contains wrapper for generated reports (images) via plot charts"""
 
-    def __init__(self, pr_colors=None, pr_labels=None, ar_colors=None, lines=None, type_platforms=None, logger=None,
-                 log_level=DEFAULT_LOGGING_LEVEL):
+    def __init__(
+        self,
+        pr_colors=None,
+        pr_labels=None,
+        ar_colors=None,
+        lines=None,
+        type_platforms=None,
+        logger=None,
+        log_level=DEFAULT_LOGGING_LEVEL,
+    ):
         """
         General init
 
@@ -23,7 +32,7 @@ class PlotlyReporter:
         :param type_platforms: list of dicts, with sections ids, where dict = {'name': 'UI',
                                                                                'sections': [16276]}, optional
         :param logger: logger object, optional
-        :param log_level: logging level, optional, by default is logging.DEBUG
+        :param log_level: logging level, optional, by default is 'logging.DEBUG'
         """
         if not logger:
             self.___logger = setup_logger(name="PlotlyReporter", log_file="PlotlyReporter.log", level=log_level)
@@ -58,7 +67,7 @@ class PlotlyReporter:
         :param filename: output filename for image, png expected, required
         :param reports: report with stacked distribution, usually it's output of
                         ATCoverageReporter().automation_state_report()
-        :param state_markers: list of dicts, contains settings for markers on chart like following:
+        :param state_markers: list of dicts, contains settings for markers on chart like the following:
                                 {
                                 "marker": {"color": "rgb(34,139,34)", "line": {"color": "rgb(0,0,51)", "width": 1.5}},
                                 "opacity": 0.6,
@@ -220,14 +229,14 @@ class PlotlyReporter:
         plotly.io.write_image(fig, filename)
 
     def draw_history_state_chart(
-            self,
-            chart_name: str,
-            history_data=None,
-            filename=None,
-            trace1_decor=None,
-            trace2_decor=None,
-            filename_pattern="current_automation",
-            reverse_traces=False,
+        self,
+        chart_name: str,
+        history_data=None,
+        filename=None,
+        trace1_decor=None,
+        trace2_decor=None,
+        filename_pattern="current_automation",
+        reverse_traces=False,
     ):
         """
         Generates image file (png) with state distribution (staked line chart)
@@ -261,8 +270,11 @@ class PlotlyReporter:
             else {"fill": "tozeroy", "line": {"width": 0.5, "color": "rgb(34,139,34)"}, "mode": "none"}
         )
 
-        history_data = history_data if history_data else CSVParser(log_level=self.___logger.level,
-                                                                   filename=filename).load_history_data()
+        history_data = (
+            history_data
+            if history_data
+            else CSVParser(log_level=self.___logger.level, filename=filename).load_history_data()
+        )
         trace1 = plotly.graph_objs.Scatter(
             x=history_data[0],
             y=history_data[1],
@@ -294,12 +306,12 @@ class PlotlyReporter:
         return filename
 
     def draw_history_type_chart(
-            self,
-            filename=None,
-            type_platforms=None,
-            history_filename_pattern="current_area_distribution",
-            ar_colors=None,
-            lines=None,
+        self,
+        filename=None,
+        type_platforms=None,
+        history_filename_pattern="current_area_distribution",
+        ar_colors=None,
+        lines=None,
     ):
         """
         Generates an image file (png) with state distribution (staked line chart)

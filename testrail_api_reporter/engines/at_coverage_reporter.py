@@ -1,4 +1,5 @@
 """ Engine to generate obtain TestRail data and prepare reports """
+
 from requests.exceptions import ReadTimeout
 from testrail_api import TestRailAPI  # type: ignore
 
@@ -9,22 +10,20 @@ from ..utils.reporter_utils import format_error, init_get_cases_process
 
 
 class ATCoverageReporter:
-    """
-    Class for generate data for automation coverage reports (or similar data) from TestRails
-    """
+    """Class for data generator for automation coverage reports (or similar data) from TestRails"""
 
     def __init__(
-            self,
-            url: str,
-            email: str,
-            password: str,
-            priority=None,
-            project=None,
-            type_platforms=None,
-            automation_platforms=None,
-            suite_id=None,
-            logger=None,
-            log_level=DEFAULT_LOGGING_LEVEL,
+        self,
+        url: str,
+        email: str,
+        password: str,
+        priority=None,
+        project=None,
+        type_platforms=None,
+        automation_platforms=None,
+        suite_id=None,
+        logger=None,
+        log_level=DEFAULT_LOGGING_LEVEL,
     ):
         """
         General init
@@ -64,10 +63,10 @@ class ATCoverageReporter:
         """
         Wrapper to get all sections ids of TestRails project/suite
 
-        :param parent_list: list for all sections, initially top section should be passed
+        :param parent_list: list for all sections, initially a top section should be passed
         :param project: project id, integer, required
-        :param suite_id: suite id, integer, optional, if no suite-management is activated
-        :return: list with ids all of sections
+        :param suite_id: suite id, integer, optional, an if no suite-management is activated
+        :return: list with ids all the sections
         """
         project = project if project else self.__project
         suite_id = suite_id if suite_id else self.__suite_id
@@ -85,7 +84,7 @@ class ATCoverageReporter:
 
         :param project_id: project id, integer, required
         :param suite_id: suite id, integer, optional, if no suite-management is activated
-        :return: list, contains all of sections
+        :return: list, contains all the sections
         """
         project = project_id if project_id else self.__project
         suite_id = suite_id if suite_id else self.__suite_id
@@ -114,17 +113,18 @@ class ATCoverageReporter:
                 response = self.__api.sections.get_sections(project_id=project, suite_id=suite_id, offset=offset)
             sections = sections + response["sections"]  # pylint: disable=unsubscriptable-object
             criteria = response["_links"]["next"]  # pylint: disable=unsubscriptable-object
-        self.___logger.debug("Found %s existing sections in TestRails for project %s, suite %s", len(sections), project,
-                             suite_id)
+        self.___logger.debug(
+            "Found %s existing sections in TestRails for project %s, suite %s", len(sections), project, suite_id
+        )
         return sections
 
     def __get_all_cases(
-            self,
-            project_id=None,
-            suite_id=None,
-            section_id=None,
-            priority_id=None,
-            retries=3,
+        self,
+        project_id=None,
+        suite_id=None,
+        section_id=None,
+        priority_id=None,
+        retries=3,
     ):
         """
         Wrapper to get all test cases for selected project, suite, section and priority
@@ -204,12 +204,12 @@ class ATCoverageReporter:
         return cases_list
 
     def automation_state_report(
-            self,
-            priority=None,
-            project=None,
-            automation_platforms=None,
-            filename_pattern="current_automation",
-            suite=None,
+        self,
+        priority=None,
+        project=None,
+        automation_platforms=None,
+        filename_pattern="current_automation",
+        suite=None,
     ):
         """
         Generates data of automation coverage for stacked bar chart or staked line chart
@@ -288,11 +288,11 @@ class ATCoverageReporter:
         return results
 
     def test_case_by_type(
-            self,
-            project=None,
-            type_platforms=None,
-            filename_pattern="current_area_distribution",
-            suite=None,
+        self,
+        project=None,
+        type_platforms=None,
+        filename_pattern="current_area_distribution",
+        suite=None,
     ):
         """
         Generates data for pie/line chart with distribution by type of platforms (guided by top section).

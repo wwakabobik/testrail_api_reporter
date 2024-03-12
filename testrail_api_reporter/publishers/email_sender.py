@@ -1,4 +1,5 @@
 """ Email sender module """
+
 import base64
 import os
 import smtplib
@@ -18,8 +19,16 @@ from ..utils.reporter_utils import format_error, check_captions_and_files
 class EmailSender:
     """Email sender class"""
 
-    def __init__(self, email=None, password=None, server_smtp=None, server_port=None, gmail_token=None, logger=None,
-                 log_level=DEFAULT_LOGGING_LEVEL):
+    def __init__(
+        self,
+        email=None,
+        password=None,
+        server_smtp=None,
+        server_port=None,
+        gmail_token=None,
+        logger=None,
+        log_level=DEFAULT_LOGGING_LEVEL,
+    ):
         """
         General init
 
@@ -29,7 +38,7 @@ class EmailSender:
         :param server_port: mail server port, integer
         :gmail_token: gmail OAuth secret file (expected json)
         :param logger: logger object
-        :param log_level: logging level, optional, by default is logging.DEBUG
+        :param log_level: logging level, optional, by default is 'logging.DEBUG'
         """
         if not logger:
             self.___logger = setup_logger(name="EmailSender", log_file="email_sender.log", level=log_level)
@@ -54,19 +63,19 @@ class EmailSender:
         self.__gmail_token = gmail_token
 
     def send_message(  # pylint: disable=too-many-branches
-            self,
-            files=None,
-            captions=None,
-            image_width="400px",
-            title=None,
-            timestamp=None,
-            recipients=None,
-            method=None,
-            custom_message=None,
-            custom_folder=os.path.join(os.path.expanduser("~"), ".credentials"),
+        self,
+        files=None,
+        captions=None,
+        image_width="400px",
+        title=None,
+        timestamp=None,
+        recipients=None,
+        method=None,
+        custom_message=None,
+        custom_folder=os.path.join(os.path.expanduser("~"), ".credentials"),
     ):
         """
-        Send email to recipients with report (with attached images)
+        Send email to recipients with a report (with attached images)
 
         :param files: list of filenames (maybe with path) with charts to attach to report, list of strings, required
         :param captions: captions for charts, length should be equal to count of files, list of strings, optional
@@ -88,13 +97,18 @@ class EmailSender:
             recipients = [recipients]
         elif not isinstance(recipients, list) and not custom_message:
             raise ValueError("Wrong list of recipients is provided, aborted!")
-        captions = check_captions_and_files(captions=captions, files=files, debug=True if self.___logger.level == DEFAULT_LOGGING_LEVEL else False)
+        captions = check_captions_and_files(
+            captions=captions,
+            files=files,
+            debug=self.___logger.level == DEFAULT_LOGGING_LEVEL,
+            logger=self.___logger,
+        )
         if not captions or custom_message:
             self.___logger.debug("No captions provided, no legend will be displayed")
         timestamp = timestamp if timestamp else datetime.now().strftime("%Y-%m-%d")
         title = title if title else f"Test development & automation coverage report for {timestamp}"
 
-        # Connect and send message
+        # Connect and send a message
         if not custom_message:
             message = self.__prepare_payload(
                 files=files,
@@ -121,8 +135,9 @@ class EmailSender:
 
         :return: connection handle ( smtplib.SMTP )
         """
-        self.___logger.debug("Connecting to custom mail server %s:%s using %s", self.__server_smtp, self.__server_port,
-                             self.__email)
+        self.___logger.debug(
+            "Connecting to custom mail server %s:%s using %s", self.__server_smtp, self.__server_port, self.__email
+        )
         try:
             connection = smtplib.SMTP(self.__server_smtp, self.__server_port)
             connection.ehlo()

@@ -2,9 +2,7 @@
 
 
 class CaseStat:
-    """
-    Placeholder class for automation statistics
-    """
+    """Placeholder class for automation statistics"""
 
     def __init__(self, name):
         """
