@@ -9,6 +9,7 @@ from .engines.results_reporter import TestRailResultsReporter
 from .publishers.confluence_sender import ConfluenceSender
 from .publishers.email_sender import EmailSender
 from .publishers.slack_sender import SlackSender
+from .publishers.gdrive_uploader import GoogleDriveUploader
 
 # Utils
 from .utils.reporter_utils import upload_image, delete_file, zip_file
