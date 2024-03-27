@@ -4,7 +4,7 @@ import datetime
 from os.path import exists
 
 from requests.exceptions import ReadTimeout
-from testrail_api import TestRailAPI
+from testrail_api import TestRailAPI, StatusCodeError
 from xmltodict import parse
 
 from ..utils.logger_config import setup_logger, DEFAULT_LOGGING_LEVEL
@@ -225,10 +225,15 @@ class TestRailResultsReporter:
             if first_run:
                 try:
                     response = self.__api.cases.get_cases(project_id=self.__project_id, suite_id=self.__suite_id)
-                except ReadTimeout as error:
-                    retry, should_continue = self.___handle_read_timeout(retry, retries, error)
-                    if should_continue:
-                        continue
+                except (ReadTimeout, StatusCodeError) as error:
+                    if (
+                        isinstance(error, StatusCodeError)
+                        and error.status_code == 504  # type: ignore  # pylint: disable=no-member
+                        or isinstance(error, ReadTimeout)
+                    ):
+                        retry, should_continue = self.___handle_read_timeout(retry, retries, error)
+                        if should_continue:
+                            continue
                 except Exception as error:
                     self.___logger.error(
                         "Get cases failed. Please validate your settings!\nError%s", format_error(error)
@@ -243,10 +248,15 @@ class TestRailResultsReporter:
                     response = self.__api.cases.get_cases(
                         project_id=self.__project_id, suite_id=self.__suite_id, offset=offset
                     )
-                except ReadTimeout as error:
-                    retry, should_continue = self.___handle_read_timeout(retry, retries, error)
-                    if should_continue:
-                        continue
+                except (ReadTimeout, StatusCodeError) as error:
+                    if (
+                        isinstance(error, StatusCodeError)
+                        and error.status_code == 504  # type: ignore  # pylint: disable=no-member
+                        or isinstance(error, ReadTimeout)
+                    ):
+                        retry, should_continue = self.___handle_read_timeout(retry, retries, error)
+                        if should_continue:
+                            continue
                 retry = 0
             cases = response["cases"]
             for item in cases:
