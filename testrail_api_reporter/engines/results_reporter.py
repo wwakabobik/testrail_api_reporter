@@ -86,7 +86,7 @@ class TestRailResultsReporter:
                     "automation_id": f'{item["@classname"]}.{item["@name"]}',
                     "time": item["@time"],
                     "status": status,
-                    "message": (
+                    "comment": (
                         f'{item["failure"]["@message"]} : ' f'{item["failure"]["#text"]}'
                         if "failure" in item.keys()
                         else ""
