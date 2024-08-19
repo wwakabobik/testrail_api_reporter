@@ -57,7 +57,7 @@ jobs:
         echo $changed_files
         if [ -n "$changed_files" ]; then
             mkdir -p .mypy_cache
-            mypy $changed_files --install-types --non-interactive --ignore-missing-imports
+            mypy $changed_files --install-types --non-interactive --ignore-missing-imports --explicit-package-bases
         else
             echo "No files changed, passing by"
             exit 0
