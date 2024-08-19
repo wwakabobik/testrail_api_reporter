@@ -29,3 +29,109 @@ min-public-methods = 1
 [[tool.mypy.overrides]]
 module = "testrail_api.*"
 ignore_missing_imports = true
+
+
+
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "leonardo_api"
+version = "0.0.10"
+authors = [
+  { name="Iliya Vereshchagin", email="i.vereshchagin@gmail.com" },
+]
+maintainers = [
+  { name="Iliya Vereshchagin", email="i.vereshchagin@gmail.com" },
+]
+keywords = ["leonardo", "ai", "image generation", "artificial intelligence", "api", "llm", "leonardo.ai", "stablediffusion"]
+description = "Leonardo.ai Python API"
+readme = "README.md"
+license = { file="LICENSE" }
+requires-python = ">=3.8"
+dependencies = [
+    'requests',
+    'aiohttp',
+    'aiofiles',
+    'asyncio',
+    'requests',
+    'urllib3',
+    'async-timeout',
+    'certifi',
+    'charset-normalizer',
+    'frozenlist'
+]
+classifiers = [
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Information Technology",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Scientific/Engineering :: Image Processing",
+    "Topic :: Scientific/Engineering :: Visualization",
+]
+
+install_requires = [
+    'requests',
+    'aiohttp',
+    'aiofiles',
+    'asyncio',
+    'requests',
+    'urllib3',
+    'async-timeout',
+    'certifi',
+    'charset-normalizer',
+    'frozenlist'
+]
+
+[project.urls]
+"Homepage" = "https://github.com/wwakabobik/leonardo_api"
+"Bug Tracker" = "https://github.com/wwakabobik/leonardo_api/issues"
+
+[tool.black]
+line-length = 120
+
+[tool.flake8]
+max-line-length = 120
+extend-ignore = """
+    Q000,
+    WPS306,
+    I001,
+    I005,
+    WPS229,
+    D400,
+    WPS317,
+    S101,
+    WPS507,
+    DAR101,
+    DAR201,
+    WPS112,
+    F401,
+    WPS300,
+    WPS412,
+    DAR301,
+    D401,
+    D205,
+    WPS615,
+    I004,
+    WPS110,
+    WPS420,
+    C812,
+    W1203,
+    R0801,
+    WPS305,
+    WPS226,
+    DAR401,
+    WPS237
+"""
+
+[tool.pylint]
+max-line-length = 120

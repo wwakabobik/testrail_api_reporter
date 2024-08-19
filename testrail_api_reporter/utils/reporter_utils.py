@@ -54,8 +54,6 @@ def delete_file(filename, debug=True, logger=None):
     if debug:
         if logger:
             logger.debug(f"Removed {filename}")
-        else:
-            print(f"Removed {filename}")
 
 
 def zip_file(filename, suffix=None, debug=True, logger=None):
@@ -75,8 +73,6 @@ def zip_file(filename, suffix=None, debug=True, logger=None):
     if debug:
         if logger:
             logger.debug(f"ZIPped {filename} to {zipped_file}")
-        else:
-            print(f"ZIPped {filename} to {zipped_file}")
     return zipped_file
 
 
@@ -95,8 +91,6 @@ def check_captions_and_files(captions, files, debug, logger=None):
         if debug:
             if logger:
                 logger.debug("Captions are not a list, thus no legend will be displayed")
-            else:
-                print("Caption list is empty, no legend will be displayed")
         return_value = None
     elif len(captions) != len(files):
         if debug:
@@ -105,11 +99,6 @@ def check_captions_and_files(captions, files, debug, logger=None):
                     "Caption and file lists are not the same length %s != %s thus no legend will be displayed",
                     len(captions),
                     len(files),
-                )
-            else:
-                print(
-                    f"Caption and file lists are not the same length {len(captions)} != {len(files)} thus "
-                    f"no legend will be displayed"
                 )
         return_value = None
     return return_value

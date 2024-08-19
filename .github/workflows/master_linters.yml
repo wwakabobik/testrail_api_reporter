@@ -1,11 +1,7 @@
-name: Linters-pR
-
+name: Linters
 on:
   push:
-    branches-ignore:
-      - 'master'
-  pull_request:
-    branches-ignore:
+    branches:
       - 'master'
 
 jobs:
