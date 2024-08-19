@@ -29,6 +29,8 @@ jobs:
         pip install black
         pip install types-xmltodict
         pip install types-requests
+    - name: Add 'testrail_api_reporter' to PYTHONPATH
+      run: echo "PYTHONPATH=$PYTHONPATH:$(pwd)/testrail_api_reporter:." >> $GITHUB_ENV
     - name: Analysing the code with pylint
       id: pylint
       continue-on-error: true
@@ -36,7 +38,7 @@ jobs:
         changed_files=$(git diff --diff-filter=d --name-only $(git merge-base HEAD origin/master) HEAD | grep '\.py$') || true
         echo $changed_files
         if [ -n "$changed_files" ]; then
-            PYTHONPATH=. pylint $changed_files
+            pylint $changed_files
         else
             echo "No files changed, passing by"
             exit 0
@@ -49,7 +51,7 @@ jobs:
         echo $changed_files
         if [ -n "$changed_files" ]; then
             mkdir -p .mypy_cache
-            PYTHONPATH=. mypy $changed_files --install-types --non-interactive --ignore-missing-imports
+            mypy $changed_files --install-types --non-interactive --ignore-missing-imports
         else
             echo "No files changed, passing by"
             exit 0
@@ -61,7 +63,7 @@ jobs:
         changed_files=$(git diff --diff-filter=d --name-only $(git merge-base HEAD origin/master) HEAD | grep '\.py$') || true
         echo $changed_files
         if [ -n "$changed_files" ]; then
-          PYTHONPATH=. flake8 $changed_files
+          flake8 $changed_files
         else
           echo "No files changed, passing by"
           exit 0
@@ -73,7 +75,7 @@ jobs:
         changed_files=$(git diff --diff-filter=d --name-only $(git merge-base HEAD origin/master) HEAD | grep '\.py$') || true
         echo $changed_files
         if [ -n "$changed_files" ]; then
-            PYTHONPATH=. black --diff --check --color $changed_files
+            black --diff --check --color $changed_files
         else
             echo "No files changed, passing by"
             exit 0
