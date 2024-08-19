@@ -33,4 +33,6 @@ jobs:
       run: echo "PYTHONPATH=$PYTHONPATH:$(pwd)/testrail_api_reporter:." >> $GITHUB_ENV
     - name: Execute tests
       id: tests
+      env:
+        FREEIMAGEHOST_API_KEY: ${{ secrets.FREEIMAGEHOST_API_KEY }}
       run: pytest tests -n=auto --cov=testrail_api_reporter --cov-report=term --cov-report=xml:coverage.xml --cov-fail-under=95
