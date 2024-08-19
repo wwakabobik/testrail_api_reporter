@@ -1,1 +1,0 @@
-""" TestRail API Reporter """

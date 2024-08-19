@@ -1,6 +1,6 @@
 """Tests for the reporter_utils module, function 'format_error'"""
 
-from ...testrail_api_reporter.utils.reporter_utils import format_error  # pylint: disable=relative-beyond-top-level
+from testrail_api_reporter.utils.reporter_utils import format_error  # pylint: disable=import-error,no-name-in-module
 
 
 def test_format_error_single_string():
