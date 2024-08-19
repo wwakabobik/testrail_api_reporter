@@ -7,7 +7,7 @@ from unittest.mock import patch, Mock
 from faker import Faker
 from pytest import raises as pytest_raises
 
-from ...testrail_api_reporter.utils.reporter_utils import upload_image
+from testrail_api_reporter.utils.reporter_utils import upload_image  # pylint: disable=import-error,no-name-in-module
 
 
 test_filename = choice((f"{getcwd()}/tests/assets/test_image.png", f"{getcwd()}/tests/assets/test_image.jpeg"))
