@@ -16,9 +16,7 @@ def setup_logger(name: str, log_file: str, level=logging.DEBUG):
     :param name: (string) Name of the logger.
     :param log_file: path to log_file
     :param level: logging level. Default is logging.DEBUG
-
     :returns: logger object
-
     """
     formatter = logging.Formatter("%(asctime)s [%(levelname)s] %(name)s: %(message)s")
 
