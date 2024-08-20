@@ -9,7 +9,7 @@ from testrail_api_reporter.utils.reporter_utils import delete_file  # pylint: di
 def test_delete_file():
     """Test delete file"""
     test_file = "test_file.txt"
-    with open(test_file, "w") as file:
+    with open(test_file, "w", encoding="utf-8") as file:
         file.write("Test")
 
     assert os.path.exists(test_file) is True
@@ -21,7 +21,7 @@ def test_delete_file():
 def test_delete_file_with_debug():
     """Test delete file with debug output"""
     test_file = "test_file.txt"
-    with open(test_file, "w") as file:
+    with open(test_file, "w", encoding="utf-8") as file:
         file.write("Test")
 
     assert os.path.exists(test_file) is True
@@ -39,6 +39,6 @@ def test_delete_file_non_existent(capfd):
     :param capfd - fixture of cap failure logger
     """
     delete_file("non_existent_file.txt", debug=True)
-    out, err = capfd.readouterr()
+    _, err = capfd.readouterr()
 
     assert "No such file or directory" in err
