@@ -1,6 +1,8 @@
 """Tests for the reporter_utils module, function 'init_get_cases_process'"""
 
-from testrail_api_reporter.utils.reporter_utils import init_get_cases_process  # pylint: disable=import-error,no-name-in-module
+from testrail_api_reporter.utils.reporter_utils import (
+    init_get_cases_process
+)  # pylint: disable=import-error,no-name-in-module
 
 
 def test_init_get_cases_process():

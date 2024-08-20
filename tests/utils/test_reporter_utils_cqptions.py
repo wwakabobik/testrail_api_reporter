@@ -6,7 +6,9 @@ from unittest.mock import MagicMock
 
 from faker import Faker
 
-from testrail_api_reporter.utils.reporter_utils import check_captions_and_files  # pylint: disable=import-error,no-name-in-module
+from testrail_api_reporter.utils.reporter_utils import (
+    check_captions_and_files
+)  # pylint: disable=import-error,no-name-in-module
 
 faker = Faker()
 
