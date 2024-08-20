@@ -24,4 +24,3 @@ def create_test_file():
         remove(test_file)
     except FileNotFoundError:
         pass
-

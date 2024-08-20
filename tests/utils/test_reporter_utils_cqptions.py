@@ -10,6 +10,7 @@ from testrail_api_reporter.utils.reporter_utils import check_captions_and_files 
 
 faker = Faker()
 
+
 def test_check_captions_and_files_not_list():
     """Test check_captions_and_files when captions is not a list"""
     captions = faker.sentence()
@@ -21,6 +22,7 @@ def test_check_captions_and_files_not_list():
     result = check_captions_and_files(captions, files, debug=True, logger=logger)
     assert result is None
     logger.debug.assert_called_once_with("Captions are not a list, thus no legend will be displayed")
+
 
 def test_check_captions_and_files_different_length():
     """Test check_captions_and_files when captions and files have different lengths"""
@@ -37,6 +39,7 @@ def test_check_captions_and_files_different_length():
         len(captions),
         len(files),
     )
+
 
 def test_check_captions_and_files_same_length():
     """Test check_captions_and_files when captions and files have the same length"""
