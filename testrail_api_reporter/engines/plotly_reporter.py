@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """ Confluence sender module """
 
 import plotly

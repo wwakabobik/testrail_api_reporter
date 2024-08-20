@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """Tests for the reporter_utils module, function 'init_get_cases_process'"""
 
 from testrail_api_reporter.utils.reporter_utils import (  # pylint: disable=import-error,no-name-in-module

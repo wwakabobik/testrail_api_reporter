@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """Tests for the reporter_utils module, function 'zip_file'"""
 
 import os

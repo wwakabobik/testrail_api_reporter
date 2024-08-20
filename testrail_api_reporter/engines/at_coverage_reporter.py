@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """ Engine to generate obtain TestRail data and prepare reports """
 
 from requests.exceptions import ReadTimeout

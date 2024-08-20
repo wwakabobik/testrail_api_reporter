@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """Tests for the reporter_utils module, function 'check_captions_and_files'"""
 
 from logging import getLogger

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """ Module for reporting results to TestRails from xml report results, obtained by pytest """
 
 import datetime

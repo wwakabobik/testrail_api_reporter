@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """ Google Drive uploader module """
 
 import json

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """ CSV parser for TestRail API Reporter """
 
 import csv

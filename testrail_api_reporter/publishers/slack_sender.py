@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """ Slack sender module """
 
 import json

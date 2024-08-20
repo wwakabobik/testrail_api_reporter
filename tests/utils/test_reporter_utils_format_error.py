@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """Tests for the reporter_utils module, function 'format_error'"""
 
 from testrail_api_reporter.utils.reporter_utils import format_error  # pylint: disable=import-error,no-name-in-module

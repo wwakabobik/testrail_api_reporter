@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """ TestRails backup module """
 
 import os

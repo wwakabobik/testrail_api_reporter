@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """ Confluence sender module """
 
 from atlassian import Confluence

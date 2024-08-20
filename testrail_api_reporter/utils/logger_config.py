@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
-"""
-Logger configuration
-"""
+"""Logger configuration"""
 
 import logging
 import sys

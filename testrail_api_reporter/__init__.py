@@ -1,4 +1,5 @@
-"""testrail_api_reporter package"""
+# -*- coding: utf-8 -*-
+""" testrail_api_reporter package """
 
 # Engines
 from .engines.at_coverage_reporter import ATCoverageReporter

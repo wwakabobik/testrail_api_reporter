@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """Tests for the reporter_utils module, function 'upload_image'"""
 
 from os import getcwd, getenv

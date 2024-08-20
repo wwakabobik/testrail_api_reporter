@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """ Email sender module """
 
 import base64
