@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 """ This module contains service functions for reporter """
-
-import os
+from logging import Logger
+from os import popen
+from typing import Optional, Any
 
 import requests
 
 
-def format_error(error):
+def format_error(error: list | str) -> str:
     """
     Service function for parse errors to human-readable format
 
@@ -20,7 +21,7 @@ def format_error(error):
     return err_msg
 
 
-def upload_image(filename, api_token):
+def upload_image(filename: str, api_token: str) -> dict:
     """
     Service function to upload images to third-party image hosting
 
@@ -43,7 +44,7 @@ def upload_image(filename, api_token):
     }
 
 
-def delete_file(filename, debug=True, logger=None):
+def delete_file(filename: str, debug: bool = True, logger: Optional[Logger] = None):
     """
     Service function to delete file from filesystem
 
@@ -51,13 +52,13 @@ def delete_file(filename, debug=True, logger=None):
     :param debug: debug output is enabled, may be True or False, optional, by default, is True
     :param logger: logger, optional
     """
-    os.popen(f"rm {filename}").read()
+    popen(f"rm {filename}").read()
     if debug:
         if logger:
             logger.debug(f"Removed {filename}")
 
 
-def zip_file(filename, suffix=None, debug=True, logger=None):
+def zip_file(filename: str, suffix: str | None = None, debug: bool = True, logger: Optional[Logger] = None) -> str:
     """
     Service function to ZIP file
 
@@ -70,14 +71,16 @@ def zip_file(filename, suffix=None, debug=True, logger=None):
     if suffix is None:
         suffix = ""
     zipped_file = f'{filename.split(".")[0]}{suffix}.zip'
-    os.popen(f"zip -r {zipped_file} {filename}").read()
+    popen(f"zip -r {zipped_file} {filename}").read()
     if debug:
         if logger:
             logger.debug(f"ZIPped {filename} to {zipped_file}")
     return zipped_file
 
 
-def check_captions_and_files(captions, files, debug, logger=None):
+def check_captions_and_files(
+        captions: list | None | Any, files: list, debug: bool = True, logger: Optional[Logger] = None
+) -> list | None:
     """
     Service function to check captions and file lists
 
@@ -88,7 +91,7 @@ def check_captions_and_files(captions, files, debug, logger=None):
     :return: captions list or None
     """
     return_value = captions
-    if not isinstance(captions, list):
+    if not isinstance(captions, list) or not isinstance(files, list):
         if debug:
             if logger:
                 logger.debug("Captions are not a list, thus no legend will be displayed")
@@ -105,7 +108,7 @@ def check_captions_and_files(captions, files, debug, logger=None):
     return return_value
 
 
-def init_get_cases_process():
+def init_get_cases_process() -> tuple[list, bool, None, None, int]:
     """
     Service function to initialize a process
 

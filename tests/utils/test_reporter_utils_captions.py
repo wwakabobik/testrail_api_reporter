@@ -30,7 +30,9 @@ def test_check_captions_and_files_not_list():
 def test_check_captions_and_files_different_length():
     """Test check_captions_and_files when captions and files have different lengths"""
     captions = [faker.sentence() for _ in range(randint(1, 10))]
-    files = [faker.file_name() for _ in range(randint(1, 10))]
+    files = []
+    while len(captions) == len(files):
+        files = [faker.file_name() for _ in range(randint(1, 10))]
 
     logger = getLogger(__name__)
     logger.debug = MagicMock()
