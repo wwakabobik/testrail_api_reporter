@@ -42,14 +42,11 @@ class CSVParser:
         date = datetime.today().strftime("%Y-%m-%d")
         last_date = ""
         mode = "r" if exists(filename) else "w"
-        try:
-            with open(filename, mode, encoding="utf-8") as csvfile:
-                if mode == "r":
-                    for row in reversed(list(csv.reader(csvfile))):
-                        last_date = f"{row[0]}-{row[1]}-{row[2]}"
-                        break
-        except FileNotFoundError:
-            raise ValueError("Can't open report file, save history data aborted!") from FileNotFoundError
+        with open(filename, mode, encoding="utf-8") as csvfile:
+            if mode == "r":
+                for row in reversed(list(csv.reader(csvfile))):
+                    last_date = f"{row[0]}-{row[1]}-{row[2]}"
+                    break
         if last_date != date:
             self.___logger.debug("Last date in file: %s for %s", filename, last_date)
             with open(filename, "a+", newline="", encoding="utf-8") as csvfile:
@@ -69,7 +66,7 @@ class CSVParser:
         else:
             self.___logger.debug("Data already stored for today, skipping save")
 
-    def load_history_data(self, filename=None):
+    def load_history_data(self, filename=None) -> list[list[datetime], list[str], list[str], list[str]]:
         """
         Load history data to CSV
 
