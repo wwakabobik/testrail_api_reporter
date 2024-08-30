@@ -1,4 +1,6 @@
+# -*- coding: utf-8 -*-
 """ This module is used to import all the classes and functions from the package """
+
 # Engines
 from .testrail_api_reporter.engines.at_coverage_reporter import ATCoverageReporter
 from .testrail_api_reporter.engines.results_reporter import TestRailResultsReporter

@@ -1,11 +1,7 @@
-name: Linters-PR
-
+name: Linters
 on:
   push:
-    branches-ignore:
-      - 'master'
-  pull_request:
-    branches-ignore:
+    branches:
       - 'master'
 
 jobs:
@@ -88,7 +84,7 @@ jobs:
             exit 0
         fi
     - name: Check runner state
-      run: |
+      run:  |
         failed_steps=()
         if [[ "${{ steps.pylint.outcome }}" == "failure" ]]; then failed_steps+=("Pylint"); fi
         if [[ "${{ steps.black.outcome }}" == "failure" ]]; then failed_steps+=("Black"); fi
@@ -100,3 +96,4 @@ jobs:
         else
           echo "All passed, well done, bro!"
         fi
+

@@ -1,11 +1,14 @@
+# -*- coding: utf-8 -*-
 """ Module for reporting results to TestRails from xml report results, obtained by pytest """
+
 import datetime
 from os.path import exists
 
 from requests.exceptions import ReadTimeout
-from testrail_api import TestRailAPI
+from testrail_api import TestRailAPI, StatusCodeError
 from xmltodict import parse
 
+from ..utils.logger_config import setup_logger, DEFAULT_LOGGING_LEVEL
 from ..utils.reporter_utils import format_error, init_get_cases_process
 
 
@@ -20,7 +23,8 @@ class TestRailResultsReporter:
         project_id: int,
         xml_report="junit-report.xml",
         suite_id=None,
-        debug=True,
+        logger=None,
+        log_level=DEFAULT_LOGGING_LEVEL,
     ):
         """
         Default init
@@ -31,13 +35,18 @@ class TestRailResultsReporter:
         :param project_id: project id, integer, required
         :param xml_report: filename (maybe with path) of xml test report
         :param suite_id: suite id, integer, optional, if no suite-management is activated
-        :param debug: debug output is enabled, may be True or False, optional
+        :param logger: logger object, optional
+        :param log_level: logging level, optional, by default is 'logging.DEBUG'
         """
-        if debug:
-            print("\nTestrail Api Reporter init")
+        if not logger:
+            self.___logger = setup_logger(
+                name="TestRailResultsReporter", log_file="TestRailResultsReporter.log", level=log_level
+            )
+        else:
+            self.___logger = logger
+        self.___logger.debug("Initializing TestRail Results Reporter")
         if url is None or email is None or password is None:
             raise ValueError("No TestRails credentials are provided!")
-        self.__debug = debug
         self.__api = TestRailAPI(url, email, password)
         self.__xml_report = xml_report if self.__check_report_exists(xml_report=xml_report) else None
         self.__project_id = project_id if self.__check_project(project_id=project_id) else None
@@ -46,14 +55,12 @@ class TestRailResultsReporter:
         self.__check_section(section_id=self.__at_section)
         self.__timestamp = datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
 
-    def __xml_to_dict(self, filename="junit-report.xml", debug=None):
+    def __xml_to_dict(self, filename="junit-report.xml"):
         """
         Converts xml file to python dict
         :param filename: filename, string, maybe with path
-        :param debug: debug output is enabled, may be True or False, optional
-        :return: dict with list of cases
+        :return: dict with a list of cases
         """
-        debug = debug if debug is not None else self.__debug
         if not self.__check_report_exists(xml_report=self.__xml_report):
             return None
         with open(filename, "r", encoding="utf-8") as file:
@@ -80,23 +87,24 @@ class TestRailResultsReporter:
                     "automation_id": f'{item["@classname"]}.{item["@name"]}',
                     "time": item["@time"],
                     "status": status,
-                    "message": f'{item["failure"]["@message"]} : ' f'{item["failure"]["#text"]}'
-                    if "failure" in item.keys()
-                    else "",
+                    "comment": (
+                        f'{item["failure"]["@message"]} : ' f'{item["failure"]["#text"]}'
+                        if "failure" in item.keys()
+                        else ""
+                    ),
                 }
             )
-        if debug:
-            print(f"Found test run at {self.__timestamp}, found {len(list_of_cases)} test results")
+        self.___logger.debug("Found test run at %s, found %s test results", self.__timestamp, len(list_of_cases))
         return list_of_cases
 
     @staticmethod
     def __search_for_item(searched_value, list_to_seek, field):
         """
-        Item seeker by value within list of dicts
+        Item seeker by value within a list of dicts
 
         :param searched_value: value what we're looking for
-        :param list_to_seek: list where we perform search
-        :param field: field of list dict
+        :param list_to_seek: a list where we perform the search
+        :param field: field of a list dict
         :return: element
         """
         for item in list_to_seek:
@@ -105,25 +113,25 @@ class TestRailResultsReporter:
 
         return [element for element in list_to_seek if element[field] == searched_value]
 
-    def __ensure_automation_section(self, title="pytest", debug=None):
+    def __ensure_automation_section(self, title="pytest"):
         """
         Service function, checks that special (default) placeholder for automation non-classified tests exists
 
         :param title: title for default folder, string
-        :param debug: debug output is enabled, may be True or False, optional
-        :return: id of section
+        :return: id of a section
         """
         first_run = True
         item_id = None
         criteria = None
         response = None
-        debug = debug if debug is not None else self.__debug
         while criteria is not None or first_run:
             if first_run:
                 try:
                     response = self.__api.sections.get_sections(project_id=self.__project_id, suite_id=self.__suite_id)
                 except Exception as error:
-                    print(f"Get sections failed. Please validate your settings!\nError{format_error(error)}")
+                    self.___logger.error(
+                        "Get sections failed. Please validate your settings!\nError%s", format_error(error)
+                    )
                     self.__self_check()
                     return None
                 first_run = False
@@ -143,23 +151,20 @@ class TestRailResultsReporter:
                     project_id=self.__project_id, suite_id=self.__suite_id, name=title
                 )["id"]
             except Exception as error:
-                print(f"Can't add section. Something nasty happened. Error{format_error(error)}")
+                self.___logger.error("Can't add section. Something nasty happened.\nError%s", format_error(error))
                 self.__self_check()
                 return None
-            if debug:
-                print(f"No default automation folder is found, created new one with name'{title}'")
+            self.___logger.debug("No default automation folder is found, created new one with name '%s'", title)
         return item_id
 
-    def __enrich_with_tc_num(self, xml_dict_list, tc_dict_list, debug=None):
+    def __enrich_with_tc_num(self, xml_dict_list, tc_dict_list):
         """
-        Add test case id to case result
+        Add a test case id to case result
 
         :param xml_dict_list: list of dict, with test cases, obtained from xml report
         :param tc_dict_list: list of dict, with test cases, obtained from TestRails
-        :param debug: debug output is enabled, may be True or False, optional
         :return: enriched list of dict with test cases
         """
-        debug = debug if debug is not None else self.__debug
         enriched_list = []
         missed_tests_counter = 0
         for item in xml_dict_list:
@@ -176,7 +181,9 @@ class TestRailResultsReporter:
                         )
                     ]
                 except Exception as error:
-                    print(f"Add case failed. Please validate your settings!\nError{format_error(error)}")
+                    self.___logger.error(
+                        "Add case failed. Please validate your settings!\nError: %s", format_error(error)
+                    )
                     self.__self_check()
                     return None
                 missed_tests_counter = missed_tests_counter + 1
@@ -187,48 +194,51 @@ class TestRailResultsReporter:
                 elapsed = 1 if elapsed == 0 else elapsed
                 enriched_list.append(
                     {
-                        "case_id": case["id"],
+                        "case_id": case["id"],  # type: ignore
                         "status_id": item["status"],
                         "comment": comment,
                         "elapsed": elapsed,
                         "attachments": [],
                     }
                 )
-        if debug:
-            if missed_tests_counter:
-                print(f"{missed_tests_counter} test cases were missed, they was automatically created.")
-            print(f"{len(enriched_list)} test results were prepared for send.")
+        if missed_tests_counter:
+            self.___logger.debug("Missed %s test cases, they was automatically created", missed_tests_counter)
+        self.___logger.debug("Found %s test cases in TestRails", len(enriched_list))
         return enriched_list
 
-    @staticmethod
-    def ___handle_read_timeout(retry, retries, debug, error):
+    def ___handle_read_timeout(self, retry, retries, error):
         if retry < retries:
             retry += 1
-            if debug:
-                print(f"Timeout error, retrying {retry}/{retries}...")
+            self.___logger.debug("Timeout error, retrying %s/%s...", retry, retries)
             return retry, True
         raise ValueError(f"Get cases failed. Please validate your settings!nError{format_error(error)}") from error
 
     # pylint: disable=R0912
-    def __get_all_auto_cases(self, retries=3, debug=None):
+    def __get_all_auto_cases(self, retries=3):
         """
         Collects all test cases from TestRails with non-empty automation_id
 
         :param retries: number of retries, integer
-        :param debug: debug output is enabled, may be True or False, optional
         :return: list of dict with cases
         """
-        debug, cases_list, first_run, criteria, response, retry = init_get_cases_process(debug, self.__debug)
+        cases_list, first_run, criteria, response, retry = init_get_cases_process()
         while criteria is not None or first_run:
             if first_run:
                 try:
                     response = self.__api.cases.get_cases(project_id=self.__project_id, suite_id=self.__suite_id)
-                except ReadTimeout as error:
-                    retry, should_continue = self.___handle_read_timeout(retry, retries, debug, error)
-                    if should_continue:
-                        continue
+                except (ReadTimeout, StatusCodeError) as error:
+                    if (
+                        isinstance(error, StatusCodeError)
+                        and error.status_code == 504  # type: ignore  # pylint: disable=no-member
+                        or isinstance(error, ReadTimeout)
+                    ):
+                        retry, should_continue = self.___handle_read_timeout(retry, retries, error)
+                        if should_continue:
+                            continue
                 except Exception as error:
-                    print(f"Get cases failed. Please validate your settings!\nError{format_error(error)}")
+                    self.___logger.error(
+                        "Get cases failed. Please validate your settings!\nError%s", format_error(error)
+                    )
                     self.__self_check()
                     return None
                 first_run = False
@@ -239,18 +249,22 @@ class TestRailResultsReporter:
                     response = self.__api.cases.get_cases(
                         project_id=self.__project_id, suite_id=self.__suite_id, offset=offset
                     )
-                except ReadTimeout as error:
-                    retry, should_continue = self.___handle_read_timeout(retry, retries, debug, error)
-                    if should_continue:
-                        continue
+                except (ReadTimeout, StatusCodeError) as error:
+                    if (
+                        isinstance(error, StatusCodeError)
+                        and error.status_code == 504  # type: ignore  # pylint: disable=no-member
+                        or isinstance(error, ReadTimeout)
+                    ):
+                        retry, should_continue = self.___handle_read_timeout(retry, retries, error)
+                        if should_continue:
+                            continue
                 retry = 0
             cases = response["cases"]
             for item in cases:
                 if item["custom_automation_id"] is not None:
                     cases_list.append({"id": item["id"], "custom_automation_id": item["custom_automation_id"]})
             criteria = response["_links"]["next"]
-        if debug:
-            print(f"Found {len(cases_list)} existing tests in TestRails with automation_id")
+        self.___logger.debug("Found %s test cases in TestRails with automation_id", len(cases_list))
         return cases_list
 
     def __prepare_payload(self):
@@ -262,7 +276,7 @@ class TestRailResultsReporter:
         parsed_xml = self.__xml_to_dict(filename=self.__xml_report)
         parsed_cases = self.__get_all_auto_cases()
         if not parsed_xml:
-            print("Preparation of payload failed, aborted")
+            self.___logger.error("Preparation of payload failed, aborted")
             return None
         payload = self.__enrich_with_tc_num(xml_dict_list=parsed_xml, tc_dict_list=parsed_cases)
         return payload
@@ -271,7 +285,7 @@ class TestRailResultsReporter:
         """
         Format test run name based on input string (most probably environment) and timestamp
 
-        :param environment: some string identifier of run
+        :param environment: some string run identifier
         :param timestamp: custom timestamp
         :return: string of prepared string for AT run name
         """
@@ -291,7 +305,6 @@ class TestRailResultsReporter:
         close_run=True,
         run_name=None,
         delete_old_run=False,
-        debug=None,
     ):
         """
         Send results to TestRail
@@ -302,19 +315,15 @@ class TestRailResultsReporter:
         :param timestamp: custom timestamp, optional
         :param close_run: close or not run, True or False
         :param run_name: name of test run, will be used if provided at top priority
-        :param delete_old_run: delete or not previous run if old one exists with same name
-        :param debug: debug output is enabled, may be True or False, optional
+        :param delete_old_run: delete or not previous run if old one exists with the same name
         :return: run id where results were submitted
         """
-        debug = debug if debug is not None else self.__debug
-        if debug:
-            print("\n")
         if (
             not self.__project_id
             or not self.__at_section
             or not self.__check_report_exists(xml_report=self.__xml_report)
         ):
-            print("Error! Please specify all required params!")
+            self.___logger.error("Error! Please specify all required params!")
             self.__self_check()
             return True
         title = self.__prepare_title(environment, timestamp) if not title else title
@@ -326,8 +335,7 @@ class TestRailResultsReporter:
         retval = self.__add_results(run_id=run_id, results=payload)
         if close_run:
             self.__close_run(run_id=run_id, title=title)
-        if debug:
-            print(f"{len(payload)} results were added to test run '{title}', cases updated. Done")
+        self.___logger.debug("%s results were added to test run '%s', cases updated. Done", len(payload), title)
         return retval
 
     def set_project_id(self, project_id):
@@ -357,9 +365,9 @@ class TestRailResultsReporter:
 
     def set_at_report_section(self, section_name):
         """
-        Set section name for AT report
+        Set section name for AT a report
 
-        :param section_name: name of section, string
+        :param section_name: name of a section, string
         """
         if self.__check_project() and self.__check_suite():
             self.__at_section = self.__ensure_automation_section(title=section_name)
@@ -383,7 +391,7 @@ class TestRailResultsReporter:
         try:
             self.__api.projects.get_project(project_id=project_id)
         except Exception as error:
-            print(f"No such project is found, please set valid project ID.\nError{format_error(error)}")
+            self.___logger.error("No such project is found, please set valid project ID.\nError%s", format_error(error))
             retval = False
         return retval
 
@@ -398,7 +406,7 @@ class TestRailResultsReporter:
         try:
             self.__api.suites.get_suite(suite_id=suite_id)
         except Exception as error:
-            print(f"No such suite is found, please set valid AT report section.\nError{format_error(error)}")
+            self.___logger.error("No such suite is found, please set valid suite ID.\nError%s", format_error(error))
             retval = False
         return retval
 
@@ -413,7 +421,7 @@ class TestRailResultsReporter:
         try:
             self.__api.sections.get_section(section_id=section_id)
         except Exception as error:
-            print(f"No default section found, please set valid suite ID.\nError{format_error(error)}")
+            self.___logger.error("No such section is found, please set valid section ID.\nError%s", format_error(error))
             retval = False
         return retval
 
@@ -431,7 +439,7 @@ class TestRailResultsReporter:
             if exists(xml_report):
                 retval = True
         if not retval:
-            print("Please specify correct path.\nError 404: No XML file found")
+            self.___logger.error("Please specify correct path.\nError 404: No XML file found")
         return retval
 
     def __check_run_exists(self, run_id=None):
@@ -445,7 +453,7 @@ class TestRailResultsReporter:
         try:
             self.__api.runs.get_run(run_id=run_id)
         except Exception as error:
-            print(f"No specified run found, please use correct one or use default (None).\nError{format_error(error)}")
+            self.___logger.error("No such run is found, please set valid run ID.\nError%s", format_error(error))
             retval = False
         return retval
 
@@ -463,7 +471,7 @@ class TestRailResultsReporter:
         Search run by name
 
         :param title: name of the run
-        :return: run id, integer
+        :return:  id, integer
         """
         retval = None
         first_run = True
@@ -474,7 +482,7 @@ class TestRailResultsReporter:
                 try:
                     response = self.__api.runs.get_runs(project_id=self.__project_id, suite_id=self.__suite_id)
                 except Exception as error:
-                    print(f"Can't get run list. Something nasty happened.\nError{format_error(error)}")
+                    self.___logger.error("Can't get run list. Something nasty happened.\nError%s", format_error(error))
                     break
                 first_run = False
             elif response["_links"]["next"] is not None:  # pylint: disable=E1136
@@ -499,24 +507,21 @@ class TestRailResultsReporter:
         try:
             self.__api.runs.delete_run(run_id=run_id)
         except Exception as error:
-            print(f"Can't delete run. Something nasty happened." f"\nError{format_error(error)}")
+            self.___logger.error("Can't delete run. Something nasty happened.\nError%s", format_error(error))
             retval = False
         return retval
 
-    def __add_run(self, title, cases_list=None, include_all=False, debug=None):
+    def __add_run(self, title, cases_list=None, include_all=False):
         """
         Add a run
 
         :param title: title of run
         :param cases_list: test cases, which will be added to run
         :param include_all: every existing testcases may be included, by default - False
-        :param debug: debug output is enabled, may be True or False, optional
         :return: id of run, integer
         """
-        debug = debug if debug is not None else self.__debug
         retval = None
-        if debug:
-            print(f"Creating new test run '{title}'")
+        self.___logger.debug("Creating new test run '%s'", title)
         try:
             retval = self.__api.runs.add_run(
                 project_id=self.__project_id,
@@ -526,7 +531,7 @@ class TestRailResultsReporter:
                 case_ids=cases_list,
             )["id"]
         except Exception as error:
-            print(f"Add run failed. Please validate your settings!\nError{format_error(error)}")
+            self.___logger.error("Can't add run. Something nasty happened.\nError%s", format_error(error))
             self.__self_check()
         return retval
 
@@ -543,7 +548,7 @@ class TestRailResultsReporter:
             self.__api.results.add_results_for_cases(run_id=run_id, results=results)
             return run_id
         except Exception as error:
-            print(f"Add results failed. Please validate your settings!\nError{format_error(error)}")
+            self.___logger.error("Add results failed. Please validate your settings!\nError%s", format_error(error))
             self.__self_check()
             self.__check_run_exists(run_id=run_id)
         return retval
@@ -552,7 +557,7 @@ class TestRailResultsReporter:
         """
         Prepare run for submitting
 
-        :param cases: list of cases, list of dicts
+        :param cases: list of cases (list of dicts)
         :param title: title of test run (which will be submitted)
         :param run_id: run id
         :param run_name:
@@ -565,7 +570,7 @@ class TestRailResultsReporter:
         if run_name:
             run_id = self.__search_for_run_by_name(title=run_name)
             if not run_id:
-                print("No run has been found by given name")
+                self.___logger.debug("No run has been found by given name")
         if delete_run and run_id:
             self.__delete_run(run_id=run_id)
             run_id = None
@@ -573,22 +578,19 @@ class TestRailResultsReporter:
             run_id = self.__add_run(title=title, cases_list=cases_list, include_all=False)
         return run_id
 
-    def __close_run(self, title=None, run_id=None, debug=None):
+    def __close_run(self, title=None, run_id=None):
         """
         Closes run
 
         :param title: title of test run
         :param run_id: run id, integer
-        :param debug: debug output is enabled, may be True or False, optional
         :return: True or False
         """
-        debug = debug if debug is not None else self.__debug
         retval = True
         try:
             self.__api.runs.close_run(run_id=run_id)
-            if debug:
-                print(f"Test run '{title}' is closed")
+            self.___logger.debug("Test run '%s' is closed", title)
         except Exception as error:
-            print(f"Can't close run! Something nasty happened.\nError{format_error(error)}")
+            self.___logger.error("Can't close run. Something nasty happened.\nError%s", format_error(error))
             retval = False
         return retval

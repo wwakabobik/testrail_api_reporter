@@ -1,16 +1,30 @@
+# -*- coding: utf-8 -*-
 """ Confluence sender module """
+
+from typing import Optional
+
 import plotly
 
 from ..utils.csv_parser import CSVParser
+from ..utils.logger_config import setup_logger, DEFAULT_LOGGING_LEVEL
 
 # Set path to orca for plotly
 plotly.io.orca.config.executable = "/usr/local/bin/orca"
 
 
 class PlotlyReporter:
-    """Class contains wrapper for generate reports (images) via plot charts"""
+    """Class contains wrapper for generated reports (images) via plot charts"""
 
-    def __init__(self, pr_colors=None, pr_labels=None, ar_colors=None, lines=None, type_platforms=None, debug=True):
+    def __init__(
+        self,
+        pr_colors=None,
+        pr_labels=None,
+        ar_colors=None,
+        lines=None,
+        type_platforms=None,
+        logger=None,
+        log_level=DEFAULT_LOGGING_LEVEL,
+    ):
         """
         General init
 
@@ -20,13 +34,16 @@ class PlotlyReporter:
         :param lines: default settings for lines, dict like {'color': 'rgb(0,0,51)', 'width': 1.5}, optional
         :param type_platforms: list of dicts, with sections ids, where dict = {'name': 'UI',
                                                                                'sections': [16276]}, optional
-        :param debug: debug output is enabled, may be True or False, optional
+        :param logger: logger object, optional
+        :param log_level: logging level, optional, by default is 'logging.DEBUG'
         """
-        if debug:
-            print("\nPlotly Reporter init")
+        if not logger:
+            self.___logger = setup_logger(name="PlotlyReporter", log_file="PlotlyReporter.log", level=log_level)
+        else:
+            self.___logger = logger
+        self.___logger.debug("Initializing Plotly Reporter")
         if not type_platforms:
             raise ValueError("Platform types is not provided, Plotly Reporter cannot be initialized!")
-        self.__debug = debug
         self.__pr_labels = pr_labels if pr_labels else ["Low", "Medium", "High", "Critical"]
         self.__pr_colors = (
             pr_colors if pr_colors else ["rgb(173,216,230)", "rgb(34,139,34)", "rgb(255,255,51)", "rgb(255, 153, 153)"]
@@ -46,23 +63,21 @@ class PlotlyReporter:
         self.__lines = lines if lines else ({"color": "rgb(0,0,51)", "width": 1.5})
         self.__type_platforms = type_platforms
 
-    def draw_automation_state_report(self, filename=None, reports=None, state_markers=None, debug=None):
+    def draw_automation_state_report(self, filename=None, reports=None, state_markers=None):
         """
         Generates an image file (png) with staked distribution (bar chart) with automation type coverage (or similar).
 
         :param filename: output filename for image, png expected, required
         :param reports: report with stacked distribution, usually it's output of
                         ATCoverageReporter().automation_state_report()
-        :param state_markers: list of dicts, contains settings for markers on chart like following:
+        :param state_markers: list of dicts, contains settings for markers on chart like the following:
                                 {
                                 "marker": {"color": "rgb(34,139,34)", "line": {"color": "rgb(0,0,51)", "width": 1.5}},
                                 "opacity": 0.6,
                                 "textposition": "auto",
                                 }
-        :param debug: debug output is enabled, may be True or False, optional
         :return: none
         """
-        debug = debug if debug is not None else self.__debug
         if not reports:
             raise ValueError("No TestRail reports are provided, report aborted!")
         if not filename:
@@ -133,14 +148,11 @@ class PlotlyReporter:
         )
 
         layout = plotly.graph_objs.Layout(barmode="stack")
-        if debug:
-            print(f"Drawing chart to file {filename}")
+        self.___logger.debug("Drawing chart to file %s", filename)
         fig = plotly.graph_objs.Figure(data=data, layout=layout)
         plotly.io.write_image(fig, filename)
 
-    def draw_test_case_by_priority(
-        self, filename=None, values=None, pr_labels=None, pr_colors=None, lines=None, debug=None
-    ):
+    def draw_test_case_by_priority(self, filename=None, values=None, pr_labels=None, pr_colors=None, lines=None):
         """
         Generates an image file (png) with priority distribution (pie chart)
 
@@ -150,7 +162,6 @@ class PlotlyReporter:
         :param pr_labels: default labels for different priorities, list with strings (usually 1-4 values), optional
         :param pr_colors: default colors for different priorities, list with rgb, (usually 1-4 values), optional
         :param lines: default settings for lines, dict like {'color': 'rgb(0,0,51)', 'width': 1.5}, optional
-        :param debug: debug output is enabled, may be True or False, optional
         :return: none
         """
         if not values:
@@ -159,7 +170,6 @@ class PlotlyReporter:
             raise ValueError("No output filename is provided, report aborted!")
         pr_labels = pr_labels if pr_labels else self.__pr_labels
         pr_colors = pr_colors if pr_colors else self.__pr_colors
-        debug = debug if debug is not None else self.__debug
         lines = lines if lines else self.__lines
         fig = {
             "data": [
@@ -175,11 +185,10 @@ class PlotlyReporter:
                 },
             ]
         }
-        if debug:
-            print(f"Drawing chart to file {filename}")
+        self.___logger.debug("Drawing chart to file %s", filename)
         plotly.io.write_image(fig, filename)
 
-    def draw_test_case_by_area(self, filename=None, cases=None, ar_colors=None, lines=None, debug=None):
+    def draw_test_case_by_area(self, filename=None, cases=None, ar_colors=None, lines=None):
         """
         Generates an image file (png) with sections distribution (pie chart)
 
@@ -188,7 +197,6 @@ class PlotlyReporter:
                        ATCoverageReporter().test_case_by_type()
         :param ar_colors: default colors for different sections (platforms), list  with rgb, optional
         :param lines: default settings for lines, dict like {'color': 'rgb(0,0,51)', 'width': 1.5}, optional
-        :param debug: debug output is enabled, may be True or False, optional
         :return: none
         """
         if not cases:
@@ -196,7 +204,6 @@ class PlotlyReporter:
         if not filename:
             raise ValueError("No output filename is provided, report aborted!")
         # priority distribution
-        debug = debug if debug is not None else self.__debug
         ar_colors = ar_colors if ar_colors else self.__ar_colors
         lines = lines if lines else self.__lines
         # area distribution
@@ -221,20 +228,18 @@ class PlotlyReporter:
             ]
         }
 
-        if debug:
-            print(f"Drawing chart to file {filename}")
+        self.___logger.debug("Drawing chart to file %s", filename)
         plotly.io.write_image(fig, filename)
 
     def draw_history_state_chart(
         self,
-        chart_name: str,
+        chart_name: Optional[str] = None,
         history_data=None,
         filename=None,
         trace1_decor=None,
         trace2_decor=None,
         filename_pattern="current_automation",
         reverse_traces=False,
-        debug=None,
     ):
         """
         Generates image file (png) with state distribution (staked line chart)
@@ -252,12 +257,10 @@ class PlotlyReporter:
                                                                                 "mode": "none"}
         :param filename_pattern: pattern, what is prefix will be for filename, string, optional
         :param reverse_traces: reverse traces order
-        :param debug: debug output is enabled, may be True or False, optional
         :return: none
         """
-        if not chart_name:
+        if chart_name is None:
             raise ValueError("No chart name is provided, report aborted!")
-        debug = debug if debug is not None else self.__debug
         filename = filename if filename else f"{filename_pattern}_{chart_name.replace(' ', '_')}.csv"
         trace1_decor = (
             trace1_decor
@@ -270,7 +273,11 @@ class PlotlyReporter:
             else {"fill": "tozeroy", "line": {"width": 0.5, "color": "rgb(34,139,34)"}, "mode": "none"}
         )
 
-        history_data = history_data if history_data else CSVParser(debug=debug, filename=filename).load_history_data()
+        history_data = (
+            history_data
+            if history_data
+            else CSVParser(log_level=self.___logger.level, filename=filename).load_history_data()
+        )
         trace1 = plotly.graph_objs.Scatter(
             x=history_data[0],
             y=history_data[1],
@@ -297,8 +304,7 @@ class PlotlyReporter:
         fig.update_yaxes(range=[0, max((eval(i) for i in history_data[1]))])  # pylint: disable=eval-used
 
         filename = f"{filename[:-3]}png"
-        if debug:
-            print(f"Drawing chart to file {filename}")
+        self.___logger.debug("Drawing chart to file %s", filename)
         plotly.io.write_image(fig, filename)
         return filename
 
@@ -309,7 +315,6 @@ class PlotlyReporter:
         history_filename_pattern="current_area_distribution",
         ar_colors=None,
         lines=None,
-        debug=None,
     ):
         """
         Generates an image file (png) with state distribution (staked line chart)
@@ -320,7 +325,6 @@ class PlotlyReporter:
         :param history_filename_pattern: pattern, what is prefix will be for filename, string, optional
         :param ar_colors: default colors for different sections (platforms), list  with rgb, optional
         :param lines: default settings for lines, dict like {'color': 'rgb(0,0,51)', 'width': 1.5}, optional
-        :param debug: debug output is enabled, may be True or False, optional
         :return: none
         """
         if not filename:
@@ -329,12 +333,11 @@ class PlotlyReporter:
         ar_colors = ar_colors if ar_colors else self.__ar_colors
         data = []
         lines = lines if lines else self.__lines
-        debug = debug if debug is not None else self.__debug
         index = 0
         for platform in type_platforms:
             type_name = platform["name"]
             history_filename = f"{history_filename_pattern}_{type_name.replace(' ', '_')}.csv"
-            history_data = CSVParser(debug=debug, filename=history_filename).load_history_data()
+            history_data = CSVParser(log_level=self.___logger.level, filename=history_filename).load_history_data()
             data.append(
                 plotly.graph_objs.Scatter(
                     x=history_data[0],
@@ -345,6 +348,5 @@ class PlotlyReporter:
             )
             index += 1
         fig = {"data": data}
-        if debug:
-            print(f"Drawing chart to file {filename}")
+        self.___logger.debug("Drawing chart to file %s", filename)
         plotly.io.write_image(fig, filename)

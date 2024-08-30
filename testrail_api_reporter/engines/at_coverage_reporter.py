@@ -1,16 +1,17 @@
+# -*- coding: utf-8 -*-
 """ Engine to generate obtain TestRail data and prepare reports """
+
 from requests.exceptions import ReadTimeout
 from testrail_api import TestRailAPI  # type: ignore
 
 from ..utils.case_stat import CaseStat
 from ..utils.csv_parser import CSVParser
+from ..utils.logger_config import setup_logger, DEFAULT_LOGGING_LEVEL
 from ..utils.reporter_utils import format_error, init_get_cases_process
 
 
 class ATCoverageReporter:
-    """
-    Class for generate data for automation coverage reports (or similar data) from TestRails
-    """
+    """Class for data generator for automation coverage reports (or similar data) from TestRails"""
 
     def __init__(
         self,
@@ -22,7 +23,8 @@ class ATCoverageReporter:
         type_platforms=None,
         automation_platforms=None,
         suite_id=None,
-        debug=None,
+        logger=None,
+        log_level=DEFAULT_LOGGING_LEVEL,
     ):
         """
         General init
@@ -41,13 +43,16 @@ class ATCoverageReporter:
                                                                                     'auto_code': 3,
                                                                                     'na_code': 4}
         :param suite_id: suite id, integer, optional, if no suite-management is activated
-        :param debug: debug output is enabled, may be True or False, optional
+        :param logger: logger object, optional
+        :param log_level: logging level, optional, by default is logging.DEBUG
         """
-        if debug:
-            print("\nAT Coverage Reporter init")
+        if not logger:
+            self.___logger = setup_logger(name="ATCoverageReporter", log_file="ATCoverageReporter.log", level=log_level)
+        else:
+            self.___logger = logger
+        self.___logger.debug("Initializing AT Coverage Reporter")
         if url is None or email is None or password is None:
             raise ValueError("No TestRails credentials are provided!")
-        self.__debug = debug if debug is not None else True
         self.__automation_platforms = automation_platforms  # should be passed with specific TestRails sections
         self.__type_platforms = type_platforms  # should be passed with specific TestRails sections
         self.__project = project
@@ -59,10 +64,10 @@ class ATCoverageReporter:
         """
         Wrapper to get all sections ids of TestRails project/suite
 
-        :param parent_list: list for all sections, initially top section should be passed
+        :param parent_list: list for all sections, initially a top section should be passed
         :param project: project id, integer, required
-        :param suite_id: suite id, integer, optional, if no suite-management is activated
-        :return: list with ids all of sections
+        :param suite_id: suite id, integer, optional, an if no suite-management is activated
+        :return: list with ids all the sections
         """
         project = project if project else self.__project
         suite_id = suite_id if suite_id else self.__suite_id
@@ -74,18 +79,16 @@ class ATCoverageReporter:
                 parent_list.append(section["id"])
         return parent_list
 
-    def __get_all_sections(self, project_id=None, suite_id=None, debug=None):
+    def __get_all_sections(self, project_id=None, suite_id=None):
         """
         Wrapper to get all sections of TestRails project/suite
 
         :param project_id: project id, integer, required
         :param suite_id: suite id, integer, optional, if no suite-management is activated
-        :param debug: debug output is enabled, may be True or False, optional
-        :return: list, contains all of sections
+        :return: list, contains all the sections
         """
         project = project_id if project_id else self.__project
         suite_id = suite_id if suite_id else self.__suite_id
-        debug = debug if debug is not None else self.__debug
         sections = []
         if not project:
             raise ValueError("No project specified, report aborted!")
@@ -97,7 +100,9 @@ class ATCoverageReporter:
                 try:
                     response = self.__api.sections.get_sections(project_id=project, suite_id=suite_id)
                 except Exception as error:  # pylint: disable=broad-except
-                    print(f"Get sections failed. Please validate your settings!\nError{format_error(error)}")
+                    self.___logger.error(
+                        "Get sections failed. Please validate your settings!\nError%s", format_error(error)
+                    )
                     return None
                 first_run = False
             elif response["_links"]["next"] is not None:  # pylint: disable=unsubscriptable-object
@@ -109,8 +114,9 @@ class ATCoverageReporter:
                 response = self.__api.sections.get_sections(project_id=project, suite_id=suite_id, offset=offset)
             sections = sections + response["sections"]  # pylint: disable=unsubscriptable-object
             criteria = response["_links"]["next"]  # pylint: disable=unsubscriptable-object
-        if debug:
-            print(f"Found {len(sections)} existing sections in TestRails for project {project_id}, suite {suite_id}")
+        self.___logger.debug(
+            "Found %s existing sections in TestRails for project %s, suite %s", len(sections), project, suite_id
+        )
         return sections
 
     def __get_all_cases(
@@ -119,7 +125,6 @@ class ATCoverageReporter:
         suite_id=None,
         section_id=None,
         priority_id=None,
-        debug=None,
         retries=3,
     ):
         """
@@ -129,13 +134,12 @@ class ATCoverageReporter:
         :param suite_id: suite id, integer, optional, if no suite-management is activated
         :param section_id: section id, integer, section where testcases should be found, optional
         :param priority_id: priority, list of integers, id of priority for test case to search
-        :param debug: debug output is enabled, may be True or False, optional
         :param retries: number of retries, integer, optional
         :return: list with all cases
         """
         project_id = project_id if project_id else self.__project
         suite_id = suite_id if suite_id else self.__suite_id
-        debug, cases_list, first_run, criteria, response, retry = init_get_cases_process(debug, self.__debug)
+        cases_list, first_run, criteria, response, retry = init_get_cases_process()
         while criteria is not None or first_run:
             if first_run:
                 try:
@@ -148,8 +152,7 @@ class ATCoverageReporter:
                 except ReadTimeout as error:
                     if retry < retries:
                         retry += 1
-                        if debug:
-                            print(f"Timeout error, retrying {retry}/{retries}...")
+                        self.___logger.debug("Timeout error, retrying %s/%s...", retry, retries)
                         continue
                     raise ValueError(
                         f"Get cases failed. Please validate your settings!\nError{format_error(error)}"
@@ -177,8 +180,7 @@ class ATCoverageReporter:
                 except ReadTimeout as error:
                     if retry < retries:
                         retry += 1
-                        if debug:
-                            print(f"Timeout error, retrying {retry}/{retries}...")
+                        self.___logger.debug("Timeout error, retrying %s/%s...", retry, retries)
                         continue
                     raise ValueError(
                         f"Get cases failed. Please validate your settings!\nError{format_error(error)}"
@@ -192,11 +194,14 @@ class ATCoverageReporter:
             cases_list = cases_list + response["cases"]  # pylint: disable=unsubscriptable-object
             criteria = response["_links"]["next"]  # pylint: disable=unsubscriptable-object
 
-        if debug:
-            print(
-                f"Found {len(cases_list)} existing tests in TestRails for project {project_id}, suite {suite_id}, "
-                f"section {section_id}, priority {priority_id}"
-            )
+        self.___logger.debug(
+            "Found %s existing tests in TestRails for project %s, suite %s, section %s, priority %s",
+            len(cases_list),
+            project_id,
+            suite_id,
+            section_id,
+            priority_id,
+        )
         return cases_list
 
     def automation_state_report(
@@ -206,7 +211,6 @@ class ATCoverageReporter:
         automation_platforms=None,
         filename_pattern="current_automation",
         suite=None,
-        debug=None,
     ):
         """
         Generates data of automation coverage for stacked bar chart or staked line chart
@@ -222,7 +226,6 @@ class ATCoverageReporter:
                                                                                     'na_code': 4}
         :param filename_pattern: pattern for filename, string
         :param suite: suite id, integer, optional, if no suite-management is activated
-        :param debug: debug output is enabled, may be True or False, optional
         :return: list of results in CaseStat format
         """
         project = project if project else self.__project
@@ -235,19 +238,15 @@ class ATCoverageReporter:
             raise ValueError("No critical priority specified, report aborted!")
         if not automation_platforms:
             raise ValueError("No automation platforms specified, report aborted!")
-        debug = debug if debug is not None else self.__debug
-        if debug:
-            print("=== Starting generation of report for current automation state ===")
+        self.___logger.debug("=== Starting generation of report for current automation state ===")
         index = 0
         results = []
         for platform in automation_platforms:
-            if debug:
-                print("processing platform " + platform["name"])
+            self.___logger.debug("Processing platform %s", platform["name"])
             results.append(CaseStat(platform["name"]))
             sections = self.__get_sections(platform["sections"])
             for section in sections:
-                if debug:
-                    print("passing section " + str(section))
+                self.___logger.debug(" Passing section %s", section)
                 cases = self.__get_all_cases(
                     project_id=project,
                     suite_id=suite,
@@ -266,30 +265,26 @@ class ATCoverageReporter:
             )
             # save history data
             filename = f"{filename_pattern}_{results[index].get_name().replace(' ', '_')}.csv"
-            CSVParser(debug=debug, filename=filename).save_history_data(report=results[index])
+            CSVParser(log_level=self.___logger.level, filename=filename).save_history_data(report=results[index])
             index += 1
         return results
 
-    def test_case_by_priority(self, project=None, suite=None, debug=None):
+    def test_case_by_priority(self, project=None, suite=None):
         """
         Generates data for pie/line chart with priority distribution
 
         :param project: project id, integer, required
         :param suite: suite id, integer, optional, if no suite-management is activated
-        :param debug: debug output is enabled, may be True or False, optional
         :return: list with values (int) for bar chart
         """
-        debug = debug if debug is not None else self.__debug
         project = project if project else self.__project
         suite = suite if suite else self.__suite_id
         if not project:
             raise ValueError("No project specified, report aborted!")
-        if debug:
-            print("=== Starting generation of report for test case priority distribution ===")
+        self.___logger.debug("=== Starting generation of report for test case priority distribution ===")
         results = []
         for i in range(1, 5):
-            if debug:
-                print(f"passing priority {str(i)}")
+            self.___logger.debug("Processing priority %s", str(i))
             results.append(len(self.__get_all_cases(project_id=project, suite_id=suite, priority_id=str(i))))
         return results
 
@@ -299,7 +294,6 @@ class ATCoverageReporter:
         type_platforms=None,
         filename_pattern="current_area_distribution",
         suite=None,
-        debug=None,
     ):
         """
         Generates data for pie/line chart with distribution by type of platforms (guided by top section).
@@ -309,7 +303,6 @@ class ATCoverageReporter:
                                                                                'sections': [16276]}
         :param filename_pattern: pattern for filename, string
         :param suite: suite id, integer, optional, if no suite-management is activated
-        :param debug: debug output is enabled, may be True or False, optional
         :return: list with values (int) for bar chart
         """
         type_platforms = type_platforms if type_platforms else self.__type_platforms
@@ -319,24 +312,20 @@ class ATCoverageReporter:
             raise ValueError("No project specified, report aborted!")
         if not type_platforms:
             raise ValueError("No platform types are provided, report aborted!")
-        debug = debug if debug is not None else self.__debug
         project = project if project else self.__project
-        if debug:
-            print("=== Starting generation of report for test case area distribution ===")
+        self.___logger.debug("=== Starting generation of report for test case type distribution ===")
         index = 0
         results = []
         for platform in type_platforms:
-            if debug:
-                print("processing area " + platform["name"])
+            self.___logger.debug("Processing platform %s", platform["name"])
             results.append(CaseStat(platform["name"]))
             sections = self.__get_sections(platform["sections"])
             for section in sections:
-                if debug:
-                    print("passing section " + str(section))
+                self.___logger.debug(" Passing section %s", section)
                 cases = self.__get_all_cases(project_id=project, suite_id=suite, section_id=section)
                 results[index].set_total(results[index].get_total() + len(cases))
             # save history data
             filename = f"{filename_pattern}_{results[index].get_name().replace(' ', '_')}.csv"
-            CSVParser(debug=debug, filename=filename).save_history_data(report=results[index])
+            CSVParser(log_level=self.___logger.level, filename=filename).save_history_data(report=results[index])
             index += 1
         return results
