@@ -67,7 +67,7 @@ class CSVParser:
         else:
             self.___logger.debug("Data already stored for today, skipping save")
 
-    def load_history_data(self, filename=None) -> List[List[datetime], List[str], List[str], List[str]]:
+    def load_history_data(self, filename=None) -> List:
         """
         Load history data to CSV
 
