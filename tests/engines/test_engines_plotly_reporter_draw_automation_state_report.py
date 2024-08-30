@@ -55,11 +55,10 @@ def test_draw_automation_state_report_no_filename(random_plotly_reporter):
         random_plotly_reporter.draw_automation_state_report(reports=[fake.pydict()])
 
 
-def test_draw_automation_state_report_creates_file(caplog, case_stat, case_stat_random, random_plotly_reporter):
+def test_draw_automation_state_report_creates_file(case_stat, case_stat_random, random_plotly_reporter):
     """
     Init PlotlyReporter and call draw_automation_state_report with valid parameters should create file
 
-    :param caplog: caplog fixture
     :param case_stat: fixture returns empty CaseStat object
     :param case_stat_random: fixture returns filled with random data CaseStat object
     :param random_plotly_reporter: fixture returns PlotlyReporter
@@ -75,11 +74,12 @@ def test_draw_automation_state_report_creates_file(caplog, case_stat, case_stat_
             remove(filename)
 
 
-def test_draw_automation_state_report_creates_correct_image(caplog, random_expected_image, compare_image):
+def test_draw_automation_state_report_creates_correct_image(
+        random_expected_image, compare_image    # pylint: disable=W0621
+):
     """
     Init PlotlyReporter and call draw_automation_state_report with valid parameters should create correct image
 
-    :param caplog: caplog fixture
     :param random_expected_image: fixture, returns any of possible expected cases
     :param compare_image: fixture, returns function to compare images
     """
@@ -94,11 +94,12 @@ def test_draw_automation_state_report_creates_correct_image(caplog, random_expec
             remove(filename)
 
 
-def test_draw_automation_state_report_changes_state_markers(caplog, random_expected_image, compare_image, random_rgb):
+def test_draw_automation_state_report_changes_state_markers(
+        random_expected_image, compare_image, random_rgb  # pylint: disable=W0621
+):
     """
-    Init PlotlyReporter and call draw_automation_state_report with valid parameters and state_markers should create correct image
+    Init PlotlyReporter and call draw_automation_state_report with state_markers should create different image
 
-    :param caplog: caplog fixture
     :param random_expected_image: fixture, returns any of possible expected cases
     :param compare_image: fixture, returns function to compare images
     :param random_rgb: fixture, returns random rgb in string format

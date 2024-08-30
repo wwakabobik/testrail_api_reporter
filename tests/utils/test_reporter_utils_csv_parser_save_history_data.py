@@ -22,8 +22,8 @@ def test_save_history_data(csv_file, random_stat, case_stat):
 
     parser.save_history_data(report=case_stat)
 
-    with open(csv_file, "r", encoding="utf-8") as f:
-        data = f.read()
+    with open(csv_file, "r", encoding="utf-8") as readable_file:
+        data = readable_file.read()
         assert data == (
             f"{datetime.today().strftime('%Y')},"
             f"{datetime.today().strftime('%m')},"
@@ -55,6 +55,6 @@ def test_save_history_data_already_stored(csv_file, case_stat_random):
     parser.save_history_data(report=case_stat_random)
     parser.save_history_data(report=case_stat_random)
 
-    with open(csv_file, "r") as f:
-        data = f.read()
+    with open(csv_file, "r", encoding="utf-8") as readable_file:
+        data = readable_file.read()
         assert data.count("\n") == 1

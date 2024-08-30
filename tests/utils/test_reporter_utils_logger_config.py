@@ -30,8 +30,8 @@ def test_setup_logger_default_level(caplog):
 
         message = str(fake.random_letters(randint(1, 10))) * randint(1, 10)
         logger.debug(message)
-        with open(log_file, "r", encoding="utf-8") as f:
-            assert message in f.read()
+        with open(log_file, "r", encoding="utf-8") as readable_file:
+            assert message in readable_file.read()
         assert message in caplog.text
     finally:
         if path.exists(log_file):

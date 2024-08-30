@@ -20,8 +20,8 @@ def test_load_history_data(csv_file, random_stat):
     year = fake.year()
     month = fake.month()
     day_of_month = fake.day_of_month()
-    with open(csv_file, "w", encoding="utf-8") as f:
-        f.write(f"{year},{month},{day_of_month},{total},{automated},{not_automated},{not_applicable}\n")
+    with open(csv_file, "w", encoding="utf-8") as writable_file:
+        writable_file.write(f"{year},{month},{day_of_month},{total},{automated},{not_automated},{not_applicable}\n")
 
     data = parser.load_history_data()
 

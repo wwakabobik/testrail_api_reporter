@@ -3,7 +3,6 @@
 
 from os import path, remove
 from random import randint
-from typing import Generator
 
 import pytest
 from faker import Faker
@@ -19,12 +18,12 @@ fake = Faker()
 
 
 @pytest.fixture
-def create_test_file() -> Generator:
+def create_test_file():
     """
     Fixture to create random test file
 
     :return: filename
-    :rtype: Generator
+    :rtype: str (generator)
     """
     test_file = f"not_existing_{fake.file_name()}"
     with open(test_file, "w", encoding="utf-8") as file:
@@ -81,12 +80,12 @@ def case_stat_random(case_stat, random_stat):  # pylint: disable=redefined-outer
 
 
 @pytest.fixture
-def csv_file() -> Generator:
+def csv_file():
     """
     Fixture to create random test file
 
     :return: filename
-    :rtype: Generator
+    :rtype: str (generator)
     """
     test_file = f"not_existing_{fake.file_name(extension='csv')}"
     with open(test_file, "w", encoding="utf-8") as file:
