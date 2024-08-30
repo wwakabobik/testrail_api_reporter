@@ -1,9 +1,6 @@
 # -*- coding: utf-8 -*-
 """Tests for plotly_reporter module, the PlotlyReporter clas, draw_history_state_chart method"""
 
-from os import path, remove, getcwd
-from random import choice, randint
-
 import pytest
 from faker import Faker
 
@@ -29,9 +26,10 @@ def test_draw_history_state_chart_no_filename(caplog, random_plotly_reporter):
     :param caplog: caplog fixture
     :param random_plotly_reporter: fixture returns PlotlyReporter
     """
-    with pytest.raises(ValueError, match="No output filename is provided, report aborted!"):
-        random_plotly_reporter.draw_test_case_by_area(cases=[fake.pydict()])
-        random_plotly_reporter.draw_history_state_chart()
+    fake_name = fake.name()
+    match = f"Can't open report file 'current_automation_{fake_name.replace(' ', '_')}.csv', load history data aborted!"
+    with pytest.raises(ValueError, match=match):
+        random_plotly_reporter.draw_history_state_chart(chart_name=fake_name)
 
 
 def test_draw_history_state_chart_creates_file(caplog, random_plotly_reporter):

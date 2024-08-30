@@ -91,5 +91,5 @@ class CSVParser:
                     not_automated.append(row[5])
                     nas.append(row[6])
         except FileNotFoundError:
-            raise ValueError("Can't open report file, load history data aborted!") from FileNotFoundError
+            raise ValueError(f"Can't open report file '{filename}', load history data aborted!") from FileNotFoundError
         return [timestamps, totals, automated, not_automated, nas]
