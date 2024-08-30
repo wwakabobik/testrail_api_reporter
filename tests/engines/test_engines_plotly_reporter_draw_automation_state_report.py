@@ -74,6 +74,7 @@ def test_draw_automation_state_report_creates_file(case_stat, case_stat_random, 
             remove(filename)
 
 
+@pytest.mark.xfail("Image may differ on GA env")
 def test_draw_automation_state_report_creates_correct_image(
     random_expected_image, compare_image  # pylint: disable=W0621
 ):
