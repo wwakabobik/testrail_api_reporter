@@ -1,10 +1,10 @@
 # TestRail reporter
 
 [![PyPI version](https://badge.fury.io/py/testrail-api-reporter.svg)](https://badge.fury.io/py/testrail-api-reporter)
-[![Linters](https://github.com/wwakabobik/testrail-api-reporter/actions/workflows/master_linters.yml/badge.svg?branch=master)](https://github.com/wwakabobik/testrail-api-reporter/actions/workflows/master_linters.yml)
-[![Tests](https://github.com/wwakabobik/testrail-api-reporter/actions/workflows/master_tests.yml/badge.svg?branch=master)](https://github.com/wwakabobik/testrail-api-reporter/actions/workflows/master_tests.yml)
-[![Coverage Status](https://coveralls.io/repos/github/wwakabobik/testrail-api-reporter/badge.svg?branch=master)](https://coveralls.io/github/wwakabobik/testrail-api-reporter?branch=master) 
-[![codecov](https://codecov.io/gh/wwakabobik/testrail-api-reporter/graph/badge.svg?token=F1I7TBGE5U)](https://codecov.io/gh/wwakabobik/testrail-api-reporter)
+[![Linters](https://github.com/wwakabobik/testrail_api_reporter/actions/workflows/master_linters.yml/badge.svg)](https://github.com/wwakabobik/testrail_api_reporter/actions/workflows/master_linters.yml)
+[![Tests](https://github.com/wwakabobik/testrail_api_reporter/actions/workflows/master_tests.yml/badge.svg?branch=master)](https://github.com/wwakabobik/testrail_api_reporter/actions/workflows/master_tests.yml)
+[![Coverage Status](https://coveralls.io/repos/github/wwakabobik/testrail_api_reporter/badge.svg)](https://coveralls.io/github/wwakabobik/testrail_api_reporter)
+[![codecov](https://codecov.io/gh/wwakabobik/testrail_api_reporter/branch/master/graph/badge.svg?token=W7TH1XV2R4)](https://codecov.io/gh/wwakabobik/testrail_api_reporter)
 ![PyPI - License](https://img.shields.io/pypi/l/testrail-api-reporter)
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/testrail-api-reporter) 
 [![Downloads](https://static.pepy.tech/badge/testrail_api_reporter)](https://pepy.tech/project/testrail_api_reporter)
