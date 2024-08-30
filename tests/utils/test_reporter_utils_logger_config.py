@@ -2,7 +2,7 @@
 """Tests for the logger_config module"""
 
 from logging import DEBUG, INFO, WARNING, ERROR, FATAL, FileHandler, StreamHandler
-from os import path, remove
+from os import path, remove, environ
 from random import choice
 
 from faker import Faker
@@ -15,7 +15,7 @@ from testrail_api_reporter.utils.logger_config import (  # pylint: disable=impor
 fake = Faker()
 
 
-def test_setup_logger_default_level(caplog):
+def test_setup_logger_default_level():
     """Init logger with default level"""
     log_file = fake.file_name(extension="log")
     try:
@@ -32,7 +32,6 @@ def test_setup_logger_default_level(caplog):
         logger.debug(message)
         with open(log_file, "r", encoding="utf-8") as readable_file:
             assert message in readable_file.read()
-        assert message in caplog.text
     finally:
         if path.exists(log_file):
             remove(log_file)

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Tests for plotly_reporter module, the PlotlyReporter clas, draw_test_case_by_priority method"""
 
-from os import path, remove, getcwd
+from os import path, remove, getcwd, environ
 from random import choice, randint
 
 import pytest
@@ -51,7 +51,7 @@ def test_draw_test_case_by_priority_creates_file(random_plotly_reporter):
             remove(filename)
 
 
-@pytest.mark.xfail(reason="Image may differ on GA env")
+@pytest.mark.xfail(condition='GITHUB_ACTIONS' in environ, reason="Image may differ on GA env")
 def test_draw_test_case_by_priority_creates_correct_image(compare_image, random_plotly_reporter):
     """
     Init PlotlyReporter and call draw_test_case_by_priority with valid parameters should create correct image

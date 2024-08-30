@@ -2,7 +2,7 @@
 """Tests for plotly_reporter module, the PlotlyReporter clas, draw_test_case_by_area method"""
 
 from copy import deepcopy
-from os import path, remove, getcwd
+from os import path, remove, getcwd, environ
 from random import choice, randint
 
 import pytest
@@ -83,7 +83,7 @@ def test_draw_test_case_by_area_creates_file(case_stat, case_stat_random, random
             remove(filename)
 
 
-@pytest.mark.xfail(reason="Image may differ on GA env")
+@pytest.mark.xfail(condition='GITHUB_ACTIONS' in environ, reason="Image may differ on GA env")
 def test_draw_test_case_by_area_creates_correct_image(random_expected_image, compare_image):  # pylint: disable=W0621
     """
     Init PlotlyReporter and call draw_test_case_by_area with valid parameters should create correct image
