@@ -38,7 +38,7 @@ def create_test_file():
 
 
 @pytest.fixture
-def random_stat() -> tuple[int, int, int, int]:
+def random_stat() -> tuple:
     """
     Fixture to return tuple with random statistics
 
@@ -143,7 +143,7 @@ def compare_image():
 
 
 @pytest.fixture
-def random_type_platforms() -> list[dict]:
+def random_type_platforms() -> list:
     """
     Returns random list with type platforms dict
 
