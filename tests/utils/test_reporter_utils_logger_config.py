@@ -3,7 +3,7 @@
 
 from logging import DEBUG, INFO, WARNING, ERROR, FATAL, FileHandler, StreamHandler
 from os import path, remove
-from random import choice, randint
+from random import choice
 
 from faker import Faker
 
@@ -28,7 +28,7 @@ def test_setup_logger_default_level(caplog):
         assert isinstance(logger.handlers[0], FileHandler)
         assert isinstance(logger.handlers[1], StreamHandler)
 
-        message = str(fake.random_letters(randint(1, 10))) * randint(1, 10)
+        message = fake.name()
         logger.debug(message)
         with open(log_file, "r", encoding="utf-8") as readable_file:
             assert message in readable_file.read()

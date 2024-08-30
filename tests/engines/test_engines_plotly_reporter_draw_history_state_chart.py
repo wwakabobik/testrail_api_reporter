@@ -55,7 +55,7 @@ def test_draw_history_state_chart_trace1_decor():
     return  # not implemented yet
 
 
-def test_draw_history_state_chart_trace2_decor(random_plotly_reporter, compare_image):
+def test_draw_history_state_chart_trace2_decor():
     """Init PlotlyReporter and call draw_history_state_chart with custom trace2 decor"""
     return  # not implemented yet
 

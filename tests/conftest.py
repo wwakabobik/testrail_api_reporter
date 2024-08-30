@@ -136,7 +136,6 @@ def compare_image():
         diff_pixels = sum(abs(r - g) + abs(g - b) + abs(b - a) + abs(a - r) > 20 for r, g, b, a in diff.getdata())
 
         # Check that the number of different pixels is below the threshold
-        print(diff_pixels)
         return diff_pixels < threshold
 
     return compare

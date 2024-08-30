@@ -83,7 +83,7 @@ def test_draw_test_case_by_area_creates_file(case_stat, case_stat_random, random
             remove(filename)
 
 
-@pytest.mark.xfail("Image may differ on GA env")
+@pytest.mark.xfail(reason="Image may differ on GA env")
 def test_draw_test_case_by_area_creates_correct_image(random_expected_image, compare_image):  # pylint: disable=W0621
     """
     Init PlotlyReporter and call draw_test_case_by_area with valid parameters should create correct image
