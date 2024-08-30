@@ -231,7 +231,7 @@ class PlotlyReporter:
 
     def draw_history_state_chart(
         self,
-        chart_name: str,
+        chart_name: str | None = None,
         history_data=None,
         filename=None,
         trace1_decor=None,
@@ -257,7 +257,7 @@ class PlotlyReporter:
         :param reverse_traces: reverse traces order
         :return: none
         """
-        if not chart_name:
+        if chart_name is None:
             raise ValueError("No chart name is provided, report aborted!")
         filename = filename if filename else f"{filename_pattern}_{chart_name.replace(' ', '_')}.csv"
         trace1_decor = (
