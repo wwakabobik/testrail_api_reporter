@@ -44,7 +44,9 @@ def test_draw_test_case_by_priority_creates_file(caplog, random_plotly_reporter)
     """
     filename = fake.file_name(extension=choice(("png", "jpg", "jpeg", "webp")))
     try:
-        random_plotly_reporter.draw_test_case_by_priority(filename=filename, values=[randint(0, 1024) for _ in range(randint(1, 4))])
+        random_plotly_reporter.draw_test_case_by_priority(
+            filename=filename, values=[randint(0, 1024) for _ in range(randint(1, 4))]
+        )
 
         assert path.exists(filename)
     finally:
@@ -64,6 +66,61 @@ def test_draw_test_case_by_priority_creates_correct_image(caplog, compare_image,
     try:
         random_plotly_reporter.draw_test_case_by_priority(filename=filename, values=[1, 101, 72, 16])
         assert compare_image(actual=filename, expected=f"{getcwd()}/tests/assets/expected_case_by_priority.png")
+    finally:
+        if path.exists(filename):
+            remove(filename)
+
+
+def test_draw_test_case_by_priority_creates_change_lines(caplog, compare_image, random_plotly_reporter, random_rgb):
+    """
+    Init PlotlyReporter and call draw_test_case_by_priority with custom lines
+
+    :param caplog: caplog fixture
+    :param compare_image: fixture, returns function to compare images
+    :param random_plotly_reporter: fixture returns PlotlyReporter
+    :param random_rgb: fixture, returns random rgb in string format
+    """
+    filename = "actual_test_case_by_priority_lines.png"
+    try:
+        lines = {"color": random_rgb(), "width": float(randint(6, 50)) / 10.0}
+        random_plotly_reporter.draw_test_case_by_priority(filename=filename, values=[1, 101, 72, 16], lines=lines)
+        assert not compare_image(actual=filename, expected=f"{getcwd()}/tests/assets/expected_case_by_priority.png")
+    finally:
+        if path.exists(filename):
+            remove(filename)
+
+
+def test_draw_test_case_by_priority_creates_change_labels(caplog, compare_image, random_plotly_reporter):
+    """
+    Init PlotlyReporter and call draw_test_case_by_priority with custom labels
+
+    :param caplog: caplog fixture
+    :param compare_image: fixture, returns function to compare images
+    :param random_plotly_reporter: fixture returns PlotlyReporter
+    """
+    filename = "actual_test_case_by_priority_labels.png"
+    labels = [fake.name() for _ in range(randint(1, 10))]
+    try:
+        random_plotly_reporter.draw_test_case_by_priority(filename=filename, values=[1, 101, 72, 16], pr_labels=labels)
+        assert not compare_image(actual=filename, expected=f"{getcwd()}/tests/assets/expected_case_by_priority.png")
+    finally:
+        if path.exists(filename):
+            remove(filename)
+
+
+def test_draw_test_case_by_priority_creates_change_colors(caplog, compare_image, random_plotly_reporter, random_rgb):
+    """
+    Init PlotlyReporter and call draw_test_case_by_priority with custom labels
+
+    :param caplog: caplog fixture
+    :param compare_image: fixture, returns function to compare images
+    :param random_plotly_reporter: fixture returns PlotlyReporter
+    """
+    filename = "actual_test_case_by_priority_colors.png"
+    colors = [random_rgb() for _ in range(randint(1, 10))]
+    try:
+        random_plotly_reporter.draw_test_case_by_priority(filename=filename, values=[1, 101, 72, 16], pr_colors=colors)
+        assert not compare_image(actual=filename, expected=f"{getcwd()}/tests/assets/expected_case_by_priority.png")
     finally:
         if path.exists(filename):
             remove(filename)

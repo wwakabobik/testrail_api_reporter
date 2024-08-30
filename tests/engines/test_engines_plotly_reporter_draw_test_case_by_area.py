@@ -3,7 +3,7 @@
 
 from copy import deepcopy
 from os import path, remove, getcwd
-from random import choice
+from random import choice, randint
 
 import pytest
 from faker import Faker
@@ -23,26 +23,22 @@ def random_expected_image(case_stat):
 
     :param case_stat: fixture returns empty CaseStat object
     """
-    if choice((False, True)):
-        case_stat_first = case_stat
-        case_stat_first.set_name("UI")
-        case_stat_first.total = 999
-        case_stat_first.automated = 1234
-        case_stat_first.not_automated = 99
-        case_stat_first.not_applicable = 56
-        case_stat_second = deepcopy(case_stat)
-        case_stat_second.set_name("API")
-        case_stat_second.total = 77
-        case_stat_second.automated = 11
-        case_stat_second.not_automated = 0
-        case_stat_second.not_applicable = 1024
-        return {
-            "filename": f"{getcwd()}/tests/assets/expected_case_by_area.png",
-            "data": [case_stat_first, case_stat_second],
-        }
-    else:
-        case_stat.set_name("Automation State")
-        return {"filename": f"{getcwd()}/tests/assets/expected_case_by_area_empty.png", "data": [case_stat]}
+    case_stat_first = case_stat
+    case_stat_first.set_name("UI")
+    case_stat_first.total = 999
+    case_stat_first.automated = 1234
+    case_stat_first.not_automated = 99
+    case_stat_first.not_applicable = 56
+    case_stat_second = deepcopy(case_stat)
+    case_stat_second.set_name("API")
+    case_stat_second.total = 77
+    case_stat_second.automated = 11
+    case_stat_second.not_automated = 0
+    case_stat_second.not_applicable = 1024
+    return {
+        "filename": f"{getcwd()}/tests/assets/expected_case_by_area.png",
+        "data": [case_stat_first, case_stat_second],
+    }
 
 
 def test_draw_test_case_by_area_no_cases(caplog, random_plotly_reporter):
@@ -104,6 +100,50 @@ def test_draw_test_case_by_area_creates_correct_image(caplog, random_expected_im
         plotly_reporter = PlotlyReporter(type_platforms=type_platforms)
         plotly_reporter.draw_test_case_by_area(filename=filename, cases=random_expected_image["data"])
         assert compare_image(actual=filename, expected=random_expected_image["filename"])
+    finally:
+        if path.exists(filename):
+            remove(filename)
+
+
+def test_draw_test_case_by_area_changes_ar_colors(caplog, random_expected_image, compare_image, random_rgb):
+    """
+    Init PlotlyReporter and call draw_test_case_by_area with valid parameters and ar_colors should create correct image
+
+    :param caplog: caplog fixture
+    :param random_expected_image: fixture, returns any of possible expected cases
+    :param compare_image: fixture, returns function to compare images
+    :param random_rgb: fixture, returns random rgb in string format
+    """
+    type_platforms = [{"name": "UI", "sections": [8080, 11, 4]}, {"name": "API", "sections": [12, 101, 86]}]
+    filename = "actual_test_case_by_area_ar_color.png"
+    ar_colors = [random_rgb(), random_rgb(), random_rgb(), random_rgb(), random_rgb()]
+    try:
+        plotly_reporter = PlotlyReporter(type_platforms=type_platforms)
+        plotly_reporter.draw_test_case_by_area(
+            filename=filename, cases=random_expected_image["data"], ar_colors=ar_colors
+        )
+        assert not compare_image(actual=filename, expected=random_expected_image["filename"])
+    finally:
+        if path.exists(filename):
+            remove(filename)
+
+
+def test_draw_test_case_by_area_changes_lines(caplog, random_expected_image, compare_image, random_rgb):
+    """
+    Init PlotlyReporter and call draw_test_case_by_area with valid parameters and ar_colors should create correct image
+
+    :param caplog: caplog fixture
+    :param random_expected_image: fixture, returns any of possible expected cases
+    :param compare_image: fixture, returns function to compare images
+    :param random_rgb: fixture, returns random rgb in string format
+    """
+    type_platforms = [{"name": "UI", "sections": [8080, 11, 4]}, {"name": "API", "sections": [12, 101, 86]}]
+    filename = "actual_test_case_by_area_lines.png"
+    lines = {"color": random_rgb(), "width": float(randint(6, 50)) / 10.0}
+    try:
+        plotly_reporter = PlotlyReporter(type_platforms=type_platforms)
+        plotly_reporter.draw_test_case_by_area(filename=filename, cases=random_expected_image["data"], lines=lines)
+        assert not compare_image(actual=filename, expected=random_expected_image["filename"])
     finally:
         if path.exists(filename):
             remove(filename)

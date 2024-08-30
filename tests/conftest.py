@@ -137,6 +137,7 @@ def compare_image():
         diff_pixels = sum(abs(r - g) + abs(g - b) + abs(b - a) + abs(a - r) > 20 for r, g, b, a in diff.getdata())
 
         # Check that the number of different pixels is below the threshold
+        print(diff_pixels)
         return diff_pixels < threshold
 
     return compare
@@ -162,3 +163,18 @@ def random_plotly_reporter(random_type_platforms) -> PlotlyReporter:
     :rtype: PlotlyReporter
     """
     return PlotlyReporter(type_platforms=random_type_platforms)
+
+
+@pytest.fixture()
+def random_rgb():
+    """Returns fixture to get rgb in string format    """
+    def get_rgb() -> str:
+        """
+        Returns rgb in string format
+
+        :return: rgb in string format
+        :rtype: str
+        """
+        return f"rgb({randint(0, 255)},{randint(0, 255)},{randint(0, 255)})"
+
+    return get_rgb

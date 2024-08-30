@@ -2,7 +2,7 @@
 """Tests for plotly_reporter module, the PlotlyReporter clas, draw_automation_state_report method"""
 
 from os import path, remove, getcwd
-from random import choice
+from random import choice, randint
 
 import pytest
 from faker import Faker
@@ -92,6 +92,45 @@ def test_draw_automation_state_report_creates_correct_image(caplog, random_expec
         plotly_reporter = PlotlyReporter(type_platforms=type_platforms)
         plotly_reporter.draw_automation_state_report(filename=filename, reports=random_expected_image["data"])
         assert compare_image(actual=filename, expected=random_expected_image["filename"])
+    finally:
+        if path.exists(filename):
+            remove(filename)
+
+
+def test_draw_automation_state_report_changes_state_markers(caplog, random_expected_image, compare_image, random_rgb):
+    """
+    Init PlotlyReporter and call draw_automation_state_report with valid parameters and state_markers should create correct image
+
+    :param caplog: caplog fixture
+    :param random_expected_image: fixture, returns any of possible expected cases
+    :param compare_image: fixture, returns function to compare images
+    :param random_rgb: fixture, returns random rgb in string format
+    """
+    type_platforms = [{"name": "Automation State", "sections": [42, 1024, 0]}]
+    filename = "actual_automation_state_with_markers.png"
+    state_markers = {
+        "Automated": {
+            "marker": {"color": random_rgb(), "line": {"color": random_rgb(), "width": float(randint(5, 20)) / 10.0}},
+            "opacity": float(randint(0, 10)) / 10,
+            "textposition": "auto",
+        },
+        "Not automated": {
+            "marker": {"color": random_rgb(), "line": {"color": random_rgb(), "width": float(randint(5, 20)) / 10.0}},
+            "opacity": float(randint(0, 10)) / 10,
+            "textposition": "auto",
+        },
+        "N/A": {
+            "marker": {"color": random_rgb(), "line": {"color": random_rgb(), "width": float(randint(5, 20)) / 10}},
+            "opacity": float(randint(0, 10)) / 10,
+            "textposition": "auto",
+        },
+    }
+    try:
+        plotly_reporter = PlotlyReporter(type_platforms=type_platforms)
+        plotly_reporter.draw_automation_state_report(
+            filename=filename, reports=random_expected_image["data"], state_markers=state_markers
+        )
+        assert not compare_image(actual=filename, expected=random_expected_image["filename"], threshold=1000)
     finally:
         if path.exists(filename):
             remove(filename)
