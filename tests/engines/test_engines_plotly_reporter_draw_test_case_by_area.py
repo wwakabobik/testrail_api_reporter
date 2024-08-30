@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-"""Tests for plotly_reporter module, the PlotlyReporter clas, draw_automation_state_report method"""
+"""Tests for plotly_reporter module, the PlotlyReporter clas, draw_test_case_by_area method"""
+
 from copy import deepcopy
 from os import path, remove, getcwd
 from random import choice
