@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 """ Confluence sender module """
 
+from typing import Optional
+
 import plotly
 
 from ..utils.csv_parser import CSVParser
@@ -231,7 +233,7 @@ class PlotlyReporter:
 
     def draw_history_state_chart(
         self,
-        chart_name: str | None = None,
+        chart_name: Optional[str] = None,
         history_data=None,
         filename=None,
         trace1_decor=None,

@@ -19,7 +19,7 @@ from testrail_api_reporter.utils.logger_config import (  # pylint: disable=impor
 fake = Faker()
 
 
-def test_plotly_reporter_init_default_params(caplog):
+def test_plotly_reporter_init_default_params():
     """Init PlotlyReporter with default parameters"""
     type_platforms = [{"name": fake.word(), "sections": [randint(1, 10000)]} for _ in range(randint(1, 5))]
 
@@ -30,9 +30,14 @@ def test_plotly_reporter_init_default_params(caplog):
     assert path.exists("PlotlyReporter.log")
 
     attributes = vars(plotly_reporter)
-    assert attributes['_PlotlyReporter__pr_labels'] == ["Low", "Medium", "High", "Critical"]
-    assert attributes['_PlotlyReporter__pr_colors'] == ["rgb(173,216,230)", "rgb(34,139,34)", "rgb(255,255,51)", "rgb(255, 153, 153)"]
-    assert attributes['_PlotlyReporter__ar_colors'] == [
+    assert attributes["_PlotlyReporter__pr_labels"] == ["Low", "Medium", "High", "Critical"]
+    assert attributes["_PlotlyReporter__pr_colors"] == [
+        "rgb(173,216,230)",
+        "rgb(34,139,34)",
+        "rgb(255,255,51)",
+        "rgb(255, 153, 153)",
+    ]
+    assert attributes["_PlotlyReporter__ar_colors"] == [
         "rgb(255, 153, 153)",
         "rgb(255,255,51)",
         "rgb(34,139,34)",
@@ -40,11 +45,11 @@ def test_plotly_reporter_init_default_params(caplog):
         "rgb(65,105,225)",
         "rgb(192, 192, 192)",
     ]
-    assert attributes['_PlotlyReporter__lines'] == {"color": "rgb(0,0,51)", "width": 1.5}
-    assert attributes['_PlotlyReporter__type_platforms'] == type_platforms
+    assert attributes["_PlotlyReporter__lines"] == {"color": "rgb(0,0,51)", "width": 1.5}
+    assert attributes["_PlotlyReporter__type_platforms"] == type_platforms
 
 
-def test_plotly_reporter_init_custom_params(caplog):
+def test_plotly_reporter_init_custom_params():
     """Init PlotlyReporter with custom parameters"""
     logger_file = fake.file_name(extension="log")
     logger_name = fake.name()
@@ -72,17 +77,17 @@ def test_plotly_reporter_init_custom_params(caplog):
         assert path.exists(logger_file)
 
         attributes = vars(plotly_reporter)
-        assert attributes['_PlotlyReporter__pr_labels'] == pr_labels
-        assert attributes['_PlotlyReporter__pr_colors'] == pr_colors
-        assert attributes['_PlotlyReporter__ar_colors'] == ar_colors
-        assert attributes['_PlotlyReporter__lines'] == lines
-        assert attributes['_PlotlyReporter__type_platforms'] == type_platforms
+        assert attributes["_PlotlyReporter__pr_labels"] == pr_labels
+        assert attributes["_PlotlyReporter__pr_colors"] == pr_colors
+        assert attributes["_PlotlyReporter__ar_colors"] == ar_colors
+        assert attributes["_PlotlyReporter__lines"] == lines
+        assert attributes["_PlotlyReporter__type_platforms"] == type_platforms
     finally:
         if path.exists(logger_file):
             remove(logger_file)
 
 
-def test_plotly_reporter_init_no_type_platforms(caplog):
+def test_plotly_reporter_init_no_type_platforms():
     """Init PlotlyReporter without type_platforms should raise ValueError"""
     with pytest.raises(ValueError, match="Platform types is not provided, Plotly Reporter cannot be initialized!"):
         PlotlyReporter()

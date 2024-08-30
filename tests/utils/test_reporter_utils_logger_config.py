@@ -30,7 +30,7 @@ def test_setup_logger_default_level(caplog):
 
         message = str(fake.random_letters(randint(1, 10))) * randint(1, 10)
         logger.debug(message)
-        with open(log_file, "r") as f:
+        with open(log_file, "r", encoding="utf-8") as f:
             assert message in f.read()
         assert message in caplog.text
     finally:
@@ -38,7 +38,7 @@ def test_setup_logger_default_level(caplog):
             remove(log_file)
 
 
-def test_setup_logger_custom_level(tmp_path):
+def test_setup_logger_custom_level():
     """Init logger with any other level"""
     log_file = fake.file_name(extension="log")
     try:

@@ -10,6 +10,7 @@ fake = Faker()
 
 
 def test_case_stat_init():
+    """Check default CaseStat init"""
     name = fake.word()
     case_stat = CaseStat(name)
     assert case_stat.name == name

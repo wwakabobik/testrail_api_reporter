@@ -20,7 +20,7 @@ def test_load_history_data(csv_file, random_stat):
     year = fake.year()
     month = fake.month()
     day_of_month = fake.day_of_month()
-    with open(csv_file, "w") as f:
+    with open(csv_file, "w", encoding="utf-8") as f:
         f.write(f"{year},{month},{day_of_month},{total},{automated},{not_automated},{not_applicable}\n")
 
     data = parser.load_history_data()
@@ -34,7 +34,7 @@ def test_load_history_data(csv_file, random_stat):
     ]
 
 
-def test_load_history_data_no_filename(csv_file):
+def test_load_history_data_no_filename():
     """No filename is provided for load history"""
     parser = CSVParser()
 

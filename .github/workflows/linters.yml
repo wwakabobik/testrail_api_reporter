@@ -35,6 +35,7 @@ jobs:
         pip install types-requests
         pip install pytest
         pip install faker
+        pip install pillow
     - name: Add 'testrail_api_reporter' to PYTHONPATH
       run: echo "PYTHONPATH=$PYTHONPATH:$(pwd)/testrail_api_reporter:." >> $GITHUB_ENV
     - name: Analysing the code with pylint

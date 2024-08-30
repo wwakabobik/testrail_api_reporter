@@ -29,16 +29,14 @@ def random_expected_image(case_stat):
         case_stat.not_automated = 27205
         case_stat.not_applicable = 10092
         return {"filename": f"{getcwd()}/tests/assets/expected_automation_state.png", "data": [case_stat]}
-    else:
-        case_stat.set_name("Automation State")
-        return {"filename": f"{getcwd()}/tests/assets/expected_automation_state_empty.png", "data": [case_stat]}
+    case_stat.set_name("Automation State")
+    return {"filename": f"{getcwd()}/tests/assets/expected_automation_state_empty.png", "data": [case_stat]}
 
 
-def test_draw_automation_state_report_no_reports(caplog, random_plotly_reporter):
+def test_draw_automation_state_report_no_reports(random_plotly_reporter):
     """
     Init PlotlyReporter and call draw_automation_state_report without reports should raise ValueError
 
-    :param caplog: caplog fixture
     :param random_plotly_reporter: fixture returns PlotlyReporter
     """
     with pytest.raises(ValueError, match="No TestRail reports are provided, report aborted!"):
@@ -47,11 +45,10 @@ def test_draw_automation_state_report_no_reports(caplog, random_plotly_reporter)
         )
 
 
-def test_draw_automation_state_report_no_filename(caplog, random_plotly_reporter):
+def test_draw_automation_state_report_no_filename(random_plotly_reporter):
     """
     Init PlotlyReporter and call draw_automation_state_report without filename should raise ValueError
 
-    :param caplog: caplog fixture
     :param random_plotly_reporter: fixture returns PlotlyReporter
     """
     with pytest.raises(ValueError, match="No output filename is provided, report aborted!"):

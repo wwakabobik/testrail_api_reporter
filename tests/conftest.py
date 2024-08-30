@@ -3,6 +3,7 @@
 
 from os import path, remove
 from random import randint
+from typing import Generator
 
 import pytest
 from faker import Faker
@@ -14,17 +15,16 @@ from testrail_api_reporter.engines.plotly_reporter import (  # pylint: disable=i
 from testrail_api_reporter.utils.case_stat import CaseStat  # pylint: disable=import-error,no-name-in-module
 
 
-
 fake = Faker()
 
 
 @pytest.fixture
-def create_test_file() -> str:
+def create_test_file() -> Generator:
     """
     Fixture to create random test file
 
     :return: filename
-    :rtype: str
+    :rtype: Generator
     """
     test_file = f"not_existing_{fake.file_name()}"
     with open(test_file, "w", encoding="utf-8") as file:
@@ -65,7 +65,7 @@ def case_stat() -> CaseStat:
 
 
 @pytest.fixture
-def case_stat_random(case_stat, random_stat):
+def case_stat_random(case_stat, random_stat):  # pylint: disable=redefined-outer-name
     """
     Fixture to return object of CaseStat
 
@@ -81,12 +81,12 @@ def case_stat_random(case_stat, random_stat):
 
 
 @pytest.fixture
-def csv_file() -> str:
+def csv_file() -> Generator:
     """
     Fixture to create random test file
 
     :return: filename
-    :rtype: str
+    :rtype: Generator
     """
     test_file = f"not_existing_{fake.file_name(extension='csv')}"
     with open(test_file, "w", encoding="utf-8") as file:
@@ -155,7 +155,7 @@ def random_type_platforms() -> list[dict]:
 
 
 @pytest.fixture
-def random_plotly_reporter(random_type_platforms) -> PlotlyReporter:
+def random_plotly_reporter(random_type_platforms) -> PlotlyReporter:  # pylint: disable=redefined-outer-name
     """
     Returns PlotlyReporter object with random type platforms
 
@@ -167,7 +167,8 @@ def random_plotly_reporter(random_type_platforms) -> PlotlyReporter:
 
 @pytest.fixture()
 def random_rgb():
-    """Returns fixture to get rgb in string format    """
+    """Returns fixture to get rgb in string format"""
+
     def get_rgb() -> str:
         """
         Returns rgb in string format

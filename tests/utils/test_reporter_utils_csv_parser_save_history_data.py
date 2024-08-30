@@ -22,7 +22,7 @@ def test_save_history_data(csv_file, random_stat, case_stat):
 
     parser.save_history_data(report=case_stat)
 
-    with open(csv_file, "r") as f:
+    with open(csv_file, "r", encoding="utf-8") as f:
         data = f.read()
         assert data == (
             f"{datetime.today().strftime('%Y')},"
@@ -32,7 +32,7 @@ def test_save_history_data(csv_file, random_stat, case_stat):
         )
 
 
-def test_save_history_data_no_filename(csv_file):
+def test_save_history_data_no_filename():
     """No filename provided for save history data"""
     parser = CSVParser()
 
@@ -48,7 +48,7 @@ def test_save_history_data_no_report(csv_file):
         parser.save_history_data()
 
 
-def test_save_history_data_already_stored(csv_file, random_stat, case_stat_random):
+def test_save_history_data_already_stored(csv_file, case_stat_random):
     """History already stored for such day for save history data"""
     parser = CSVParser(filename=csv_file)
 

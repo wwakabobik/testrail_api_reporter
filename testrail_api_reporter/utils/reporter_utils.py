@@ -2,12 +2,12 @@
 """ This module contains service functions for reporter """
 from logging import Logger
 from os import popen
-from typing import Optional, Any
+from typing import Optional, Any, Union
 
 import requests
 
 
-def format_error(error: list | str | Exception) -> str:
+def format_error(error: Union[list, str, Exception]) -> str:
     """
     Service function for parse errors to human-readable format
 
@@ -58,7 +58,7 @@ def delete_file(filename: str, debug: bool = True, logger: Optional[Logger] = No
             logger.debug(f"Removed {filename}")
 
 
-def zip_file(filename: str, suffix: str | None = None, debug: bool = True, logger: Optional[Logger] = None) -> str:
+def zip_file(filename: str, suffix: Optional[str] = None, debug: bool = True, logger: Optional[Logger] = None) -> str:
     """
     Service function to ZIP file
 
@@ -79,8 +79,8 @@ def zip_file(filename: str, suffix: str | None = None, debug: bool = True, logge
 
 
 def check_captions_and_files(
-        captions: list | None | Any, files: list, debug: bool = True, logger: Optional[Logger] = None
-) -> list | None:
+    captions: Union[list, None, Any], files: list, debug: bool = True, logger: Optional[Logger] = None
+) -> Optional[list]:
     """
     Service function to check captions and file lists
 
@@ -114,7 +114,7 @@ def init_get_cases_process() -> tuple[list, bool, None, None, int]:
 
     :return: cases_list, first_run, criteria, response, retry
     """
-    cases_list = []
+    cases_list: list = []
     first_run = True
     criteria = None
     response = None
