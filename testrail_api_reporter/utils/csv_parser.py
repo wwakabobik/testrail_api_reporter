@@ -4,6 +4,7 @@
 import csv
 from datetime import datetime
 from os.path import exists
+from typing import List
 
 from .logger_config import setup_logger, DEFAULT_LOGGING_LEVEL
 
@@ -66,7 +67,7 @@ class CSVParser:
         else:
             self.___logger.debug("Data already stored for today, skipping save")
 
-    def load_history_data(self, filename=None) -> list[list[datetime], list[str], list[str], list[str]]:
+    def load_history_data(self, filename=None) -> List[List[datetime], List[str], List[str], List[str]]:
         """
         Load history data to CSV
 

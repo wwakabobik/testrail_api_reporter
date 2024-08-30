@@ -75,7 +75,7 @@ def test_draw_automation_state_report_creates_file(case_stat, case_stat_random, 
 
 
 def test_draw_automation_state_report_creates_correct_image(
-        random_expected_image, compare_image    # pylint: disable=W0621
+    random_expected_image, compare_image  # pylint: disable=W0621
 ):
     """
     Init PlotlyReporter and call draw_automation_state_report with valid parameters should create correct image
@@ -95,7 +95,7 @@ def test_draw_automation_state_report_creates_correct_image(
 
 
 def test_draw_automation_state_report_changes_state_markers(
-        random_expected_image, compare_image, random_rgb  # pylint: disable=W0621
+    random_expected_image, compare_image, random_rgb  # pylint: disable=W0621
 ):
     """
     Init PlotlyReporter and call draw_automation_state_report with state_markers should create different image

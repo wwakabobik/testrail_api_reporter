@@ -102,7 +102,7 @@ def test_draw_test_case_by_area_creates_correct_image(random_expected_image, com
 
 
 def test_draw_test_case_by_area_changes_ar_colors(
-        random_expected_image, compare_image, random_rgb  # pylint: disable=W0621
+    random_expected_image, compare_image, random_rgb  # pylint: disable=W0621
 ):
     """
     Init PlotlyReporter and call draw_test_case_by_area with valid parameters and ar_colors should create correct image
@@ -126,7 +126,7 @@ def test_draw_test_case_by_area_changes_ar_colors(
 
 
 def test_draw_test_case_by_area_changes_lines(
-        random_expected_image, compare_image, random_rgb  # pylint: disable=W0621
+    random_expected_image, compare_image, random_rgb  # pylint: disable=W0621
 ):
     """
     Init PlotlyReporter and call draw_test_case_by_area with valid parameters and ar_colors should create correct image
