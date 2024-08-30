@@ -108,7 +108,7 @@ def check_captions_and_files(
     return return_value
 
 
-def init_get_cases_process() -> tuple[list, bool, None, None, int]:
+def init_get_cases_process() -> tuple:
     """
     Service function to initialize a process
 
