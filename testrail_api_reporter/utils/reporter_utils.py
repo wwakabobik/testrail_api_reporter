@@ -7,7 +7,7 @@ from typing import Optional, Any
 import requests
 
 
-def format_error(error: list | str) -> str:
+def format_error(error: list | str | Exception) -> str:
     """
     Service function for parse errors to human-readable format
 
