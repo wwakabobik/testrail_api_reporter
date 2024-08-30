@@ -2,7 +2,7 @@
 """Tests for the logger_config module"""
 
 from logging import DEBUG, INFO, WARNING, ERROR, FATAL, FileHandler, StreamHandler
-from os import path, remove, environ
+from os import path, remove
 from random import choice
 
 from faker import Faker
