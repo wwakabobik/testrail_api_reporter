@@ -217,4 +217,4 @@ image_thumb = image_uploaded['thumb']
 ```
 
 ## Donations
-If you like this project, you can support it by donating via [DonationAlerts](https://www.donationalerts.com/r/rocketsciencegeek).
+If you like this project, you can support it by donating via [DonationAlerts](https://www.donationalerts.com/r/rocketsciencegeek) or [Buy me a coffee](https://www.buymeacoffee.com/wwakabobik) or [Thanks Dev](https://thanksdev.com/wwakabobik).
