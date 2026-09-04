@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-""" Confluence sender module """
+"""Confluence sender module"""
 
 from typing import Optional
 
