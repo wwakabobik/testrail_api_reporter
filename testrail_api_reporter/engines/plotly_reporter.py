@@ -150,7 +150,7 @@ class PlotlyReporter:
         fig = plotly.graph_objs.Figure(data=data, layout=layout)
         plotly.io.write_image(fig, filename)
 
-    def draw_test_case_by_priority(self, filename=None, values=None, pr_labels=None, pr_colors=None, lines=None):
+    def draw_test_case_by_priority(self, *, filename=None, values=None, pr_labels=None, pr_colors=None, lines=None):
         """
         Generates an image file (png) with priority distribution (pie chart)
 
@@ -309,6 +309,7 @@ class PlotlyReporter:
 
     def draw_history_type_chart(
         self,
+        *,
         filename=None,
         type_platforms=None,
         history_filename_pattern="current_area_distribution",
