@@ -8,9 +8,6 @@ import plotly
 from ..utils.csv_parser import CSVParser
 from ..utils.logger_config import setup_logger, DEFAULT_LOGGING_LEVEL
 
-# Set path to orca for plotly
-plotly.io.orca.config.executable = "/usr/local/bin/orca"
-
 
 class PlotlyReporter:
     """Class contains wrapper for generated reports (images) via plot charts"""
