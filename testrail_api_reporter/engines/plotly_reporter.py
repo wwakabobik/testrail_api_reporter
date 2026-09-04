@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-""" Confluence sender module """
+"""Confluence sender module"""
 
 from typing import Optional
 
@@ -8,15 +8,13 @@ import plotly
 from ..utils.csv_parser import CSVParser
 from ..utils.logger_config import setup_logger, DEFAULT_LOGGING_LEVEL
 
-# Set path to orca for plotly
-plotly.io.orca.config.executable = "/usr/local/bin/orca"
-
 
 class PlotlyReporter:
     """Class contains wrapper for generated reports (images) via plot charts"""
 
     def __init__(
         self,
+        *,
         pr_colors=None,
         pr_labels=None,
         ar_colors=None,
@@ -152,7 +150,7 @@ class PlotlyReporter:
         fig = plotly.graph_objs.Figure(data=data, layout=layout)
         plotly.io.write_image(fig, filename)
 
-    def draw_test_case_by_priority(self, filename=None, values=None, pr_labels=None, pr_colors=None, lines=None):
+    def draw_test_case_by_priority(self, *, filename=None, values=None, pr_labels=None, pr_colors=None, lines=None):
         """
         Generates an image file (png) with priority distribution (pie chart)
 
@@ -233,6 +231,7 @@ class PlotlyReporter:
 
     def draw_history_state_chart(
         self,
+        *,
         chart_name: Optional[str] = None,
         history_data=None,
         filename=None,
@@ -310,6 +309,7 @@ class PlotlyReporter:
 
     def draw_history_type_chart(
         self,
+        *,
         filename=None,
         type_platforms=None,
         history_filename_pattern="current_area_distribution",
