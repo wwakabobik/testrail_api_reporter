@@ -14,6 +14,7 @@ class PlotlyReporter:
 
     def __init__(
         self,
+        *,
         pr_colors=None,
         pr_labels=None,
         ar_colors=None,
@@ -230,6 +231,7 @@ class PlotlyReporter:
 
     def draw_history_state_chart(
         self,
+        *,
         chart_name: Optional[str] = None,
         history_data=None,
         filename=None,
