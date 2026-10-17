@@ -476,8 +476,8 @@ class TestRailResultsReporter:
         retval = None
         first_run = True
         criteria = None
+        response = None
         while criteria is not None or first_run:
-            response = None
             if first_run:
                 try:
                     response = self.__api.runs.get_runs(project_id=self.__project_id, suite_id=self.__suite_id)
@@ -490,8 +490,12 @@ class TestRailResultsReporter:
                 response = self.__api.runs.get_runs(
                     project_id=self.__project_id, suite_id=self.__suite_id, offset=offset
                 )
-            if response["runs"]["name"] == title:
-                retval = response["runs"]["id"]
+            # "runs" is a list of run dicts, not a single run - this used to be indexed as if it were one,
+            # which raised TypeError on any real (non-mocked) response
+            found = self.__search_for_item(searched_value=title, list_to_seek=response["runs"], field="name")
+            found = found if isinstance(found, list) else [found]
+            if found:
+                retval = found[0]["id"]
                 break
             criteria = response["_links"]["next"]
         return retval

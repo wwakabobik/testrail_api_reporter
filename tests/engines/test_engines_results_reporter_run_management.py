@@ -43,7 +43,7 @@ def test_search_for_run_by_name_found_first_page(reporter):  # pylint: disable=r
     """A run matching the title on the first page should be returned"""
     api = reporter._TestRailResultsReporter__api  # pylint: disable=protected-access
     title = fake.sentence()
-    api.runs.get_runs.return_value = {"runs": {"name": title, "id": 77}, "_links": {"next": None}}
+    api.runs.get_runs.return_value = {"runs": [{"name": title, "id": 77}], "_links": {"next": None}}
 
     # pylint: disable=protected-access,no-member
     result = reporter._TestRailResultsReporter__search_for_run_by_name(title=title)
@@ -54,7 +54,7 @@ def test_search_for_run_by_name_found_first_page(reporter):  # pylint: disable=r
 def test_search_for_run_by_name_not_found(reporter):  # pylint: disable=redefined-outer-name
     """When no run matches the title, None should be returned"""
     api = reporter._TestRailResultsReporter__api  # pylint: disable=protected-access
-    api.runs.get_runs.return_value = {"runs": {"name": fake.sentence(), "id": 1}, "_links": {"next": None}}
+    api.runs.get_runs.return_value = {"runs": [{"name": fake.sentence(), "id": 1}], "_links": {"next": None}}
 
     # pylint: disable=protected-access,no-member
     result = reporter._TestRailResultsReporter__search_for_run_by_name(title=fake.sentence())
@@ -62,16 +62,19 @@ def test_search_for_run_by_name_not_found(reporter):  # pylint: disable=redefine
     assert result is None
 
 
-def test_search_for_run_by_name_pagination_crashes(reporter):  # pylint: disable=redefined-outer-name
-    """`response` is reset to None at the top of every loop iteration, so once the first page says there is a
-    next page, the pagination branch dereferences that None and crashes (pre-existing behaviour)"""
+def test_search_for_run_by_name_found_second_page(reporter):  # pylint: disable=redefined-outer-name
+    """A run matching the title only on a later page should be found by following pagination"""
     api = reporter._TestRailResultsReporter__api  # pylint: disable=protected-access
-    page1 = {"runs": {"name": fake.sentence(), "id": 1}, "_links": {"next": "?page=2&offset=1&limit=1"}}
-    api.runs.get_runs.return_value = page1
+    title = fake.sentence()
+    page1 = {"runs": [{"name": fake.sentence(), "id": 1}], "_links": {"next": "?page=2&offset=1&limit=1"}}
+    page2 = {"runs": [{"name": title, "id": 77}], "_links": {"next": None}}
+    api.runs.get_runs.side_effect = [page1, page2]
 
-    with pytest.raises(TypeError):
-        # pylint: disable=protected-access,no-member
-        reporter._TestRailResultsReporter__search_for_run_by_name(title=fake.sentence())
+    # pylint: disable=protected-access,no-member
+    result = reporter._TestRailResultsReporter__search_for_run_by_name(title=title)
+
+    assert result == 77
+    assert api.runs.get_runs.call_count == 2
 
 
 # --- __delete_run ---
