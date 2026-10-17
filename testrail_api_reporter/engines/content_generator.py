@@ -10,7 +10,7 @@ from testrail_api import TestRailAPI
 
 from ..utils.ai_providers import AIContentProvider
 from ..utils.logger_config import setup_logger, DEFAULT_LOGGING_LEVEL
-from ..utils.reporter_utils import format_error
+from ..utils.reporter_utils import DEFAULT_AUTOMATION_FIELD_NAME, format_error
 
 DEFAULT_SYSTEM_PROMPT = """
 You are a senior QA engineer. You will be given the source code of a single automated test \
@@ -49,6 +49,7 @@ class TestCaseContentGenerator:
         *,
         suite_id=None,
         system_prompt: str = DEFAULT_SYSTEM_PROMPT,
+        automation_field_name=DEFAULT_AUTOMATION_FIELD_NAME,
         logger=None,
         log_level=DEFAULT_LOGGING_LEVEL,
     ):
@@ -62,6 +63,13 @@ class TestCaseContentGenerator:
         :param provider: AI provider instance, used to generate content, required
         :param suite_id: suite id, integer, optional, if no suite-management is activated
         :param system_prompt: system prompt sent to the AI provider, string, optional
+        :param automation_field_name: system name of the case custom field used to store the automation id,
+                                       string. Defaults to 'custom_automation_id', which matches a custom field
+                                       named 'automation_id' on older TestRail instances. Newer TestRail versions
+                                       auto-prefix custom case fields created via the API with the entity name
+                                       (e.g. a field named 'automation_id' becomes 'custom_case_automation_id') -
+                                       check the actual system name via get_case_fields and pass it here if it
+                                       differs from the default (see README for details)
         :param logger: logger object, optional
         :param log_level: logging level, optional, by default is 'logging.DEBUG'
         """
@@ -81,6 +89,7 @@ class TestCaseContentGenerator:
         self.__project_id = project_id
         self.__suite_id = suite_id
         self.__system_prompt = system_prompt
+        self.__automation_field_name = automation_field_name
         self.__cases_by_automation_id: dict = {}
 
     @staticmethod
@@ -225,8 +234,8 @@ class TestCaseContentGenerator:
                     project_id=self.__project_id, suite_id=self.__suite_id, offset=offset
                 )
             for item in response["cases"]:  # type: ignore
-                if item.get("custom_automation_id"):
-                    cases_by_automation_id[item["custom_automation_id"]] = item["id"]
+                if item.get(self.__automation_field_name):
+                    cases_by_automation_id[item[self.__automation_field_name]] = item["id"]
             criteria = response["_links"]["next"]  # type: ignore
         self.___logger.debug("Found %s test cases in TestRail with automation_id", len(cases_by_automation_id))
         self.__cases_by_automation_id = cases_by_automation_id

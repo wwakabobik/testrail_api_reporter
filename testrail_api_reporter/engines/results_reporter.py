@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-""" Module for reporting results to TestRails from xml report results, obtained by pytest """
+"""Module for reporting results to TestRails from xml report results, obtained by pytest"""
 
 import datetime
 from os.path import exists
@@ -9,7 +9,13 @@ from testrail_api import TestRailAPI, StatusCodeError
 from xmltodict import parse
 
 from ..utils.logger_config import setup_logger, DEFAULT_LOGGING_LEVEL
-from ..utils.reporter_utils import format_error, init_get_cases_process
+from ..utils.reporter_utils import DEFAULT_AUTOMATION_FIELD_NAME, format_error, init_get_cases_process
+
+# Used for non-xfail "skipped" results if the TestRail instance has no custom status
+# matching `skipped_status_name` (or its statuses can't be fetched) - this is the id most
+# TestRail Cloud instances use for a custom "Skipped" status, but it's not guaranteed to
+# exist, since custom statuses are configured per-instance.
+DEFAULT_SKIPPED_STATUS_ID = 7
 
 
 class TestRailResultsReporter:
@@ -23,6 +29,8 @@ class TestRailResultsReporter:
         project_id: int,
         xml_report="junit-report.xml",
         suite_id=None,
+        skipped_status_name="Skipped",
+        automation_field_name=DEFAULT_AUTOMATION_FIELD_NAME,
         logger=None,
         log_level=DEFAULT_LOGGING_LEVEL,
     ):
@@ -35,6 +43,17 @@ class TestRailResultsReporter:
         :param project_id: project id, integer, required
         :param xml_report: filename (maybe with path) of xml test report
         :param suite_id: suite id, integer, optional, if no suite-management is activated
+        :param skipped_status_name: label/name of the custom status to use for non-xfail skipped tests, string.
+                                     Resolved against the instance's actual statuses (see get_statuses), since
+                                     custom status ids differ per TestRail instance; falls back to
+                                     DEFAULT_SKIPPED_STATUS_ID if no such status is found
+        :param automation_field_name: system name of the case custom field used to store the automation id,
+                                       string. Defaults to 'custom_automation_id', which matches a custom field
+                                       named 'automation_id' on older TestRail instances. Newer TestRail versions
+                                       auto-prefix custom case fields created via the API with the entity name
+                                       (e.g. a field named 'automation_id' becomes 'custom_case_automation_id') -
+                                       check the actual system name via get_case_fields and pass it here if it
+                                       differs from the default (see README for details)
         :param logger: logger object, optional
         :param log_level: logging level, optional, by default is 'logging.DEBUG'
         """
@@ -54,6 +73,9 @@ class TestRailResultsReporter:
         self.__at_section = self.__ensure_automation_section() if self.__project_id else None
         self.__check_section(section_id=self.__at_section)
         self.__timestamp = datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
+        self.__skipped_status_name = skipped_status_name
+        self.__skipped_status_id = None
+        self.__automation_field_name = automation_field_name
 
     def __xml_to_dict(self, filename="junit-report.xml"):
         """
@@ -81,7 +103,7 @@ class TestRailResultsReporter:
                 if item["skipped"]["@type"] == "pytest.xfail":
                     status = 5
                 else:
-                    status = 7
+                    status = self.__resolve_skipped_status_id()
             list_of_cases.append(
                 {
                     "automation_id": f'{item["@classname"]}.{item["@name"]}',
@@ -96,6 +118,45 @@ class TestRailResultsReporter:
             )
         self.___logger.debug("Found test run at %s, found %s test results", self.__timestamp, len(list_of_cases))
         return list_of_cases
+
+    def __resolve_skipped_status_id(self):
+        """
+        Resolve (and cache) the status id to use for non-xfail skipped tests, by looking up a status whose
+        name or label matches `skipped_status_name` among the instance's actual statuses. Falls back to
+        DEFAULT_SKIPPED_STATUS_ID if no such status exists, or statuses can't be fetched
+
+        :return: status id, integer
+        """
+        if self.__skipped_status_id is not None:
+            return self.__skipped_status_id
+        status_id = DEFAULT_SKIPPED_STATUS_ID
+        try:
+            statuses = self.__api.statuses.get_statuses()
+            match = next(
+                (
+                    status
+                    for status in statuses
+                    if self.__skipped_status_name in (status.get("name"), status.get("label"))
+                ),
+                None,
+            )
+            if match:
+                status_id = match["id"]
+            else:
+                self.___logger.debug(
+                    "No status named '%s' found, falling back to status id %s",
+                    self.__skipped_status_name,
+                    DEFAULT_SKIPPED_STATUS_ID,
+                )
+        except Exception as error:  # pylint: disable=broad-except
+            self.___logger.debug(
+                "Could not fetch statuses to resolve '%s', falling back to status id %s.\nError%s",
+                self.__skipped_status_name,
+                DEFAULT_SKIPPED_STATUS_ID,
+                format_error(error),
+            )
+        self.__skipped_status_id = status_id
+        return status_id
 
     @staticmethod
     def __search_for_item(searched_value, list_to_seek, field):
@@ -169,7 +230,7 @@ class TestRailResultsReporter:
         missed_tests_counter = 0
         for item in xml_dict_list:
             cases = self.__search_for_item(
-                searched_value=item["automation_id"], list_to_seek=tc_dict_list, field="custom_automation_id"
+                searched_value=item["automation_id"], list_to_seek=tc_dict_list, field=self.__automation_field_name
             )
             if not cases:
                 try:
@@ -177,7 +238,7 @@ class TestRailResultsReporter:
                         self.__api.cases.add_case(
                             section_id=self.__at_section,
                             title=item["automation_id"],
-                            custom_automation_id=item["automation_id"],
+                            **{self.__automation_field_name: item["automation_id"]},
                         )
                     ]
                 except Exception as error:
@@ -261,8 +322,10 @@ class TestRailResultsReporter:
                 retry = 0
             cases = response["cases"]
             for item in cases:
-                if item["custom_automation_id"] is not None:
-                    cases_list.append({"id": item["id"], "custom_automation_id": item["custom_automation_id"]})
+                if item.get(self.__automation_field_name) is not None:
+                    cases_list.append(
+                        {"id": item["id"], self.__automation_field_name: item[self.__automation_field_name]}
+                    )
             criteria = response["_links"]["next"]
         self.___logger.debug("Found %s test cases in TestRails with automation_id", len(cases_list))
         return cases_list
@@ -476,8 +539,8 @@ class TestRailResultsReporter:
         retval = None
         first_run = True
         criteria = None
+        response = None
         while criteria is not None or first_run:
-            response = None
             if first_run:
                 try:
                     response = self.__api.runs.get_runs(project_id=self.__project_id, suite_id=self.__suite_id)
@@ -490,8 +553,12 @@ class TestRailResultsReporter:
                 response = self.__api.runs.get_runs(
                     project_id=self.__project_id, suite_id=self.__suite_id, offset=offset
                 )
-            if response["runs"]["name"] == title:
-                retval = response["runs"]["id"]
+            # "runs" is a list of run dicts, not a single run - this used to be indexed as if it were one,
+            # which raised TypeError on any real (non-mocked) response
+            found = self.__search_for_item(searched_value=title, list_to_seek=response["runs"], field="name")
+            found = found if isinstance(found, list) else [found]
+            if found:
+                retval = found[0]["id"]
                 break
             criteria = response["_links"]["next"]
         return retval

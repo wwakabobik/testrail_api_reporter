@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.7.0] - 2026-10-17
 
+### Fixed
+
+- `TestRailResultsReporter.__get_all_auto_cases` no longer crashes with `KeyError` when a case
+  returned by TestRail doesn't carry the automation-id custom field at all (e.g. the field isn't
+  configured on that project/template), found via a live run against a real TestRail instance.
+- The automation-id case custom field's system name is now configurable via the
+  `automation_field_name` constructor parameter on `TestRailResultsReporter` and
+  `TestCaseContentGenerator` (defaults to `custom_automation_id`, unchanged). Needed because newer
+  TestRail versions auto-prefix custom case fields created via `add_case_field` with the entity name
+  (a field named `automation_id` becomes `custom_case_automation_id` instead of `custom_automation_id`),
+  confirmed against a live instance; see the README note next to the `automation_id` setup instructions.
+
 ### Added
 
 - `TestCaseContentGenerator` engine: parses automated test files, uses a pluggable AI provider to

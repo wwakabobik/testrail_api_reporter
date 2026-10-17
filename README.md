@@ -25,6 +25,14 @@ pytest --junitxml "junit-report.xml" "./tests"
 
 Also, you need to add custom field (string type) to TestRails with name `automation_id`.
 
+> **Note:** on older TestRail instances, a case custom field named `automation_id` gets the system
+> name `custom_automation_id`, which is what `TestRailResultsReporter` and `TestCaseContentGenerator`
+> expect by default. On newer TestRail versions, the API auto-prefixes custom case fields created
+> through `add_case_field` with the entity name, so the same field becomes `custom_case_automation_id`
+> instead. Check the actual system name after creating the field (`get_case_fields`) and, if it
+> differs from `custom_automation_id`, pass it explicitly via the `automation_field_name` constructor
+> parameter, e.g. `automation_field_name="custom_case_automation_id"`.
+
 Now, you ready to upload results to TestRails.
 To it, use:
 
