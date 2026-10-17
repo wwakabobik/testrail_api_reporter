@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-""" This module contains service functions for reporter """
+"""This module contains service functions for reporter"""
+
 from logging import Logger
 from os import popen
 from typing import Optional, Any, Union
@@ -30,6 +31,13 @@ def upload_image(filename: str, api_token: str) -> dict:
     :return: dict with urls with image itself and its thumbnail
     """
     payload = {"action": "upload", "key": api_token, "format": "json"}
+    # freeimage.host (Chevereto, behind Cloudflare) rejects requests with the default
+    # python-requests User-Agent as bot traffic, so pretend to be a regular browser.
+    headers = {
+        "User-Agent": (
+            "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 " "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+        )
+    }
     with open(filename, "rb") as source_file:
         response = requests.post(
             url="https://freeimage.host/api/1/upload",
@@ -37,6 +45,7 @@ def upload_image(filename: str, api_token: str) -> dict:
             timeout=5,
             verify=True,
             files={"source": source_file},
+            headers=headers,
         )
     return {
         "image": response.json()["image"]["url"],
