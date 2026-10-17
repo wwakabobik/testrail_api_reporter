@@ -3,8 +3,10 @@
 
 from os import getenv
 from uuid import uuid4
+from warnings import warn
 
 import pytest
+from testrail_api import StatusCodeError
 
 from testrail_api_reporter.engines.results_reporter import (  # pylint: disable=import-error,no-name-in-module
     TestRailResultsReporter,
@@ -88,6 +90,14 @@ def test_send_results_round_trip(
         assert {result["status_id"] for result in results} == {1, 5}
     finally:
         if run_id:
-            tr_api.runs.delete_run(run_id=run_id)
+            try:
+                tr_api.runs.delete_run(run_id=run_id)
+            except StatusCodeError as exc:
+                warn(
+                    f"Could not delete live test run {run_id}, leaving it behind "
+                    f"in the disposable project (likely missing the 'delete completed "
+                    f"test runs' permission): {exc}",
+                    stacklevel=2,
+                )
         for case_id in case_ids:
             tr_api.cases.delete_case(case_id=case_id)

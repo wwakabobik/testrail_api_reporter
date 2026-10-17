@@ -7,6 +7,13 @@ from typing import Optional, Any, Union
 
 import requests
 
+# System name of the case custom field used to store the automation id. Matches a case field
+# named 'automation_id' on older TestRail instances. Newer TestRail versions auto-prefix new
+# custom case fields created via the API with the entity name (e.g. a field named 'automation_id'
+# becomes 'custom_case_automation_id') - check the actual system name via get_case_fields and pass
+# it via the `automation_field_name` constructor parameter if it differs (see README for details).
+DEFAULT_AUTOMATION_FIELD_NAME = "custom_automation_id"
+
 
 def format_error(error: Union[list, str, Exception]) -> str:
     """
