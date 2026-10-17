@@ -11,6 +11,7 @@ sections, cases and runs.
 """
 
 from os import getenv
+from typing import Optional
 
 import pytest
 
@@ -32,25 +33,25 @@ requires_live_testrail = pytest.mark.skipif(
 
 
 @pytest.fixture(scope="session")
-def tr_url() -> str:
+def tr_url() -> Optional[str]:
     """TestRail server URL, e.g. https://yourcompany.testrail.io"""
     return TESTRAIL_URL
 
 
 @pytest.fixture(scope="session")
-def tr_email() -> str:
+def tr_email() -> Optional[str]:
     """TestRail account email"""
     return TESTRAIL_EMAIL
 
 
 @pytest.fixture(scope="session")
-def tr_password() -> str:
+def tr_password() -> Optional[str]:
     """TestRail account password or API key"""
     return TESTRAIL_PASSWORD
 
 
 @pytest.fixture(scope="session")
-def tr_project_id() -> int:
+def tr_project_id() -> Optional[int]:
     """TestRail project id used for live tests"""
     return int(TESTRAIL_PROJECT_ID) if TESTRAIL_PROJECT_ID else None
 

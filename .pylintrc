@@ -2,7 +2,7 @@
 max-line-length=120
 
 [MESSAGES CONTROL]
-disable=E1101,R0913,W0718,R0801
+disable=E1101,R0913,R0917,W0718,R0801
 
 [DESIGN]
 max-attributes=10

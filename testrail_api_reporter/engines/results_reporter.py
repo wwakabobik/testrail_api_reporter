@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-""" Module for reporting results to TestRails from xml report results, obtained by pytest """
+"""Module for reporting results to TestRails from xml report results, obtained by pytest"""
 
 import datetime
 from os.path import exists

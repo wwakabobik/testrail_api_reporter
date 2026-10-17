@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-""" TestRails backup module """
+"""TestRails backup module"""
 
 import os
 from datetime import datetime
