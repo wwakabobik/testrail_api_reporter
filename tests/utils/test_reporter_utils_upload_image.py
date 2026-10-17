@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 """Tests for the reporter_utils module, function 'upload_image'"""
 
-from os import getcwd, getenv
-from random import choice
-from time import sleep
+from os import getcwd, getenv, remove
+from os.path import exists
+from random import choice, randint
 from unittest.mock import patch, Mock
 
 from faker import Faker
+from PIL import Image
 from pytest import raises as pytest_raises
 
 from testrail_api_reporter.utils.reporter_utils import upload_image  # pylint: disable=import-error,no-name-in-module
@@ -58,22 +59,19 @@ def test_upload_image_live_success():
     """
     Test success image upload
 
-    Retries a few times with backoff: freeimage.host occasionally rejects a repeat upload of the same
-    static fixture file (duplicate-content/rate-limit handling on their side), which is transient and not
-    a real failure of upload_image itself.
+    Generates a fresh, randomly-colored image for each run instead of reusing the static fixture:
+    freeimage.host rejects a repeat upload of bytes it has already seen (duplicate-content detection),
+    which isn't a real failure of upload_image itself, just a side effect of the fixture file never changing.
     """
-    retries = 3
-    result = None
-    for attempt in range(retries):
-        try:
-            result = upload_image(test_filename, getenv("FREEIMAGEHOST_API_KEY"))
-            break
-        except KeyError:
-            if attempt == retries - 1:
-                raise
-            sleep(2**attempt)
-    assert "image" in result
-    assert "thumb" in result
+    unique_filename = f"{getcwd()}/tests/assets/live_upload_{randint(1, 2**31)}.png"
+    try:
+        Image.new("RGB", (8, 8), color=(randint(0, 255), randint(0, 255), randint(0, 255))).save(unique_filename)
+        result = upload_image(unique_filename, getenv("FREEIMAGEHOST_API_KEY"))
+        assert "image" in result
+        assert "thumb" in result
+    finally:
+        if exists(unique_filename):
+            remove(unique_filename)
 
 
 def test_upload_image_live_nonexistent_file():
