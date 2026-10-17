@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """testrail_api_reporter package"""
 
-__version__ = "1.7.0"
+__version__ = "1.7.1"
 
 # Engines
 from .engines.at_coverage_reporter import ATCoverageReporter
