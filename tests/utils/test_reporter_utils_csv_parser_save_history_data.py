@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """Tests for the csv_parser module'"""
 from datetime import datetime
+from os import path, remove
 
 import pytest
 from faker import Faker
@@ -8,6 +9,34 @@ from faker import Faker
 from testrail_api_reporter.utils.csv_parser import CSVParser  # pylint: disable=import-error,no-name-in-module
 
 fake = Faker()
+
+
+def test_save_history_data_new_file(random_stat, case_stat):
+    """Check save_history_data function when the target file does not exist yet"""
+    filename = f"not_existing_{fake.file_name(extension='csv')}"
+    assert path.exists(filename) is False
+    parser = CSVParser(filename=filename)
+
+    total, automated, not_automated, not_applicable = random_stat
+    case_stat.set_total(total)
+    case_stat.set_automated(automated)
+    case_stat.set_not_automated(not_automated)
+    case_stat.set_not_applicable(not_applicable)
+
+    try:
+        parser.save_history_data(report=case_stat)
+
+        with open(filename, "r", encoding="utf-8") as readable_file:
+            data = readable_file.read()
+            assert data == (
+                f"{datetime.today().strftime('%Y')},"
+                f"{datetime.today().strftime('%m')},"
+                f"{datetime.today().strftime('%d')},"
+                f"{total},{automated},{not_automated},{not_applicable}\n"
+            )
+    finally:
+        if path.exists(filename):
+            remove(filename)
 
 
 def test_save_history_data(csv_file, random_stat, case_stat):

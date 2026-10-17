@@ -27,6 +27,24 @@ def test_check_captions_and_files_not_list():
     logger.debug.assert_called_once_with("Captions are not a list, thus no legend will be displayed")
 
 
+def test_check_captions_and_files_not_list_debug_disabled():
+    """Test check_captions_and_files when captions is not a list and debug is disabled"""
+    captions = faker.sentence()
+    files = [faker.file_name() for _ in range(randint(1, 10))]
+
+    result = check_captions_and_files(captions, files, debug=False)
+    assert result is None
+
+
+def test_check_captions_and_files_not_list_no_logger():
+    """Test check_captions_and_files when captions is not a list and no logger is provided"""
+    captions = faker.sentence()
+    files = [faker.file_name() for _ in range(randint(1, 10))]
+
+    result = check_captions_and_files(captions, files, debug=True)
+    assert result is None
+
+
 def test_check_captions_and_files_different_length():
     """Test check_captions_and_files when captions and files have different lengths"""
     captions = [faker.sentence() for _ in range(randint(1, 10))]
@@ -44,6 +62,28 @@ def test_check_captions_and_files_different_length():
         len(captions),
         len(files),
     )
+
+
+def test_check_captions_and_files_different_length_debug_disabled():
+    """Test check_captions_and_files when captions and files have different lengths and debug is disabled"""
+    captions = [faker.sentence() for _ in range(randint(1, 10))]
+    files = []
+    while len(captions) == len(files):
+        files = [faker.file_name() for _ in range(randint(1, 10))]
+
+    result = check_captions_and_files(captions, files, debug=False)
+    assert result is None
+
+
+def test_check_captions_and_files_different_length_no_logger():
+    """Test check_captions_and_files when captions and files have different lengths and no logger is provided"""
+    captions = [faker.sentence() for _ in range(randint(1, 10))]
+    files = []
+    while len(captions) == len(files):
+        files = [faker.file_name() for _ in range(randint(1, 10))]
+
+    result = check_captions_and_files(captions, files, debug=True)
+    assert result is None
 
 
 def test_check_captions_and_files_same_length():
