@@ -17,6 +17,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Regenerated the `PlotlyReporter` expected image fixtures to match the
   rendering output of the bumped `kaleido`/`plotly` versions.
 
+### Removed
+
+- Dropped Python 3.9 from the CI matrix: it reached end-of-life in
+  October 2025, and the latest `google-api-python-client`,
+  `google-auth-httplib2`, `google-auth-oauthlib` and `requests` releases
+  already require Python 3.10+.
+
 ### Added
 
 - A Chrome install step in the test workflows, required by `kaleido>=1.0`
