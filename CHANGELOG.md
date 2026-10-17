@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.1] - 2026-10-17
+
+### Fixed
+
+- `test_upload_image_live_success` now retries a few times with backoff:
+  freeimage.host occasionally rejects a repeat upload of the same static
+  fixture file (duplicate-content/rate-limit handling on their side),
+  which was transient and not a real failure of `upload_image` itself —
+  confirmed by the same test passing minutes earlier/later on an
+  unchanged commit.
+
 ## [1.6.0] - 2026-10-17
 
 ### Added

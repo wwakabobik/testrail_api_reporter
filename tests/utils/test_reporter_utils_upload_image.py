@@ -3,13 +3,13 @@
 
 from os import getcwd, getenv
 from random import choice
+from time import sleep
 from unittest.mock import patch, Mock
 
 from faker import Faker
 from pytest import raises as pytest_raises
 
 from testrail_api_reporter.utils.reporter_utils import upload_image  # pylint: disable=import-error,no-name-in-module
-
 
 test_filename = choice((f"{getcwd()}/tests/assets/test_image.png", f"{getcwd()}/tests/assets/test_image.jpeg"))
 
@@ -55,8 +55,23 @@ def test_upload_image_mock_api_error():
 
 
 def test_upload_image_live_success():
-    """Test success image upload"""
-    result = upload_image(test_filename, getenv("FREEIMAGEHOST_API_KEY"))
+    """
+    Test success image upload
+
+    Retries a few times with backoff: freeimage.host occasionally rejects a repeat upload of the same
+    static fixture file (duplicate-content/rate-limit handling on their side), which is transient and not
+    a real failure of upload_image itself.
+    """
+    retries = 3
+    result = None
+    for attempt in range(retries):
+        try:
+            result = upload_image(test_filename, getenv("FREEIMAGEHOST_API_KEY"))
+            break
+        except KeyError:
+            if attempt == retries - 1:
+                raise
+            sleep(2**attempt)
     assert "image" in result
     assert "thumb" in result
 
