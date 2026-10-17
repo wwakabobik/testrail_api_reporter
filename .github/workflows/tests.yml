@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
+        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13", "3.14", "3.15"]
     steps:
     - name: Checkout
       uses: actions/checkout@v4
@@ -30,6 +30,8 @@ jobs:
         pip install pytest-cov
         pip install faker
         pip install pillow
+    - name: Install Chrome for Kaleido
+      run: plotly_get_chrome -y
     - name: Add 'testrail_api_reporter' to PYTHONPATH
       run: echo "PYTHONPATH=$PYTHONPATH:$(pwd)/testrail_api_reporter:." >> $GITHUB_ENV
     - name: Execute tests
