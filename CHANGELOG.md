@@ -9,12 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- `test_upload_image_live_success` now retries a few times with backoff:
-  freeimage.host occasionally rejects a repeat upload of the same static
-  fixture file (duplicate-content/rate-limit handling on their side),
-  which was transient and not a real failure of `upload_image` itself —
-  confirmed by the same test passing minutes earlier/later on an
-  unchanged commit.
+- `test_upload_image_live_success` now uploads a freshly generated,
+  randomly-colored image instead of the static fixture file:
+  freeimage.host rejects a repeat upload of bytes it has already seen
+  (duplicate-content detection), which isn't a real failure of
+  `upload_image` itself — confirmed by the same test passing minutes
+  earlier on an unchanged commit, then consistently failing on later
+  runs that re-uploaded the same unchanged fixture.
 
 ## [1.6.0] - 2026-10-17
 
