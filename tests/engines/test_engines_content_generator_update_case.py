@@ -106,6 +106,35 @@ def test_update_testrail_case_api_failure_returns_none(generator):  # pylint: di
     assert result is None
 
 
+def test_get_all_auto_cases_api_failure_returns_empty(generator):  # pylint: disable=redefined-outer-name
+    """A failure fetching the first page of cases should be logged and return {} without caching"""
+    api = generator._TestCaseContentGenerator__api  # pylint: disable=protected-access
+    api.cases.get_cases.side_effect = OSError("boom")
+
+    # pylint: disable=protected-access,no-member
+    result = generator._TestCaseContentGenerator__get_all_auto_cases()
+
+    assert result == {}
+    assert generator._TestCaseContentGenerator__cases_by_automation_id == {}  # pylint: disable=protected-access
+
+
+def test_get_all_auto_cases_multiple_pages(generator):  # pylint: disable=redefined-outer-name
+    """Multiple pages of cases should be collected and merged by automation_id"""
+    api = generator._TestCaseContentGenerator__api  # pylint: disable=protected-access
+    page1 = {
+        "cases": [{"id": 1, "custom_automation_id": None}, {"id": 2, "custom_automation_id": "pkg.a"}],
+        "_links": {"next": "?page=2&offset=1&limit=1"},
+    }
+    page2 = {"cases": [{"id": 3, "custom_automation_id": "pkg.b"}], "_links": {"next": None}}
+    api.cases.get_cases.side_effect = [page1, page2]
+
+    # pylint: disable=protected-access,no-member
+    result = generator._TestCaseContentGenerator__get_all_auto_cases()
+
+    assert result == {"pkg.a": 2, "pkg.b": 3}
+    assert api.cases.get_cases.call_count == 2
+
+
 def test_get_all_auto_cases_is_cached(generator):  # pylint: disable=redefined-outer-name
     """Repeated calls should not re-fetch cases from TestRail once cached"""
     api = generator._TestCaseContentGenerator__api  # pylint: disable=protected-access

@@ -109,9 +109,11 @@ def test_generate_for_file(generator, provider, tmp_path):  # pylint: disable=re
 
     results = generator.generate_for_file(str(file_path))
 
+    # pylint: disable=protected-access,no-member
+    build_id = generator._TestCaseContentGenerator__automation_id
     assert len(results) == 2
     assert {r["automation_id"] for r in results} == {
-        f"{generator._TestCaseContentGenerator__automation_id(str(file_path), 'test_one')}",  # pylint: disable=protected-access,no-member
-        f"{generator._TestCaseContentGenerator__automation_id(str(file_path), 'test_two')}",  # pylint: disable=protected-access,no-member
+        build_id(str(file_path), "test_one"),
+        build_id(str(file_path), "test_two"),
     }
     assert [r["content"] for r in results] == contents

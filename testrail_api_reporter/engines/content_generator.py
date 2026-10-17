@@ -218,8 +218,9 @@ class TestCaseContentGenerator:
                     )
                     return {}
                 first_run = False
-            elif response["_links"]["next"] is not None:  # type: ignore  # pylint: disable=E1136
-                offset = int(response["_links"]["next"].split("&offset=")[1].split("&")[0])  # type: ignore  # pylint: disable=E1136
+            else:
+                next_link = response["_links"]["next"]  # type: ignore  # pylint: disable=E1136
+                offset = int(next_link.split("&offset=")[1].split("&")[0])
                 response = self.__api.cases.get_cases(
                     project_id=self.__project_id, suite_id=self.__suite_id, offset=offset
                 )

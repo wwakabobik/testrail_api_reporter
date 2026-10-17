@@ -19,6 +19,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   local/self-hosted model) via a plain callable. The `openai`, `cohere` and `anthropic` packages are
   optional dependencies (`pip install testrail-api-reporter[openai|cohere|anthropic|ai]`).
 
+### Changed
+
+- The PR-facing `Tests-PR`/`Linters-PR` workflows (triggered on push/PR to any branch but `master`) now run
+  against a single Python version (3.13, the latest minus one) instead of the full version matrix, to keep
+  feedback on in-progress branches fast. The full matrix still runs on every push to `master`
+  (`Tests`/`Linters` workflows), unchanged.
+
 ## [1.6.1] - 2026-10-17
 
 ### Fixed
