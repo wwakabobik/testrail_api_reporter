@@ -36,7 +36,7 @@ jobs:
       continue-on-error: true
       env:
         FREEIMAGEHOST_API_KEY: ${{ secrets.FREEIMAGEHOST_API_KEY }}
-      run: pytest tests -n=auto --cov=testrail_api_reporter --cov-report=term --cov-report=xml:coverage.xml --cov-report=html
+      run: pytest tests -n=auto --cov=testrail_api_reporter --cov-branch --cov-report=term --cov-report=xml:coverage.xml --cov-report=html
     - name: Upload coverage reports to Codecov
       uses: codecov/codecov-action@v4.0.1
       with:

@@ -5,7 +5,46 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.5.0] - 2026-10-17
+## [1.6.0] - 2026-10-17
+
+### Added
+
+- Statement and branch test coverage raised to 99% (from ~33%), adding
+  tests for every previously untested engine and publisher: `at_coverage_reporter`,
+  `case_backup`, `confluence_sender`, `email_sender`, `gdrive_uploader`,
+  `results_reporter`, `slack_sender`, plus the untested
+  `PlotlyReporter.draw_history_state_chart`/`draw_history_type_chart`
+  methods and a few remaining branch gaps in `utils`.
+- `pyproject.toml` now carries real packaging metadata (`[project]` /
+  `[build-system]`, setuptools, dynamic version read from
+  `testrail_api_reporter.__version__`) so the package can be built with
+  `python -m build` and checked with `twine check`.
+
+### Changed
+
+- `tests.yml`/`master_tests.yml` now measure branch coverage too
+  (`--cov-branch`), and the enforced floor in `tests.yml` is raised from
+  95% to 99% statement+branch combined, matching what is actually
+  achievable without touching production code (see below).
+
+### Known gaps (not fixed, by design)
+
+The remaining 1% is dead/unreachable code uncovered by any test, confirmed
+via direct analysis rather than left unexamined:
+
+- `at_coverage_reporter.__get_all_sections`/`__get_all_cases` and
+  `results_reporter.__ensure_automation_section`/`__get_all_auto_cases`:
+  a pagination `elif response["_links"]["next"] is not None` branch whose
+  `False` side can never be taken once the loop re-enters (the loop only
+  re-enters when that exact value was non-`None`).
+- `results_reporter.__search_for_run_by_name`: `response` is reset to
+  `None` at the top of every loop iteration, so pagination (a second
+  page) always crashes with `TypeError` before ever reaching the second
+  page's own code — covered by a test documenting the crash, not a
+  successful pagination.
+
+Fixing these would mean changing production code, which is out of scope
+for a test-only coverage pass.
 
 ### Changed
 
