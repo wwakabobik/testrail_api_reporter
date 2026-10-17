@@ -82,7 +82,9 @@ def test_send_results_success_no_close_run_name_priority(reporter):  # pylint: d
         reporter, "_TestRailResultsReporter__prepare_runs", return_value=fake.random_int()
     ) as mock_prepare_runs, patch.object(
         reporter, "_TestRailResultsReporter__add_results", return_value=fake.random_int()
-    ), patch.object(reporter, "_TestRailResultsReporter__close_run") as mock_close_run:
+    ), patch.object(
+        reporter, "_TestRailResultsReporter__close_run"
+    ) as mock_close_run:
         reporter.send_results(title=fake.sentence(), run_name=run_name, close_run=False)
 
     assert mock_prepare_runs.call_args.kwargs["title"] == run_name

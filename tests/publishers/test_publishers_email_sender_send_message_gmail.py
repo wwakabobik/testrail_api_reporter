@@ -96,8 +96,8 @@ def test_gmail_get_credentials_invalid_credentials_run_flow_failure(
 @patch("testrail_api_reporter.publishers.email_sender.client.flow_from_clientsecrets")
 @patch("testrail_api_reporter.publishers.email_sender.file.Storage")
 def test_gmail_get_credentials_new_flow_success(
-    mock_storage, mock_flow_from_clientsecrets, mock_run_flow, gmail_sender, mocked_credentials  # pylint: disable=redefined-outer-name
-):
+    mock_storage, mock_flow_from_clientsecrets, mock_run_flow, gmail_sender, mocked_credentials
+):  # pylint: disable=redefined-outer-name
     """When no credentials are stored, a successful OAuth flow should return the new credentials"""
     mock_storage.return_value.get.return_value = None
     flow = Mock()
@@ -124,7 +124,9 @@ def test_gmail_get_credentials_already_valid(
 
 @patch("testrail_api_reporter.publishers.email_sender.file.Storage")
 @patch("testrail_api_reporter.publishers.email_sender.os.makedirs")
-def test_gmail_get_credential_path_makedirs_failure(mock_makedirs, _mock_storage, gmail_sender):  # pylint: disable=redefined-outer-name
+def test_gmail_get_credential_path_makedirs_failure(
+    mock_makedirs, _mock_storage, gmail_sender
+):  # pylint: disable=redefined-outer-name
     """A failure creating the credential directory should be logged, not raised"""
     mock_makedirs.side_effect = OSError("boom")
 

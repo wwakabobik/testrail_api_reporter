@@ -18,7 +18,9 @@ fake = Faker()
 def reporter():
     """Fixture to return ATCoverageReporter with a mocked TestRailAPI"""
     with patch("testrail_api_reporter.engines.at_coverage_reporter.TestRailAPI"):
-        return ATCoverageReporter(url=fake.url(), email=fake.email(), password=fake.password(), project=fake.random_int())
+        return ATCoverageReporter(
+            url=fake.url(), email=fake.email(), password=fake.password(), project=fake.random_int()
+        )
 
 
 def test_get_all_cases_single_page(reporter):  # pylint: disable=redefined-outer-name

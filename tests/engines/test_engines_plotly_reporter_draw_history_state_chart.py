@@ -7,7 +7,6 @@ from os import environ, getcwd, path, remove
 import pytest
 from faker import Faker
 
-
 fake = Faker()
 
 

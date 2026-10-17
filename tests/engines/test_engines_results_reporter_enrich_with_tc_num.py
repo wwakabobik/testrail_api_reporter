@@ -72,9 +72,7 @@ def test_enrich_with_tc_num_missing_case_creation_failure(reporter):  # pylint: 
 def test_enrich_with_tc_num_item_with_failure_key(reporter):  # pylint: disable=redefined-outer-name
     """An item carrying a 'failure' key should use its 'message' field as the comment"""
     tc_dict_list = [{"id": 10, "custom_automation_id": "pkg.test_failed"}]
-    xml_dict_list = [
-        {"automation_id": "pkg.test_failed", "time": "0.1", "status": 5, "failure": {}, "message": "boom"}
-    ]
+    xml_dict_list = [{"automation_id": "pkg.test_failed", "time": "0.1", "status": 5, "failure": {}, "message": "boom"}]
 
     result = reporter._TestRailResultsReporter__enrich_with_tc_num(  # pylint: disable=protected-access,no-member
         xml_dict_list=xml_dict_list, tc_dict_list=tc_dict_list

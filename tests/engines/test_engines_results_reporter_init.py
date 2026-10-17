@@ -44,7 +44,9 @@ def test_results_reporter_init_default_params(mock_api_class, xml_report):  # py
     password = fake.password()
     project_id = fake.random_int()
 
-    reporter = TestRailResultsReporter(url=url, email=email, password=password, project_id=project_id, xml_report=xml_report)
+    reporter = TestRailResultsReporter(
+        url=url, email=email, password=password, project_id=project_id, xml_report=xml_report
+    )
 
     mock_api_class.assert_called_once_with(url, email, password)
 
@@ -117,7 +119,11 @@ def test_results_reporter_init_invalid_project(mock_api_class, xml_report):  # p
     api.projects.get_project.side_effect = OSError("boom")
 
     reporter = TestRailResultsReporter(
-        url=fake.url(), email=fake.email(), password=fake.password(), project_id=fake.random_int(), xml_report=xml_report
+        url=fake.url(),
+        email=fake.email(),
+        password=fake.password(),
+        project_id=fake.random_int(),
+        xml_report=xml_report,
     )
 
     attributes = vars(reporter)
@@ -145,13 +151,19 @@ def test_results_reporter_init_invalid_suite(mock_api_class, xml_report):  # pyl
 
 
 @patch("testrail_api_reporter.engines.results_reporter.TestRailAPI")
-def test_results_reporter_init_no_project_id_skips_section_lookup(mock_api_class, xml_report):  # pylint: disable=redefined-outer-name
+def test_results_reporter_init_no_project_id_skips_section_lookup(
+    mock_api_class, xml_report
+):  # pylint: disable=redefined-outer-name
     """Init TestRailResultsReporter with a project check that fails should also skip the section lookup"""
     api = mock_api_class.return_value
     api.projects.get_project.side_effect = OSError("boom")
 
     TestRailResultsReporter(
-        url=fake.url(), email=fake.email(), password=fake.password(), project_id=fake.random_int(), xml_report=xml_report
+        url=fake.url(),
+        email=fake.email(),
+        password=fake.password(),
+        project_id=fake.random_int(),
+        xml_report=xml_report,
     )
 
     api.sections.get_sections.assert_not_called()

@@ -56,13 +56,16 @@ def test_get_all_auto_cases_multiple_pages(reporter):  # pylint: disable=redefin
     assert result == page1["cases"] + page2["cases"]
 
 
-def test_get_all_auto_cases_first_run_read_timeout_retries_then_succeeds(reporter):  # pylint: disable=redefined-outer-name
+def test_get_all_auto_cases_first_run_read_timeout_retries_then_succeeds(
+    reporter,
+):  # pylint: disable=redefined-outer-name
     """A ReadTimeout on the first page should be retried until it succeeds"""
     api = reporter._TestRailResultsReporter__api  # pylint: disable=protected-access
     cases = [{"id": 1, "custom_automation_id": "pkg.a"}]
     api.cases.get_cases.side_effect = [ReadTimeout("boom"), {"cases": cases, "_links": {"next": None}}]
 
-    result = reporter._TestRailResultsReporter__get_all_auto_cases(retries=3)  # pylint: disable=protected-access,no-member
+    # pylint: disable=protected-access,no-member
+    result = reporter._TestRailResultsReporter__get_all_auto_cases(retries=3)
 
     assert result == cases
 
@@ -76,13 +79,16 @@ def test_get_all_auto_cases_first_run_read_timeout_exhausted(reporter):  # pylin
         reporter._TestRailResultsReporter__get_all_auto_cases(retries=0)  # pylint: disable=protected-access,no-member
 
 
-def test_get_all_auto_cases_first_run_status_code_504_retries_then_succeeds(reporter):  # pylint: disable=redefined-outer-name
+def test_get_all_auto_cases_first_run_status_code_504_retries_then_succeeds(
+    reporter,
+):  # pylint: disable=redefined-outer-name
     """A 504 StatusCodeError on the first page should be retried just like a ReadTimeout"""
     api = reporter._TestRailResultsReporter__api  # pylint: disable=protected-access
     cases = [{"id": 1, "custom_automation_id": "pkg.a"}]
     api.cases.get_cases.side_effect = [_status_code_error(504), {"cases": cases, "_links": {"next": None}}]
 
-    result = reporter._TestRailResultsReporter__get_all_auto_cases(retries=3)  # pylint: disable=protected-access,no-member
+    # pylint: disable=protected-access,no-member
+    result = reporter._TestRailResultsReporter__get_all_auto_cases(retries=3)
 
     assert result == cases
 
@@ -107,14 +113,17 @@ def test_get_all_auto_cases_first_run_generic_exception(reporter):  # pylint: di
     assert result is None
 
 
-def test_get_all_auto_cases_pagination_read_timeout_retries_then_succeeds(reporter):  # pylint: disable=redefined-outer-name
+def test_get_all_auto_cases_pagination_read_timeout_retries_then_succeeds(
+    reporter,
+):  # pylint: disable=redefined-outer-name
     """A ReadTimeout fetching the second page should be retried until it succeeds"""
     api = reporter._TestRailResultsReporter__api  # pylint: disable=protected-access
     page1 = {"cases": [{"id": 1, "custom_automation_id": "pkg.a"}], "_links": {"next": "?page=2&offset=1&limit=1"}}
     page2 = {"cases": [{"id": 2, "custom_automation_id": "pkg.b"}], "_links": {"next": None}}
     api.cases.get_cases.side_effect = [page1, ReadTimeout("boom"), page2]
 
-    result = reporter._TestRailResultsReporter__get_all_auto_cases(retries=3)  # pylint: disable=protected-access,no-member
+    # pylint: disable=protected-access,no-member
+    result = reporter._TestRailResultsReporter__get_all_auto_cases(retries=3)
 
     assert result == page1["cases"] + page2["cases"]
 

@@ -7,11 +7,6 @@ from random import randint
 import pytest
 from faker import Faker
 
-from testrail_api_reporter.engines.plotly_reporter import (  # pylint: disable=import-error,no-name-in-module
-    PlotlyReporter,
-)
-
-
 fake = Faker()
 
 

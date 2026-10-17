@@ -16,9 +16,7 @@ fake = Faker()
 def _single_testcase_xml(testcase_xml):
     """Wrap a single <testcase> block into a full junit testsuites document"""
     return (
-        '<testsuites><testsuite timestamp="2024-01-01T10:00:00.123456">'
-        f"{testcase_xml}"
-        "</testsuite></testsuites>"
+        '<testsuites><testsuite timestamp="2024-01-01T10:00:00.123456">' f"{testcase_xml}" "</testsuite></testsuites>"
     )
 
 
@@ -60,7 +58,8 @@ def test_xml_to_dict_single_passed_case(reporter, tmp_path):  # pylint: disable=
     )
     reporter._TestRailResultsReporter__xml_report = str(report)  # pylint: disable=protected-access
 
-    result = reporter._TestRailResultsReporter__xml_to_dict(filename=str(report))  # pylint: disable=protected-access,no-member
+    # pylint: disable=protected-access,no-member
+    result = reporter._TestRailResultsReporter__xml_to_dict(filename=str(report))
 
     assert result == [{"automation_id": "pkg.mod.test_ok", "time": "0.1", "status": 1, "comment": ""}]
 
@@ -82,7 +81,8 @@ def test_xml_to_dict_multiple_cases_all_statuses(reporter, tmp_path):  # pylint:
     )
     reporter._TestRailResultsReporter__xml_report = str(report)  # pylint: disable=protected-access
 
-    result = reporter._TestRailResultsReporter__xml_to_dict(filename=str(report))  # pylint: disable=protected-access,no-member
+    # pylint: disable=protected-access,no-member
+    result = reporter._TestRailResultsReporter__xml_to_dict(filename=str(report))
 
     statuses = {item["automation_id"]: item["status"] for item in result}
     assert statuses == {

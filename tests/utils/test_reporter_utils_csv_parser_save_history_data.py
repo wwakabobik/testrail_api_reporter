@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """Tests for the csv_parser module'"""
+
 from datetime import datetime
 from os import path, remove
 

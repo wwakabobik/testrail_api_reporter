@@ -23,9 +23,9 @@ def test_get_archive_backup_default_params(mock_popen):
         test_rails_suite=fake.random_int(),
     )
     zipped_file = fake.file_name(extension="zip")
-    with patch(
-        "testrail_api_reporter.engines.case_backup.zip_file", return_value=zipped_file
-    ) as mock_zip_file, patch("testrail_api_reporter.engines.case_backup.delete_file") as mock_delete_file:
+    with patch("testrail_api_reporter.engines.case_backup.zip_file", return_value=zipped_file) as mock_zip_file, patch(
+        "testrail_api_reporter.engines.case_backup.delete_file"
+    ) as mock_delete_file:
         result = backup.get_archive_backup()
         assert result == zipped_file
         mock_zip_file.assert_called_once()
@@ -45,9 +45,9 @@ def test_get_archive_backup_no_cleanup(mock_popen):
         cleanup_needed=False,
     )
     zipped_file = fake.file_name(extension="zip")
-    with patch(
-        "testrail_api_reporter.engines.case_backup.zip_file", return_value=zipped_file
-    ) as mock_zip_file, patch("testrail_api_reporter.engines.case_backup.delete_file") as mock_delete_file:
+    with patch("testrail_api_reporter.engines.case_backup.zip_file", return_value=zipped_file) as mock_zip_file, patch(
+        "testrail_api_reporter.engines.case_backup.delete_file"
+    ) as mock_delete_file:
         result = backup.get_archive_backup()
         assert result == zipped_file
         mock_zip_file.assert_called_once()
@@ -73,5 +73,8 @@ def test_get_archive_backup_custom_params(mock_popen):
         result = backup.get_archive_backup(filename=filename, suite=suite, suffix=suffix)
         assert result == zipped_file
         mock_zip_file.assert_called_once_with(
-            filename=filename, suffix=suffix, debug=False, logger=backup._TCBackup___logger  # pylint: disable=protected-access,no-member
+            filename=filename,
+            suffix=suffix,
+            debug=False,
+            logger=backup._TCBackup___logger,  # pylint: disable=protected-access,no-member
         )

@@ -33,7 +33,8 @@ def test_search_for_run_by_name_api_failure(reporter):  # pylint: disable=redefi
     api = reporter._TestRailResultsReporter__api  # pylint: disable=protected-access
     api.runs.get_runs.side_effect = OSError("boom")
 
-    result = reporter._TestRailResultsReporter__search_for_run_by_name(title=fake.sentence())  # pylint: disable=protected-access,no-member
+    # pylint: disable=protected-access,no-member
+    result = reporter._TestRailResultsReporter__search_for_run_by_name(title=fake.sentence())
 
     assert result is None
 
@@ -44,7 +45,8 @@ def test_search_for_run_by_name_found_first_page(reporter):  # pylint: disable=r
     title = fake.sentence()
     api.runs.get_runs.return_value = {"runs": {"name": title, "id": 77}, "_links": {"next": None}}
 
-    result = reporter._TestRailResultsReporter__search_for_run_by_name(title=title)  # pylint: disable=protected-access,no-member
+    # pylint: disable=protected-access,no-member
+    result = reporter._TestRailResultsReporter__search_for_run_by_name(title=title)
 
     assert result == 77
 
@@ -54,7 +56,8 @@ def test_search_for_run_by_name_not_found(reporter):  # pylint: disable=redefine
     api = reporter._TestRailResultsReporter__api  # pylint: disable=protected-access
     api.runs.get_runs.return_value = {"runs": {"name": fake.sentence(), "id": 1}, "_links": {"next": None}}
 
-    result = reporter._TestRailResultsReporter__search_for_run_by_name(title=fake.sentence())  # pylint: disable=protected-access,no-member
+    # pylint: disable=protected-access,no-member
+    result = reporter._TestRailResultsReporter__search_for_run_by_name(title=fake.sentence())
 
     assert result is None
 
@@ -67,7 +70,8 @@ def test_search_for_run_by_name_pagination_crashes(reporter):  # pylint: disable
     api.runs.get_runs.return_value = page1
 
     with pytest.raises(TypeError):
-        reporter._TestRailResultsReporter__search_for_run_by_name(title=fake.sentence())  # pylint: disable=protected-access,no-member
+        # pylint: disable=protected-access,no-member
+        reporter._TestRailResultsReporter__search_for_run_by_name(title=fake.sentence())
 
 
 # --- __delete_run ---
@@ -75,7 +79,8 @@ def test_search_for_run_by_name_pagination_crashes(reporter):  # pylint: disable
 
 def test_delete_run_success(reporter):  # pylint: disable=redefined-outer-name
     """A successful deletion should return True"""
-    assert reporter._TestRailResultsReporter__delete_run(run_id=fake.random_int()) is True  # pylint: disable=protected-access,no-member
+    # pylint: disable=protected-access,no-member
+    assert reporter._TestRailResultsReporter__delete_run(run_id=fake.random_int()) is True
 
 
 def test_delete_run_failure(reporter):  # pylint: disable=redefined-outer-name
@@ -94,7 +99,8 @@ def test_add_run_success(reporter):  # pylint: disable=redefined-outer-name
     api = reporter._TestRailResultsReporter__api  # pylint: disable=protected-access
     api.runs.add_run.return_value = {"id": 42}
 
-    result = reporter._TestRailResultsReporter__add_run(title=fake.sentence(), cases_list=[1, 2])  # pylint: disable=protected-access,no-member
+    # pylint: disable=protected-access,no-member
+    result = reporter._TestRailResultsReporter__add_run(title=fake.sentence(), cases_list=[1, 2])
 
     assert result == 42
 
@@ -105,7 +111,8 @@ def test_add_run_failure(reporter):  # pylint: disable=redefined-outer-name
     api.runs.add_run.side_effect = OSError("boom")
 
     with patch.object(reporter, "_TestRailResultsReporter__self_check") as mock_self_check:
-        result = reporter._TestRailResultsReporter__add_run(title=fake.sentence())  # pylint: disable=protected-access,no-member
+        # pylint: disable=protected-access,no-member
+        result = reporter._TestRailResultsReporter__add_run(title=fake.sentence())
 
     assert result is None
     mock_self_check.assert_called_once()
@@ -118,7 +125,8 @@ def test_add_results_success(reporter):  # pylint: disable=redefined-outer-name
     """A successful submission should return the run id"""
     run_id = fake.random_int()
 
-    result = reporter._TestRailResultsReporter__add_results(run_id=run_id, results=[{"case_id": 1}])  # pylint: disable=protected-access,no-member
+    # pylint: disable=protected-access,no-member
+    result = reporter._TestRailResultsReporter__add_results(run_id=run_id, results=[{"case_id": 1}])
 
     assert result == run_id
 
@@ -129,7 +137,8 @@ def test_add_results_failure(reporter):  # pylint: disable=redefined-outer-name
     api.results.add_results_for_cases.side_effect = OSError("boom")
 
     with patch.object(reporter, "_TestRailResultsReporter__self_check") as mock_self_check:
-        result = reporter._TestRailResultsReporter__add_results(run_id=fake.random_int(), results=[])  # pylint: disable=protected-access,no-member
+        # pylint: disable=protected-access,no-member
+        result = reporter._TestRailResultsReporter__add_results(run_id=fake.random_int(), results=[])
 
     assert result is False
     mock_self_check.assert_called_once()
@@ -147,14 +156,16 @@ def test_prepare_runs_no_run_name_creates_new(reporter):  # pylint: disable=rede
         )
 
     assert result == 99
-    mock_add_run.assert_called_once_with(title=mock_add_run.call_args.kwargs["title"], cases_list=[1, 2], include_all=False)
+    mock_add_run.assert_called_once_with(
+        title=mock_add_run.call_args.kwargs["title"], cases_list=[1, 2], include_all=False
+    )
 
 
 def test_prepare_runs_run_name_not_found_creates_new(reporter):  # pylint: disable=redefined-outer-name
     """With a run_name that matches no existing run, a new run should be created"""
-    with patch.object(
-        reporter, "_TestRailResultsReporter__search_for_run_by_name", return_value=None
-    ), patch.object(reporter, "_TestRailResultsReporter__add_run", return_value=99) as mock_add_run:
+    with patch.object(reporter, "_TestRailResultsReporter__search_for_run_by_name", return_value=None), patch.object(
+        reporter, "_TestRailResultsReporter__add_run", return_value=99
+    ) as mock_add_run:
         result = reporter._TestRailResultsReporter__prepare_runs(  # pylint: disable=protected-access,no-member
             cases=[{"case_id": 1}], title=fake.sentence(), run_name=fake.sentence()
         )
@@ -165,9 +176,9 @@ def test_prepare_runs_run_name_not_found_creates_new(reporter):  # pylint: disab
 
 def test_prepare_runs_run_name_found_reused(reporter):  # pylint: disable=redefined-outer-name
     """With a run_name that matches an existing run (and no deletion requested), that run should be reused"""
-    with patch.object(
-        reporter, "_TestRailResultsReporter__search_for_run_by_name", return_value=55
-    ), patch.object(reporter, "_TestRailResultsReporter__add_run") as mock_add_run:
+    with patch.object(reporter, "_TestRailResultsReporter__search_for_run_by_name", return_value=55), patch.object(
+        reporter, "_TestRailResultsReporter__add_run"
+    ) as mock_add_run:
         result = reporter._TestRailResultsReporter__prepare_runs(  # pylint: disable=protected-access,no-member
             cases=[{"case_id": 1}], title=fake.sentence(), run_name=fake.sentence()
         )
@@ -178,11 +189,9 @@ def test_prepare_runs_run_name_found_reused(reporter):  # pylint: disable=redefi
 
 def test_prepare_runs_run_name_found_deleted_and_recreated(reporter):  # pylint: disable=redefined-outer-name
     """With delete_run requested and an existing run found, it should be deleted and a new one created"""
-    with patch.object(
-        reporter, "_TestRailResultsReporter__search_for_run_by_name", return_value=55
-    ), patch.object(reporter, "_TestRailResultsReporter__delete_run") as mock_delete_run, patch.object(
-        reporter, "_TestRailResultsReporter__add_run", return_value=99
-    ) as mock_add_run:
+    with patch.object(reporter, "_TestRailResultsReporter__search_for_run_by_name", return_value=55), patch.object(
+        reporter, "_TestRailResultsReporter__delete_run"
+    ) as mock_delete_run, patch.object(reporter, "_TestRailResultsReporter__add_run", return_value=99) as mock_add_run:
         result = reporter._TestRailResultsReporter__prepare_runs(  # pylint: disable=protected-access,no-member
             cases=[{"case_id": 1}], title=fake.sentence(), run_name=fake.sentence(), delete_run=True
         )
@@ -209,7 +218,8 @@ def test_prepare_runs_existing_run_id_no_run_name(reporter):  # pylint: disable=
 
 def test_close_run_success(reporter):  # pylint: disable=redefined-outer-name
     """A successful close should return True"""
-    assert reporter._TestRailResultsReporter__close_run(run_id=fake.random_int(), title=fake.sentence()) is True  # pylint: disable=protected-access,no-member
+    # pylint: disable=protected-access,no-member
+    assert reporter._TestRailResultsReporter__close_run(run_id=fake.random_int(), title=fake.sentence()) is True
 
 
 def test_close_run_failure(reporter):  # pylint: disable=redefined-outer-name

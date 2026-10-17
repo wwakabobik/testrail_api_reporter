@@ -86,7 +86,10 @@ def test_gdrive_uploader_init_first_run_no_refresh_token(mock_popen, _mock_input
         {"device_code": fake.uuid4(), "user_code": fake.word(), "verification_url": fake.url()}
     )
     oauth_response = json.dumps({"access_token": fake.password(), "refresh_token": fake.password()})
-    mock_popen.side_effect = [Mock(read=Mock(return_value=device_response)), Mock(read=Mock(return_value=oauth_response))]
+    mock_popen.side_effect = [
+        Mock(read=Mock(return_value=device_response)),
+        Mock(read=Mock(return_value=oauth_response)),
+    ]
 
     uploader = GoogleDriveUploader(google_id=fake.uuid4(), google_secret=fake.password())
 
@@ -104,7 +107,10 @@ def test_gdrive_uploader_init_first_run_empty_refresh_token(mock_popen, _mock_in
         {"device_code": fake.uuid4(), "user_code": fake.word(), "verification_url": fake.url()}
     )
     oauth_response = json.dumps({"access_token": fake.password(), "refresh_token": fake.password()})
-    mock_popen.side_effect = [Mock(read=Mock(return_value=device_response)), Mock(read=Mock(return_value=oauth_response))]
+    mock_popen.side_effect = [
+        Mock(read=Mock(return_value=device_response)),
+        Mock(read=Mock(return_value=oauth_response)),
+    ]
 
     uploader = GoogleDriveUploader(google_id=fake.uuid4(), google_secret=fake.password(), google_api_refresh_token="")
 

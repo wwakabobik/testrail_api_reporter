@@ -91,9 +91,7 @@ def test_set_xml_filename_missing(reporter):  # pylint: disable=redefined-outer-
 
 def test_set_at_report_section_success(reporter):  # pylint: disable=redefined-outer-name
     """When both project and suite checks pass, the automation section should be (re)resolved"""
-    with patch.object(
-        reporter, "_TestRailResultsReporter__ensure_automation_section", return_value=123
-    ) as mock_ensure:
+    with patch.object(reporter, "_TestRailResultsReporter__ensure_automation_section", return_value=123) as mock_ensure:
         reporter.set_at_report_section("my_section")
 
     mock_ensure.assert_called_once_with(title="my_section")
@@ -135,7 +133,8 @@ def test_set_timestamp(reporter):  # pylint: disable=redefined-outer-name
 
 def test_check_section_success(reporter):  # pylint: disable=redefined-outer-name
     """A valid section id should return True"""
-    assert reporter._TestRailResultsReporter__check_section(section_id=fake.random_int()) is True  # pylint: disable=protected-access,no-member
+    # pylint: disable=protected-access,no-member
+    assert reporter._TestRailResultsReporter__check_section(section_id=fake.random_int()) is True
 
 
 def test_check_section_failure(reporter):  # pylint: disable=redefined-outer-name
@@ -147,7 +146,8 @@ def test_check_section_failure(reporter):  # pylint: disable=redefined-outer-nam
 
 def test_check_run_exists_success(reporter):  # pylint: disable=redefined-outer-name
     """An existing run id should return True"""
-    assert reporter._TestRailResultsReporter__check_run_exists(run_id=fake.random_int()) is True  # pylint: disable=protected-access,no-member
+    # pylint: disable=protected-access,no-member
+    assert reporter._TestRailResultsReporter__check_run_exists(run_id=fake.random_int()) is True
 
 
 def test_check_run_exists_failure(reporter):  # pylint: disable=redefined-outer-name
@@ -164,12 +164,14 @@ def test_check_report_exists_explicit_existing(reporter, tmp_path):  # pylint: d
     """An explicit, existing report path should return True"""
     report = tmp_path / "explicit.xml"
     report.write_text("<testsuites></testsuites>", encoding="utf-8")
-    assert reporter._TestRailResultsReporter__check_report_exists(xml_report=str(report)) is True  # pylint: disable=protected-access,no-member
+    # pylint: disable=protected-access,no-member
+    assert reporter._TestRailResultsReporter__check_report_exists(xml_report=str(report)) is True
 
 
 def test_check_report_exists_falls_back_to_instance(reporter):  # pylint: disable=redefined-outer-name
     """With no explicit path, the instance's own xml_report should be used"""
-    assert reporter._TestRailResultsReporter__check_report_exists() is True  # pylint: disable=protected-access,no-member
+    # pylint: disable=protected-access,no-member
+    assert reporter._TestRailResultsReporter__check_report_exists() is True
 
 
 def test_check_report_exists_missing(reporter):  # pylint: disable=redefined-outer-name
@@ -183,7 +185,8 @@ def test_check_report_exists_missing(reporter):  # pylint: disable=redefined-out
 def test_check_report_exists_no_path_at_all(reporter):  # pylint: disable=redefined-outer-name
     """With neither an explicit nor an instance path, it should return False"""
     reporter._TestRailResultsReporter__xml_report = None  # pylint: disable=protected-access
-    assert reporter._TestRailResultsReporter__check_report_exists() is False  # pylint: disable=protected-access,no-member
+    # pylint: disable=protected-access,no-member
+    assert reporter._TestRailResultsReporter__check_report_exists() is False
 
 
 # --- __self_check ---

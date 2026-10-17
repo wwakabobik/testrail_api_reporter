@@ -51,6 +51,4 @@ def test_test_case_area_distribution_success(confluence_sender):  # pylint: disa
     plotly = confluence_sender._ConfluenceSender__plotly  # pylint: disable=protected-access
     confluence = confluence_sender._ConfluenceSender__confluence  # pylint: disable=protected-access
     plotly.draw_test_case_by_area.assert_called_once_with(cases=cases, filename=filename)
-    confluence.attach_file.assert_called_once_with(
-        filename, page_id=confluence_page, title="current_area_distribution"
-    )
+    confluence.attach_file.assert_called_once_with(filename, page_id=confluence_page, title="current_area_distribution")

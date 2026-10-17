@@ -29,7 +29,8 @@ def test_ensure_automation_section_api_failure(reporter):  # pylint: disable=red
     api = reporter._TestRailResultsReporter__api  # pylint: disable=protected-access
     api.sections.get_sections.side_effect = OSError("boom")
 
-    result = reporter._TestRailResultsReporter__ensure_automation_section()  # pylint: disable=protected-access,no-member
+    # pylint: disable=protected-access,no-member
+    result = reporter._TestRailResultsReporter__ensure_automation_section()
 
     assert result is None
 
@@ -39,7 +40,8 @@ def test_ensure_automation_section_found_on_first_page(reporter):  # pylint: dis
     api = reporter._TestRailResultsReporter__api  # pylint: disable=protected-access
     api.sections.get_sections.return_value = {"sections": [{"id": 7, "name": "pytest"}], "_links": {"next": None}}
 
-    result = reporter._TestRailResultsReporter__ensure_automation_section()  # pylint: disable=protected-access,no-member
+    # pylint: disable=protected-access,no-member
+    result = reporter._TestRailResultsReporter__ensure_automation_section()
 
     assert result == 7
     api.sections.add_section.assert_not_called()
@@ -52,7 +54,8 @@ def test_ensure_automation_section_found_on_second_page(reporter):  # pylint: di
     page2 = {"sections": [{"id": 8, "name": "pytest"}], "_links": {"next": None}}
     api.sections.get_sections.side_effect = [page1, page2]
 
-    result = reporter._TestRailResultsReporter__ensure_automation_section()  # pylint: disable=protected-access,no-member
+    # pylint: disable=protected-access,no-member
+    result = reporter._TestRailResultsReporter__ensure_automation_section()
 
     assert result == 8
     assert api.sections.get_sections.call_count == 2
@@ -64,7 +67,8 @@ def test_ensure_automation_section_not_found_creates_new(reporter):  # pylint: d
     api.sections.get_sections.return_value = {"sections": [{"id": 1, "name": "other"}], "_links": {"next": None}}
     api.sections.add_section.return_value = {"id": 99}
 
-    result = reporter._TestRailResultsReporter__ensure_automation_section(title="my_section")  # pylint: disable=protected-access,no-member
+    # pylint: disable=protected-access,no-member
+    result = reporter._TestRailResultsReporter__ensure_automation_section(title="my_section")
 
     assert result == 99
     api.sections.add_section.assert_called_once()
@@ -76,6 +80,7 @@ def test_ensure_automation_section_create_failure(reporter):  # pylint: disable=
     api.sections.get_sections.return_value = {"sections": [], "_links": {"next": None}}
     api.sections.add_section.side_effect = OSError("boom")
 
-    result = reporter._TestRailResultsReporter__ensure_automation_section()  # pylint: disable=protected-access,no-member
+    # pylint: disable=protected-access,no-member
+    result = reporter._TestRailResultsReporter__ensure_automation_section()
 
     assert result is None

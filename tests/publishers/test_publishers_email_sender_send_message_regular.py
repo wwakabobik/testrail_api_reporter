@@ -2,7 +2,7 @@
 """Tests for email_sender module, the EmailSender class, send_message method (regular/SMTP method)"""
 
 from os import getcwd
-from random import choice, randint
+from random import randint
 from unittest.mock import Mock, patch
 
 import pytest

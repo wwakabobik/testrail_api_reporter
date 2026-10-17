@@ -46,9 +46,7 @@ def test_slack_sender_init_custom_params():
         timeout = fake.random_int(min=1, max=60)
         verify = fake.boolean()
 
-        slack_sender = SlackSender(
-            hook_url=hook_url, timeout=timeout, verify=verify, logger=logger, log_level=INFO
-        )
+        slack_sender = SlackSender(hook_url=hook_url, timeout=timeout, verify=verify, logger=logger, log_level=INFO)
 
         logger = getLogger(logger_name)
         assert logger.level == logger_level

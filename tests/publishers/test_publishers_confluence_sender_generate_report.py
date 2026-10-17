@@ -56,17 +56,13 @@ def test_generate_report_no_type_platforms(confluence_sender):  # pylint: disabl
     """Call generate_report without type_platforms (and none set at init) should raise ValueError"""
     confluence_sender._ConfluenceSender__type_platforms = None  # pylint: disable=protected-access
     with pytest.raises(ValueError, match="No type platforms specified, report aborted!"):
-        confluence_sender.generate_report(
-            confluence_page=fake.word(), reports=[Mock()], cases=[Mock()], values=[1]
-        )
+        confluence_sender.generate_report(confluence_page=fake.word(), reports=[Mock()], cases=[Mock()], values=[1])
 
 
 def test_generate_report_no_automation_platforms(confluence_sender):  # pylint: disable=redefined-outer-name
     """Call generate_report without automation_platforms (and none set at init) should raise ValueError"""
     with pytest.raises(ValueError, match="No type platforms specified, report aborted!"):
-        confluence_sender.generate_report(
-            confluence_page=fake.word(), reports=[Mock()], cases=[Mock()], values=[1]
-        )
+        confluence_sender.generate_report(confluence_page=fake.word(), reports=[Mock()], cases=[Mock()], values=[1])
 
 
 def test_generate_report_success_with_arguments(confluence_sender):  # pylint: disable=redefined-outer-name
@@ -82,7 +78,9 @@ def test_generate_report_success_with_arguments(confluence_sender):  # pylint: d
         confluence_sender, "test_case_priority_distribution"
     ) as mock_priority, patch.object(confluence_sender, "test_case_area_distribution") as mock_area, patch.object(
         confluence_sender, "history_type_chart"
-    ) as mock_type_chart, patch.object(confluence_sender, "history_state_chart") as mock_state_chart:
+    ) as mock_type_chart, patch.object(
+        confluence_sender, "history_state_chart"
+    ) as mock_state_chart:
         confluence_sender.generate_report(
             confluence_page=confluence_page,
             reports=reports,
@@ -110,7 +108,9 @@ def test_generate_report_success_with_defaults(confluence_sender):  # pylint: di
         confluence_sender, "test_case_priority_distribution"
     ), patch.object(confluence_sender, "test_case_area_distribution"), patch.object(
         confluence_sender, "history_type_chart"
-    ) as mock_type_chart, patch.object(confluence_sender, "history_state_chart"):
+    ) as mock_type_chart, patch.object(
+        confluence_sender, "history_state_chart"
+    ):
         confluence_sender.generate_report(reports=[Mock()], cases=[Mock()], values=[1])
 
     mock_automation_state.assert_called_once()

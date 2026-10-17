@@ -43,9 +43,9 @@ def test_test_case_by_type_no_type_platforms(reporter):  # pylint: disable=redef
 @patch("testrail_api_reporter.engines.at_coverage_reporter.CSVParser")
 def test_test_case_by_type_default_params(mock_csv_parser, reporter):  # pylint: disable=redefined-outer-name
     """Call test_case_by_type with the instance default type_platforms should tally totals per platform"""
-    with patch.object(reporter, "_ATCoverageReporter__get_sections", side_effect=lambda sections: sections), patch.object(
-        reporter, "_ATCoverageReporter__get_all_cases", return_value=[{}, {}]
-    ):
+    with patch.object(
+        reporter, "_ATCoverageReporter__get_sections", side_effect=lambda sections: sections
+    ), patch.object(reporter, "_ATCoverageReporter__get_all_cases", return_value=[{}, {}]):
         results = reporter.test_case_by_type()
 
     assert len(results) == 1
@@ -55,7 +55,9 @@ def test_test_case_by_type_default_params(mock_csv_parser, reporter):  # pylint:
 
 
 @patch("testrail_api_reporter.engines.at_coverage_reporter.CSVParser")
-def test_test_case_by_type_custom_params(mock_csv_parser, reporter):  # pylint: disable=redefined-outer-name,unused-argument
+def test_test_case_by_type_custom_params(
+    mock_csv_parser, reporter
+):  # pylint: disable=redefined-outer-name,unused-argument
     """Call test_case_by_type with explicit type_platforms made of several platforms/sections"""
     type_platforms = [
         {"name": "UI", "sections": [1]},
