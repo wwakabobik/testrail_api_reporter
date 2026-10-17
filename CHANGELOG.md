@@ -9,13 +9,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- `test_upload_image_live_success` now uploads a freshly generated,
-  randomly-colored image instead of the static fixture file:
-  freeimage.host rejects a repeat upload of bytes it has already seen
-  (duplicate-content detection), which isn't a real failure of
-  `upload_image` itself — confirmed by the same test passing minutes
-  earlier on an unchanged commit, then consistently failing on later
-  runs that re-uploaded the same unchanged fixture.
+- `upload_image` now sends a browser-like `User-Agent` header.
+  `freeimage.host` (Chevereto, behind Cloudflare) started rejecting
+  every upload from this project's CI with a generic
+  `400 {"error":{"message":"Internal upload error","code":111}}`,
+  regardless of the uploaded content or the API key — raw diagnostics
+  captured on CI ruled out duplicate-content and rate-limit theories
+  first. The error isn't one of Chevereto's documented API codes
+  (100 invalid key, 110 invalid version, 120 invalid action, 130 empty
+  source), which points to a WAF/bot-detection rule instead; the
+  default `python-requests` user agent is a common target for that
+  kind of rule on Cloudflare-fronted sites.
+- `test_upload_image_live_success` also uploads a freshly generated,
+  randomly-colored image instead of the static fixture file, so it no
+  longer depends on content that's been re-uploaded, byte-for-byte, on
+  every CI run for a long time.
 
 ## [1.6.0] - 2026-10-17
 
