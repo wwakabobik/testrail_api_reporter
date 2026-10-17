@@ -196,6 +196,57 @@ gdrive.upload(filename='backup.zip', mime_type='application/zip')
 
 ![Backup in Google Drive](https://github.com/wwakabobik/testrail_api_reporter/blob/master/screenshots/tr_gdrive_backup.png)
 
+---
+
+# AI-generated test case content
+
+Writing (and keeping up to date) TestRail documentation for automated tests by hand is tedious. `TestCaseContentGenerator`
+reads your automated test source files, asks an AI provider to turn each test into TestRail-ready content
+(title, preconditions, steps, expected result, description), and updates the matching TestRail case (matched by the
+same `automation_id` custom field used by `TestRailResultsReporter`).
+
+The AI part is pluggable: built-in adapters are provided for OpenAI, Cohere and Anthropic, and `CustomProvider` lets
+you plug in literally any other provider (or a local/self-hosted model) by wrapping it in a simple function.
+
+```python
+from testrail_api_reporter import TestCaseContentGenerator, OpenAIProvider, CohereProvider, AnthropicProvider, CustomProvider
+
+# pick any provider you like, they all implement the same interface
+provider = OpenAIProvider(api_key=openai_api_key, model="gpt-4o-mini")
+# provider = CohereProvider(api_key=cohere_api_key, model="command-r-plus")
+# provider = AnthropicProvider(api_key=anthropic_api_key, model="claude-sonnet-5-5")
+# or bring your own provider/model:
+# provider = CustomProvider(generate_func=lambda prompt, system_prompt: my_llm_client.ask(system_prompt, prompt))
+
+generator = TestCaseContentGenerator(
+    url=tr_url, email=tr_email, password=tr_password, project_id=project_id, suite_id=test_suite_id, provider=provider
+)
+
+# generate content and push it straight to TestRail
+results = generator.process_files(["tests/test_login.py", "tests/test_checkout.py"])
+
+# or inspect what would be generated first, without touching TestRail
+preview = generator.process_files(["tests/test_login.py"], dry_run=True)
+```
+
+Each result is `{"automation_id": ..., "content": {...}, "case": ...}`: `content` is what the AI provider generated,
+`case` is the updated TestRail case (or `None` when nothing matched, or in `dry_run` mode). By default, generated
+fields are mapped to TestRail's `title`, `custom_preconds`, `custom_steps`, `custom_expected` and `custom_description`
+fields; pass your own `field_map` to `process_files`/`process_file`/`update_testrail_case` if your project uses
+different custom field names.
+
+You can also drive it step by step, e.g. to inspect or post-process content before pushing it to TestRail:
+
+```python
+tests = generator.extract_tests_from_file("tests/test_login.py")  # parses the file via ast, no AI call yet
+content = generator.generate_content(tests[0], extra_context="Covers only the web UI, not the mobile app")
+generator.update_testrail_case(tests[0]["automation_id"], content)
+```
+
+The `openai`, `cohere` and `anthropic` packages are optional dependencies, install the one(s) you need, e.g.
+`pip install testrail-api-reporter[openai]`, `pip install testrail-api-reporter[cohere]`,
+`pip install testrail-api-reporter[anthropic]`, or `pip install testrail-api-reporter[ai]` for all three.
+`CustomProvider` needs none of them.
 
 
 ## Troubleshooting
