@@ -27,8 +27,9 @@ def reporter(tmp_path):
 
 def test_prepare_payload_no_parsed_xml(reporter):  # pylint: disable=redefined-outer-name
     """When the xml report could not be parsed, __prepare_payload should return None"""
-    with patch.object(reporter, "_TestRailResultsReporter__xml_to_dict", return_value=None), patch.object(
-        reporter, "_TestRailResultsReporter__get_all_auto_cases", return_value=[]
+    with (
+        patch.object(reporter, "_TestRailResultsReporter__xml_to_dict", return_value=None),
+        patch.object(reporter, "_TestRailResultsReporter__get_all_auto_cases", return_value=[]),
     ):
         result = reporter._TestRailResultsReporter__prepare_payload()  # pylint: disable=protected-access,no-member
 
@@ -40,13 +41,11 @@ def test_prepare_payload_success(reporter):  # pylint: disable=redefined-outer-n
     parsed_xml = [{"automation_id": "pkg.test_ok"}]
     parsed_cases = [{"id": 1}]
     enriched = [{"case_id": 1}]
-    with patch.object(
-        reporter, "_TestRailResultsReporter__xml_to_dict", return_value=parsed_xml
-    ) as mock_xml_to_dict, patch.object(
-        reporter, "_TestRailResultsReporter__get_all_auto_cases", return_value=parsed_cases
-    ), patch.object(
-        reporter, "_TestRailResultsReporter__enrich_with_tc_num", return_value=enriched
-    ) as mock_enrich:
+    with (
+        patch.object(reporter, "_TestRailResultsReporter__xml_to_dict", return_value=parsed_xml) as mock_xml_to_dict,
+        patch.object(reporter, "_TestRailResultsReporter__get_all_auto_cases", return_value=parsed_cases),
+        patch.object(reporter, "_TestRailResultsReporter__enrich_with_tc_num", return_value=enriched) as mock_enrich,
+    ):
         result = reporter._TestRailResultsReporter__prepare_payload()  # pylint: disable=protected-access,no-member
 
     assert result == enriched

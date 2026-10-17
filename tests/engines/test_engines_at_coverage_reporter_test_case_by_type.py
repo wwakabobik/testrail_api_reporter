@@ -43,9 +43,10 @@ def test_test_case_by_type_no_type_platforms(reporter):  # pylint: disable=redef
 @patch("testrail_api_reporter.engines.at_coverage_reporter.CSVParser")
 def test_test_case_by_type_default_params(mock_csv_parser, reporter):  # pylint: disable=redefined-outer-name
     """Call test_case_by_type with the instance default type_platforms should tally totals per platform"""
-    with patch.object(
-        reporter, "_ATCoverageReporter__get_sections", side_effect=lambda sections: sections
-    ), patch.object(reporter, "_ATCoverageReporter__get_all_cases", return_value=[{}, {}]):
+    with (
+        patch.object(reporter, "_ATCoverageReporter__get_sections", side_effect=lambda sections: sections),
+        patch.object(reporter, "_ATCoverageReporter__get_all_cases", return_value=[{}, {}]),
+    ):
         results = reporter.test_case_by_type()
 
     assert len(results) == 1
@@ -63,9 +64,10 @@ def test_test_case_by_type_custom_params(
         {"name": "UI", "sections": [1]},
         {"name": "API", "sections": [2]},
     ]
-    with patch.object(
-        reporter, "_ATCoverageReporter__get_sections", side_effect=lambda sections: sections + [99]
-    ), patch.object(reporter, "_ATCoverageReporter__get_all_cases", return_value=[{}]):
+    with (
+        patch.object(reporter, "_ATCoverageReporter__get_sections", side_effect=lambda sections: sections + [99]),
+        patch.object(reporter, "_ATCoverageReporter__get_all_cases", return_value=[{}]),
+    ):
         results = reporter.test_case_by_type(
             project=fake.random_int(), type_platforms=type_platforms, suite=fake.random_int()
         )

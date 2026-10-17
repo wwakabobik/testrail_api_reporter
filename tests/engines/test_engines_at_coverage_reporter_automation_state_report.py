@@ -59,9 +59,10 @@ def test_automation_state_report_success(mock_csv_parser, reporter):  # pylint: 
     ]
     cases = [{"type_id": 3}, {"type_id": 4}, {"type_id": 1}]  # 1 automated, 1 n/a, 1 neither (not automated)
 
-    with patch.object(
-        reporter, "_ATCoverageReporter__get_sections", side_effect=lambda sections: sections
-    ), patch.object(reporter, "_ATCoverageReporter__get_all_cases", return_value=cases):
+    with (
+        patch.object(reporter, "_ATCoverageReporter__get_sections", side_effect=lambda sections: sections),
+        patch.object(reporter, "_ATCoverageReporter__get_all_cases", return_value=cases),
+    ):
         results = reporter.automation_state_report(automation_platforms=automation_platforms)
 
     assert len(results) == 2

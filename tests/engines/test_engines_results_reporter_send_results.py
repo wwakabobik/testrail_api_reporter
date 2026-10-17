@@ -59,13 +59,12 @@ def test_send_results_success_with_title(reporter):  # pylint: disable=redefined
     title = fake.sentence()
     run_id = fake.random_int()
     payload = [{"case_id": 1}]
-    with patch.object(reporter, "_TestRailResultsReporter__prepare_payload", return_value=payload), patch.object(
-        reporter, "_TestRailResultsReporter__prepare_runs", return_value=run_id
-    ) as mock_prepare_runs, patch.object(
-        reporter, "_TestRailResultsReporter__add_results", return_value=run_id
-    ) as mock_add_results, patch.object(
-        reporter, "_TestRailResultsReporter__close_run"
-    ) as mock_close_run:
+    with (
+        patch.object(reporter, "_TestRailResultsReporter__prepare_payload", return_value=payload),
+        patch.object(reporter, "_TestRailResultsReporter__prepare_runs", return_value=run_id) as mock_prepare_runs,
+        patch.object(reporter, "_TestRailResultsReporter__add_results", return_value=run_id) as mock_add_results,
+        patch.object(reporter, "_TestRailResultsReporter__close_run") as mock_close_run,
+    ):
         result = reporter.send_results(title=title)
 
     assert result == run_id
@@ -78,13 +77,14 @@ def test_send_results_success_no_close_run_name_priority(reporter):  # pylint: d
     """run_name should take priority over title, and close_run=False should skip closing the run"""
     run_name = fake.sentence()
     payload = [{"case_id": 1}]
-    with patch.object(reporter, "_TestRailResultsReporter__prepare_payload", return_value=payload), patch.object(
-        reporter, "_TestRailResultsReporter__prepare_runs", return_value=fake.random_int()
-    ) as mock_prepare_runs, patch.object(
-        reporter, "_TestRailResultsReporter__add_results", return_value=fake.random_int()
-    ), patch.object(
-        reporter, "_TestRailResultsReporter__close_run"
-    ) as mock_close_run:
+    with (
+        patch.object(reporter, "_TestRailResultsReporter__prepare_payload", return_value=payload),
+        patch.object(
+            reporter, "_TestRailResultsReporter__prepare_runs", return_value=fake.random_int()
+        ) as mock_prepare_runs,
+        patch.object(reporter, "_TestRailResultsReporter__add_results", return_value=fake.random_int()),
+        patch.object(reporter, "_TestRailResultsReporter__close_run") as mock_close_run,
+    ):
         reporter.send_results(title=fake.sentence(), run_name=run_name, close_run=False)
 
     assert mock_prepare_runs.call_args.kwargs["title"] == run_name

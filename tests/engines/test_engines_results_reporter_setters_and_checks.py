@@ -194,11 +194,12 @@ def test_check_report_exists_no_path_at_all(reporter):  # pylint: disable=redefi
 
 def test_self_check_calls_every_check(reporter):  # pylint: disable=redefined-outer-name
     """__self_check should call every individual check once"""
-    with patch.object(reporter, "_TestRailResultsReporter__check_project") as mock_project, patch.object(
-        reporter, "_TestRailResultsReporter__check_suite"
-    ) as mock_suite, patch.object(reporter, "_TestRailResultsReporter__check_section") as mock_section, patch.object(
-        reporter, "_TestRailResultsReporter__check_report_exists"
-    ) as mock_report:
+    with (
+        patch.object(reporter, "_TestRailResultsReporter__check_project") as mock_project,
+        patch.object(reporter, "_TestRailResultsReporter__check_suite") as mock_suite,
+        patch.object(reporter, "_TestRailResultsReporter__check_section") as mock_section,
+        patch.object(reporter, "_TestRailResultsReporter__check_report_exists") as mock_report,
+    ):
         reporter._TestRailResultsReporter__self_check()  # pylint: disable=protected-access,no-member
 
     mock_project.assert_called_once()

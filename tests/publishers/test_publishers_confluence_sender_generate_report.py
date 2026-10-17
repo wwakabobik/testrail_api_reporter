@@ -74,13 +74,13 @@ def test_generate_report_success_with_arguments(confluence_sender):  # pylint: d
     type_platforms = [{"name": fake.word()}]
     automation_platforms = [{"name": fake.word()}]
 
-    with patch.object(confluence_sender, "automation_state") as mock_automation_state, patch.object(
-        confluence_sender, "test_case_priority_distribution"
-    ) as mock_priority, patch.object(confluence_sender, "test_case_area_distribution") as mock_area, patch.object(
-        confluence_sender, "history_type_chart"
-    ) as mock_type_chart, patch.object(
-        confluence_sender, "history_state_chart"
-    ) as mock_state_chart:
+    with (
+        patch.object(confluence_sender, "automation_state") as mock_automation_state,
+        patch.object(confluence_sender, "test_case_priority_distribution") as mock_priority,
+        patch.object(confluence_sender, "test_case_area_distribution") as mock_area,
+        patch.object(confluence_sender, "history_type_chart") as mock_type_chart,
+        patch.object(confluence_sender, "history_state_chart") as mock_state_chart,
+    ):
         confluence_sender.generate_report(
             confluence_page=confluence_page,
             reports=reports,
@@ -104,12 +104,12 @@ def test_generate_report_success_with_defaults(confluence_sender):  # pylint: di
     confluence_sender._ConfluenceSender__confluence_page = confluence_page  # pylint: disable=protected-access
     confluence_sender._ConfluenceSender__automation_platforms = automation_platforms  # pylint: disable=protected-access
 
-    with patch.object(confluence_sender, "automation_state") as mock_automation_state, patch.object(
-        confluence_sender, "test_case_priority_distribution"
-    ), patch.object(confluence_sender, "test_case_area_distribution"), patch.object(
-        confluence_sender, "history_type_chart"
-    ) as mock_type_chart, patch.object(
-        confluence_sender, "history_state_chart"
+    with (
+        patch.object(confluence_sender, "automation_state") as mock_automation_state,
+        patch.object(confluence_sender, "test_case_priority_distribution"),
+        patch.object(confluence_sender, "test_case_area_distribution"),
+        patch.object(confluence_sender, "history_type_chart") as mock_type_chart,
+        patch.object(confluence_sender, "history_state_chart"),
     ):
         confluence_sender.generate_report(reports=[Mock()], cases=[Mock()], values=[1])
 

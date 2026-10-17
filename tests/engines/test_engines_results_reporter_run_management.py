@@ -163,9 +163,10 @@ def test_prepare_runs_no_run_name_creates_new(reporter):  # pylint: disable=rede
 
 def test_prepare_runs_run_name_not_found_creates_new(reporter):  # pylint: disable=redefined-outer-name
     """With a run_name that matches no existing run, a new run should be created"""
-    with patch.object(reporter, "_TestRailResultsReporter__search_for_run_by_name", return_value=None), patch.object(
-        reporter, "_TestRailResultsReporter__add_run", return_value=99
-    ) as mock_add_run:
+    with (
+        patch.object(reporter, "_TestRailResultsReporter__search_for_run_by_name", return_value=None),
+        patch.object(reporter, "_TestRailResultsReporter__add_run", return_value=99) as mock_add_run,
+    ):
         result = reporter._TestRailResultsReporter__prepare_runs(  # pylint: disable=protected-access,no-member
             cases=[{"case_id": 1}], title=fake.sentence(), run_name=fake.sentence()
         )
@@ -176,9 +177,10 @@ def test_prepare_runs_run_name_not_found_creates_new(reporter):  # pylint: disab
 
 def test_prepare_runs_run_name_found_reused(reporter):  # pylint: disable=redefined-outer-name
     """With a run_name that matches an existing run (and no deletion requested), that run should be reused"""
-    with patch.object(reporter, "_TestRailResultsReporter__search_for_run_by_name", return_value=55), patch.object(
-        reporter, "_TestRailResultsReporter__add_run"
-    ) as mock_add_run:
+    with (
+        patch.object(reporter, "_TestRailResultsReporter__search_for_run_by_name", return_value=55),
+        patch.object(reporter, "_TestRailResultsReporter__add_run") as mock_add_run,
+    ):
         result = reporter._TestRailResultsReporter__prepare_runs(  # pylint: disable=protected-access,no-member
             cases=[{"case_id": 1}], title=fake.sentence(), run_name=fake.sentence()
         )
@@ -189,9 +191,11 @@ def test_prepare_runs_run_name_found_reused(reporter):  # pylint: disable=redefi
 
 def test_prepare_runs_run_name_found_deleted_and_recreated(reporter):  # pylint: disable=redefined-outer-name
     """With delete_run requested and an existing run found, it should be deleted and a new one created"""
-    with patch.object(reporter, "_TestRailResultsReporter__search_for_run_by_name", return_value=55), patch.object(
-        reporter, "_TestRailResultsReporter__delete_run"
-    ) as mock_delete_run, patch.object(reporter, "_TestRailResultsReporter__add_run", return_value=99) as mock_add_run:
+    with (
+        patch.object(reporter, "_TestRailResultsReporter__search_for_run_by_name", return_value=55),
+        patch.object(reporter, "_TestRailResultsReporter__delete_run") as mock_delete_run,
+        patch.object(reporter, "_TestRailResultsReporter__add_run", return_value=99) as mock_add_run,
+    ):
         result = reporter._TestRailResultsReporter__prepare_runs(  # pylint: disable=protected-access,no-member
             cases=[{"case_id": 1}], title=fake.sentence(), run_name=fake.sentence(), delete_run=True
         )
