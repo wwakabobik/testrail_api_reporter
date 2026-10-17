@@ -33,6 +33,19 @@ def test_zip_file_suffix(create_test_file):
             remove(create_test_file)
 
 
+def test_zip_file_debug_no_logger(create_test_file):
+    """Test zip file with debug enabled but without logger"""
+    zipped_file = ""
+    try:
+        zipped_file = zip_file(create_test_file, debug=True)
+        assert path.exists(zipped_file) is True
+    finally:
+        if path.exists(zipped_file):
+            remove(zipped_file)
+        if path.exists(create_test_file):
+            remove(create_test_file)
+
+
 def test_zip_file_logger(create_test_file):
     """Test zip file with logger"""
     zipped_file = ""
