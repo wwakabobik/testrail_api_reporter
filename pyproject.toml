@@ -46,6 +46,12 @@ dependencies = [
     "xmltodict>=1.0.4",
 ]
 
+[project.optional-dependencies]
+openai = ["openai>=1.0.0"]
+cohere = ["cohere>=5.0.0"]
+anthropic = ["anthropic>=0.40.0"]
+ai = ["openai>=1.0.0", "cohere>=5.0.0", "anthropic>=0.40.0"]
+
 [project.urls]
 Homepage = "https://github.com/wwakabobik/testrail_api_reporter"
 "Bug Tracker" = "https://github.com/wwakabobik/testrail_api_reporter/issues"

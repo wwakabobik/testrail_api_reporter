@@ -5,6 +5,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.7.0] - 2026-10-17
+
+### Added
+
+- `TestCaseContentGenerator` engine: parses automated test files, uses a pluggable AI provider to
+  generate TestRail-ready test case content (title, preconditions, steps, expected result, description)
+  and pushes it into the matching TestRail case (matched by the `automation_id` custom field, same
+  convention as `TestRailResultsReporter`). Supports a `dry_run` mode to preview generated content
+  without touching TestRail, and a configurable `field_map` for projects with different custom field names.
+- `testrail_api_reporter.utils.ai_providers` module with an `AIContentProvider` interface and ready-made
+  adapters for OpenAI, Cohere and Anthropic, plus `CustomProvider` to plug in any other provider (or a
+  local/self-hosted model) via a plain callable. The `openai`, `cohere` and `anthropic` packages are
+  optional dependencies (`pip install testrail-api-reporter[openai|cohere|anthropic|ai]`).
+
+### Changed
+
+- The PR-facing `Tests-PR`/`Linters-PR` workflows (triggered on push/PR to any branch but `master`) now run
+  against a single Python version (3.13, the latest minus one) instead of the full version matrix, to keep
+  feedback on in-progress branches fast. The full matrix still runs on every push to `master`
+  (`Tests`/`Linters` workflows), unchanged.
+
 ## [1.6.1] - 2026-10-17
 
 ### Fixed
